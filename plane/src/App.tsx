@@ -115,29 +115,20 @@ export default function App() {
         <TouchSafetyShowcase onClose={() => setShowTouchSafety(false)} />
       )}
 
-      {/* ── Disconnected / Delayed Alert Banner ── */}
-      {state && (
-        <DisconnectedBanner
-          status={state.connectionStatus}
-          lastSeenUtc={state.connectionLastSeenUtc}
-        />
-      )}
-
-      {/* ── FIRST SECTION & DEFAULT VIEW: Tablet Pilot Overview ── */}
-      {state && (
+      {/* ── FIRST SCREEN & DEFAULT VIEW: Single-Glance Pilot Overview ── */}
+      {state && activeTab === 'overview' && (
         <TabletPilotOverview
           state={state}
-          onNavigateToSection={handleNavigateToSection}
           onSendPilotResponse={handleSendPilotResponse}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
+          onOpenUpdates={() => handleNavigateToSection('operational-notices-panel')}
+          onOpenFlightStatus={() => handleNavigateToSection('arrival-overview-panel')}
         />
       )}
 
-      {/* ── SECOND SECTION: Detailed Cockpit Screens (Accessible below or via item tap) ── */}
-      {state && (
+      {/* ── SECOND VIEW: Detailed Cockpit Screens (Accessible via "Updates", "Flight Status", or navigation) ── */}
+      {state && activeTab === 'detailed' && (
         <section
-          className={`detailed-screens-container ${activeTab === 'overview' ? 'overview-collapsed-preview' : 'active-full'}`}
+          className="detailed-screens-container active-full"
           id="detailed-cockpit-screens"
           aria-label="Detailed Cockpit Systems"
         >
@@ -149,13 +140,19 @@ export default function App() {
             <div className="detailed-section-meta">
               <span>Deep-dive flight management, routing diffs, and ATIS observations</span>
               <button
-                className="toggle-detailed-btn"
-                onClick={() => setActiveTab(activeTab === 'overview' ? 'detailed' : 'overview')}
+                className="toggle-detailed-btn highlight-return"
+                onClick={() => setActiveTab('overview')}
               >
-                {activeTab === 'detailed' ? '▲ Switch to Tablet Overview' : '▼ Expand Full Detailed Views'}
+                ◀ Back to Single-Glance Overview
               </button>
             </div>
           </div>
+
+          {/* Disconnected / Delayed Alert Banner in detailed view */}
+          <DisconnectedBanner
+            status={state.connectionStatus}
+            lastSeenUtc={state.connectionLastSeenUtc}
+          />
 
           <main className="dashboard-grid" role="main" id="cockpit-dashboard">
             {/* Detailed Card 1: Arrival & Sequencing Overview */}

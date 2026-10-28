@@ -71,24 +71,40 @@ Each data panel displays its originating source and the last-updated UTC timesta
 
 ## Pilot Workflows & Views
 
-### 1. Default View: Honey B Single-Glance Cockpit Tablet Overview
-Designed for high-stress arrival environments as a calm, high-contrast cockpit tablet display:
-- **Tablet Header**: Honey B bee insignia, flight identity (`EK201`, `OMDB → EGLL`), datalink health status, and age of last ground update.
-- **Priority-Sorted Operational Stream**:
-  1. *Landing Sequence* (e.g., `#4 in Sequence · 11 in Stream · Est. 14:48Z`) with runway alignment graphic.
-  2. *Holding Advisory & Delay* (e.g., `Hold at LAM · EFC 15:10Z · AMAN Delay ~48m`) with holding racetrack diagram and non-clearance advisory tag.
-  3. *ETA & Touchdown Impact* (e.g., `EGLL 14:48Z (+18m vs FMS) · Target 14:48Z`) with clock delta graphic.
-  4. *Proposed Tactical Reroute* (e.g., `Via BIG DCT EGLL · +4m · TMA Sequencing`) with diverging waypoint diagram.
-  5. *Urgent Operational Notice* (e.g., `Runway 27R CLSD · Snow Clearance in Progress`) with high-contrast warning badge.
-- **Secondary Suggested Reply Buttons**:
-  - Contextual one-tap responses (e.g., `((•)) "Wilco, entering hold LAM" ›`, `((•)) "Unable reroute — fuel minimums" ›`).
-  - Opens the **Suggested Reply Review Modal** requiring explicit pilot confirmation and notes before downlinking (disclaiming that downlinks are advisory intent, not ATC clearances).
-- **Persistent Bottom Dock**:
-  - Four persistent at-a-glance values: `FUEL (14.2t / 2h 45m)`, `CURRENT ETA (14:48Z)`, `ASSIGNED RUNWAY (27L)`, and `ARRIVAL PRIORITY (#4 / MED)`.
-- **Deep-Dive Cross-Linking**:
-  - Tapping any priority card or bottom strip metric instantly scrolls down to the corresponding detailed system card with a pulsing target highlight.
+### 1. Default View: Simplified Cockpit Tablet Overview (Usable at a Glance Without Scrolling)
+Engineered specifically for calm, high-stress arrival management on a cockpit tablet screen without scrolling:
 
-### 2. Detailed Cockpit Screens (Accessible below or via tab toggle)
+- **Area 1: Compact Header**:
+  - Flight identification chip (`EK201`, `OMDB → EGLL`, `A388`).
+  - Datalink health status pill (`LIVE` / `DELAYED` / `DISCONNECTED`) with real-time age of latest ground update (`12s ago`).
+  - Obvious one-tap deep navigation buttons:
+    - `[📋 Updates]` (with badge count of active messages & notices).
+    - `[✈ Flight Status]` (immediate access to deep avionics, fuel, weather, and reroute diffs).
+
+- **Conditional Urgent Notice (Rendered Only When One Exists)**:
+  - If a critical notice exists (e.g., `RUNWAY 27R CLSD — Snow Clearance`), datalink is lost, or a runway reversal occurs, a high-contrast amber/red warning banner appears with a direct link to details.
+  - If no urgent condition exists, this area is completely hidden to eliminate clutter.
+
+- **Area 2: Main Operational Card**:
+  - **One Clear Sentence**: Displays ONLY the single latest operative instruction or proposal in crystal-clear natural language (e.g., *"Cleared for standard arrival into London Heathrow, number 4 in sequence for Runway 27R"* or *"ATC proposes tactical reroute via BIG DCT EGLL (+4 min) for arrival spacing"*).
+  - Explicit metadata: originating ground source (`SOURCE: GROUND CONTROL`) and issued UTC timestamp.
+  - **Protected Pilot Actions**:
+    - Large, widely separated **“Acknowledge”** and **“Unable”** action controls (minimum 56px height).
+    - Separated by an inactive physical cushion buffer zone (`SAFETY SEPARATION`) to eliminate accidental cross-touches in turbulence.
+    - Protected by deliberate dwell (>120ms) and duplicate debounce shielding (450ms).
+    - Consequential reroute acceptance protected by a 1.0s Press-and-Hold with visible progress.
+
+- **Area 3: Four Large Arrival Summary Values**:
+  1. **Landing Sequence**: e.g., `#4 of 11` (with AMAN status).
+  2. **Holding Status**: e.g., `None` or `15:10Z` (EFC Time). If no further-clearance time is supplied, strictly displays **"Awaiting further clearance"** rather than showing a countdown.
+  3. **Destination ETA**: e.g., `14:48Z` (with delay delta `+18m vs FMS`).
+  4. **Assigned Runway**: e.g., `27L` (with approach type and wind).
+
+- **One-Tap Access to Deep Cockpit Screens**:
+  - Detailed flight systems, fuel endurance, waypoint diffs, and ATIS conditions are accessible via the header's `[Updates]` and `[Flight Status]` buttons.
+  - A prominent `[◀ Back to Single-Glance Overview]` button returns to the first screen in one tap.
+
+### 2. Detailed Cockpit Screens (Accessible via One-Tap Navigation)
 1. **Arrival & Sequencing Overview**: Real-time position in the arrival stream (#4/11), assigned runway, countdown, holding status with ATC EFC vs. AMAN predicted delay, and FMS vs. TLDT delta comparison.
 2. **Tactical Reroute Review**: Side-by-side route inspection, diff, time impact (+/- min), and pilot advisory response options (`Accept` / `Unable`).
 3. **Operational Notices**: Filtered and sorted strictly by urgency (`CRITICAL` → `HIGH` → `MEDIUM` → `LOW` → `INFO`) with clear text tags and distinct colors.

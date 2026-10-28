@@ -70,12 +70,12 @@ Switch scenarios using the interactive selector bar at the top of the screen:
 
 ## 2. Honey B Cockpit Views: Single-Glance Overview & Detailed Screens
 
-The pilot interface opens by default into the **Honey B Cockpit Tablet Overview**:
-- **Tablet Header**: Flight identity chip (`EK201` `OMDB → EGLL`), datalink indicator, and time elapsed since last ground message.
-- **Top 5 Priority Items**: Sequence position, holding advisory & delay, ETA changes, proposed reroute, and operational notices with clear plain-language summaries and runway/racetrack/reroute vector diagrams.
-- **Secondary Suggested Reply Buttons**: Direct one-tap responses (e.g. `((•)) "Wilco, entering hold LAM" ›`) triggering an explicit pilot review and confirmation modal.
-- **Persistent Bottom Dock**: Fuel endurance, destination ETA, assigned runway, and arrival priority metrics.
-- **Detailed Screens**: Easily accessible below the tablet or through the toggle button for deep-dive telemetry, fuel burn graphs, waypoint diffs, and ATIS conditions. Tapping any overview card smoothly scrolls directly to its corresponding detailed screen.
+The pilot interface opens by default into the **Simplified Single-Glance Tablet Overview** (usable without scrolling):
+1. **Header**: Flight identity chip (`EK201`, `OMDB → EGLL`), datalink health status, age of latest ground update, and one-tap deep navigation (`Updates` and `Flight Status`).
+2. **Main Card**: Shows ONLY the latest operative instruction or proposal in one clear sentence, with time, source, and large widely separated “Acknowledge” and “Unable” action controls protected by touch safety heuristics.
+3. **Arrival Summary**: Four large, readable values: Landing sequence (`#4 of 11`), Holding status (with "Awaiting further clearance" when no EFC time is supplied), Destination ETA (`14:48Z`), and Assigned runway (`27L`).
+- **Conditional Urgent Notice**: High-visibility amber/red alert displayed ONLY when a critical notice, runway closure, or lost connection condition exists.
+- **Deep Cockpit Screens**: Deep-dive avionics telemetry, fuel endurance models, waypoint diffs, and ATIS conditions are accessible behind one-tap buttons with immediate return.
 
 ---
 
