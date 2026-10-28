@@ -17,6 +17,19 @@ export const Header: React.FC = () => {
   // Parse time
   const timeStr = serverTime ? serverTime.replace('T', ' ').replace('Z', ' UTC') : '03:00:00 UTC';
 
+  const activeController = controllers.find((c) => c.id === activeControllerId);
+
+  const handleControllerChange = (val: string) => {
+    setActiveControllerId(val);
+    const url = new URL(window.location.href);
+    if (val === 'ALL') {
+      url.searchParams.delete('controller');
+    } else {
+      url.searchParams.set('controller', val);
+    }
+    window.history.pushState({}, '', url.toString());
+  };
+
   return (
     <header className="h-14 bg-[#090F1B] border-b border-[#162338] px-4 flex items-center justify-between select-none">
       {/* Left: Brand & Navigation */}
@@ -29,6 +42,16 @@ export const Header: React.FC = () => {
           <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
             OMDB
           </span>
+          {activeControllerId === 'ALL' ? (
+            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-blue-900/40 text-blue-300 border border-blue-600/40">
+              OVERVIEW WALL (SUPERVISOR)
+            </span>
+          ) : (
+            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-900/40 text-emerald-300 border border-emerald-500/50 flex items-center space-x-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>SECTOR: {activeController?.name.toUpperCase()} ({activeControllerId.replace('CTRL-', '')})</span>
+            </span>
+          )}
         </div>
 
         {/* Page Switcher */}
@@ -96,7 +119,7 @@ export const Header: React.FC = () => {
           <span className="text-[11px] font-mono text-slate-400">CONSOLE:</span>
           <select
             value={activeControllerId}
-            onChange={(e) => setActiveControllerId(e.target.value)}
+            onChange={(e) => handleControllerChange(e.target.value)}
             className="bg-[#0D1526] border border-[#233552] text-xs font-mono font-bold text-cyan-300 rounded px-2.5 py-1 focus:outline-none focus:border-cyan-400"
           >
             <option value="ALL">ALL (Overview Wall)</option>

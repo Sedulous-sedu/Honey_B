@@ -15,6 +15,8 @@ export const App: React.FC = () => {
     const ctrlParam = params.get('controller');
     if (ctrlParam) {
       setActiveControllerId(ctrlParam);
+    } else {
+      setActiveControllerId('ALL');
     }
 
     // Initialize real-time WebSocket connection to ground server

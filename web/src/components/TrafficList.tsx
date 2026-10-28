@@ -1,16 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAtcStore } from '../store/useAtcStore';
 import { Aircraft } from '../types';
+import { UserCheck, Shield } from 'lucide-react';
 
 export const TrafficList: React.FC = () => {
   const aircraft = useAtcStore((s) => s.aircraft);
   const selectedId = useAtcStore((s) => s.selectedAircraftId);
   const setSelectedId = useAtcStore((s) => s.setSelectedAircraftId);
-  const trafficFilter = useAtcStore((s) => s.trafficFilter);
-  const setTrafficFilter = useAtcStore((s) => s.setTrafficFilter);
   const activeControllerId = useAtcStore((s) => s.activeControllerId);
+  const controllers = useAtcStore((s) => s.controllers);
+
+  const [tab, setTab] = useState<'ALL' | 'MINE' | 'ARR' | 'DEP' | 'OTHER'>('ALL');
 
   const allFlights = Object.values(aircraft);
+  const activeCtrl = controllers.find((c) => c.id === activeControllerId);
+
+  const myFlights = activeControllerId === 'ALL'
+    ? allFlights
+    : allFlights.filter((a) => a.assignedControllerId === activeControllerId);
 
   const arrFlights = allFlights.filter((a) =>
     ['ARRIVAL', 'APPROACH', 'FINAL', 'HOLDING'].includes(a.flightPhase)
@@ -22,30 +29,72 @@ export const TrafficList: React.FC = () => {
     ['PARKED', 'AT_STAND', 'TAXI_IN', 'LANDED', 'DIVERTING'].includes(a.flightPhase)
   );
 
-  const filteredFlights =
-    trafficFilter === 'ARR'
-      ? arrFlights
-      : trafficFilter === 'DEP'
-      ? depFlights
-      : trafficFilter === 'OTHER'
-      ? otherFlights
-      : allFlights;
+  let displayedFlights = allFlights;
+  if (tab === 'MINE') {
+    displayedFlights = myFlights;
+  } else if (tab === 'ARR') {
+    displayedFlights = arrFlights;
+  } else if (tab === 'DEP') {
+    displayedFlights = depFlights;
+  } else if (tab === 'OTHER') {
+    displayedFlights = otherFlights;
+  }
+
+  // When viewing a specific controller in ALL/ARR/DEP, sort their flights to the top
+  const sortedFlights = [...displayedFlights].sort((a, b) => {
+    if (activeControllerId === 'ALL') return 0;
+    const aMine = a.assignedControllerId === activeControllerId ? 1 : 0;
+    const bMine = b.assignedControllerId === activeControllerId ? 1 : 0;
+    return bMine - aMine;
+  });
 
   return (
     <div className="w-80 h-full bg-[#0B0F19] border-r border-[#162338] flex flex-col select-none overflow-hidden">
       {/* Header */}
       <div className="p-3 border-b border-[#162338] bg-[#0E1524]">
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-xs font-mono font-bold tracking-widest text-slate-300 uppercase">Air Traffic</h2>
-          <span className="text-[11px] font-mono text-cyan-400 font-bold">{allFlights.length} TRACKS</span>
-        </div>
+        {/* Sector Info Banner */}
+        {activeControllerId !== 'ALL' ? (
+          <div className="mb-2 p-2 rounded-lg bg-blue-950/40 border border-blue-500/40 flex items-center justify-between">
+            <div className="flex items-center space-x-1.5">
+              <UserCheck className="w-4 h-4 text-cyan-400" />
+              <div>
+                <span className="text-[10px] font-mono text-cyan-300 font-bold block">
+                  SECTOR: {activeCtrl?.name.toUpperCase() || activeControllerId}
+                </span>
+                <span className="text-[9px] font-mono text-slate-400">
+                  {activeCtrl?.role} · {myFlights.length} Assigned
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={() => setTab('MINE')}
+              className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
+                tab === 'MINE' ? 'bg-cyan-500 text-black' : 'bg-[#121E36] text-cyan-300 border border-cyan-500/30'
+              }`}
+            >
+              MY SECTOR
+            </button>
+          </div>
+        ) : (
+          <div className="mb-2 p-1.5 rounded-lg bg-[#070B12] border border-[#162338] flex items-center justify-between">
+            <div className="flex items-center space-x-1.5">
+              <Shield className="w-3.5 h-3.5 text-blue-400" />
+              <span className="text-[10px] font-mono text-slate-300 font-bold">
+                WALL SCREEN: ALL SECTORS
+              </span>
+            </div>
+            <span className="text-[10px] font-mono text-cyan-400 font-bold">
+              {allFlights.length} TOTAL
+            </span>
+          </div>
+        )}
 
-        {/* Filter Tabs matching the image */}
+        {/* Filter Tabs matching image */}
         <div className="grid grid-cols-4 gap-1 p-0.5 bg-[#070B12] rounded border border-[#162338]">
           <button
-            onClick={() => setTrafficFilter('ALL')}
+            onClick={() => setTab('ALL')}
             className={`py-1 text-[11px] font-mono font-bold rounded transition-colors ${
-              trafficFilter === 'ALL'
+              tab === 'ALL'
                 ? 'bg-blue-600 text-white shadow-sm'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
@@ -53,19 +102,19 @@ export const TrafficList: React.FC = () => {
             ALL ({allFlights.length})
           </button>
           <button
-            onClick={() => setTrafficFilter('ARR')}
+            onClick={() => setTab(activeControllerId === 'ALL' ? 'ARR' : 'MINE')}
             className={`py-1 text-[11px] font-mono font-bold rounded transition-colors ${
-              trafficFilter === 'ARR'
+              tab === (activeControllerId === 'ALL' ? 'ARR' : 'MINE')
                 ? 'bg-blue-600 text-white shadow-sm'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            ARR ({arrFlights.length})
+            {activeControllerId === 'ALL' ? `ARR (${arrFlights.length})` : `MINE (${myFlights.length})`}
           </button>
           <button
-            onClick={() => setTrafficFilter('DEP')}
+            onClick={() => setTab('DEP')}
             className={`py-1 text-[11px] font-mono font-bold rounded transition-colors ${
-              trafficFilter === 'DEP'
+              tab === 'DEP'
                 ? 'bg-blue-600 text-white shadow-sm'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
@@ -73,9 +122,9 @@ export const TrafficList: React.FC = () => {
             DEP ({depFlights.length})
           </button>
           <button
-            onClick={() => setTrafficFilter('OTHER')}
+            onClick={() => setTab('OTHER')}
             className={`py-1 text-[11px] font-mono font-bold rounded transition-colors ${
-              trafficFilter === 'OTHER'
+              tab === 'OTHER'
                 ? 'bg-blue-600 text-white shadow-sm'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
@@ -87,7 +136,7 @@ export const TrafficList: React.FC = () => {
 
       {/* Flight Rows */}
       <div className="flex-1 overflow-y-auto divide-y divide-[#131E30]">
-        {filteredFlights.map((ac) => {
+        {sortedFlights.map((ac) => {
           const isSelected = selectedId === ac.callsign;
           const isAssignedToMe = activeControllerId === 'ALL' || ac.assignedControllerId === activeControllerId;
 
@@ -102,6 +151,8 @@ export const TrafficList: React.FC = () => {
             priorityBorder = 'border-l-4 border-l-pink-500 bg-pink-950/10';
           } else if (ac.status === 'UNABLE_TO_LAND' || ac.flightPhase === 'DIVERTING') {
             priorityBorder = 'border-l-4 border-l-amber-500 bg-amber-950/10';
+          } else if (isAssignedToMe && activeControllerId !== 'ALL') {
+            priorityBorder = 'border-l-4 border-l-cyan-400 bg-cyan-950/10';
           }
 
           // Distance or ground status label matching photo
@@ -128,15 +179,23 @@ export const TrafficList: React.FC = () => {
             statusColor = 'text-emerald-400 font-bold';
           }
 
+          // Controller name label
+          const ctrl = controllers.find((c) => c.id === ac.assignedControllerId);
+          const ctrlDisplayName = ctrl ? ctrl.name : (ac.assignedControllerId || 'UNASSIGNED');
+
           return (
             <div
               key={ac.callsign}
               onClick={() => setSelectedId(ac.callsign)}
-              className={`p-2.5 flex items-center justify-between cursor-pointer transition-colors ${
+              className={`p-2.5 flex items-center justify-between cursor-pointer transition-all ${
                 isSelected
                   ? 'bg-[#152338] ring-1 ring-cyan-500/50'
                   : 'hover:bg-[#10192A]'
-              } ${priorityBorder} ${!isAssignedToMe ? 'opacity-40 hover:opacity-80' : 'opacity-100'}`}
+              } ${priorityBorder} ${
+                activeControllerId !== 'ALL' && !isAssignedToMe
+                  ? 'opacity-25 hover:opacity-75 grayscale-[50%]'
+                  : 'opacity-100'
+              }`}
             >
               {/* Left: Callsign & Type */}
               <div className="flex items-center space-x-2">
@@ -144,6 +203,11 @@ export const TrafficList: React.FC = () => {
                   <div className="flex items-center space-x-1.5">
                     <span className="font-mono text-xs font-bold text-slate-100">{ac.callsign}</span>
                     <span className="text-[10px] font-mono text-slate-400">{ac.aircraftType}</span>
+                    {isAssignedToMe && activeControllerId !== 'ALL' && (
+                      <span className="text-[8px] font-mono font-bold px-1 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                        MINE
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-center space-x-1 mt-0.5">
                     <span
@@ -169,8 +233,8 @@ export const TrafficList: React.FC = () => {
               {/* Right: Distance / Status & Controller */}
               <div className="text-right">
                 <span className={`text-xs font-mono ${statusColor}`}>{statusText}</span>
-                <div className="text-[9px] font-mono text-slate-500 mt-0.5">
-                  {ac.assignedControllerId ? ac.assignedControllerId.replace('CTRL-', '') : 'UNASSIGNED'}
+                <div className={`text-[9px] font-mono mt-0.5 ${isAssignedToMe ? 'text-cyan-400 font-bold' : 'text-slate-500'}`}>
+                  {isAssignedToMe && activeControllerId !== 'ALL' ? '● YOU' : ctrlDisplayName}
                 </div>
               </div>
             </div>

@@ -7,8 +7,10 @@ export const RadarScope: React.FC = () => {
   const selectedId = useAtcStore((s) => s.selectedAircraftId);
   const setSelectedId = useAtcStore((s) => s.setSelectedAircraftId);
   const activeControllerId = useAtcStore((s) => s.activeControllerId);
+  const controllers = useAtcStore((s) => s.controllers);
   const weather = useAtcStore((s) => s.weather);
 
+  const activeCtrl = controllers.find((c) => c.id === activeControllerId);
   const [zoom, setZoom] = useState(1.0);
 
   // OMDB center reference: 25.2532 N, 55.3657 E
@@ -51,13 +53,23 @@ export const RadarScope: React.FC = () => {
   return (
     <div className="relative w-full h-full bg-[#070B12] rounded-lg border border-[#162338] overflow-hidden flex flex-col shadow-2xl">
       {/* Top Header / Status overlay on radar */}
-      <div className="absolute top-3 left-4 z-10 flex items-center space-x-4 bg-[#0B1322]/85 px-3 py-1.5 rounded border border-[#1F2E47] backdrop-blur-sm">
+      <div className="absolute top-3 left-4 z-10 flex items-center space-x-3 bg-[#0B1322]/90 px-3 py-1.5 rounded-lg border border-[#1F2E47] backdrop-blur-sm shadow-lg">
         <div className="flex items-center space-x-2">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
           <span className="text-xs font-mono font-bold tracking-wider text-emerald-400">SURVEILLANCE PRIMARY/MSSR</span>
         </div>
         <span className="text-xs font-mono text-slate-400">RANGE: {Math.round(30 / zoom)} NM</span>
-        <span className="text-xs font-mono text-slate-400">OMDB RADAR</span>
+
+        {activeControllerId === 'ALL' ? (
+          <span className="px-2 py-0.5 text-[10px] font-mono font-bold rounded bg-blue-500/20 text-blue-300 border border-blue-500/40">
+            ALL SECTORS (WALL OVERVIEW)
+          </span>
+        ) : (
+          <span className="px-2 py-0.5 text-[10px] font-mono font-bold rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+            SECTOR: {activeCtrl?.name || activeControllerId}
+          </span>
+        )}
+
         {weather?.lvp.active && (
           <span className="px-2 py-0.5 text-[10px] font-bold tracking-wider rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">
             LVP {weather.lvp.phase}
@@ -206,14 +218,21 @@ export const RadarScope: React.FC = () => {
 
           // Multi-controller dimming:
           const isOwnedByActiveCtrl = activeControllerId === 'ALL' || ac.assignedControllerId === activeControllerId;
-          const opacity = isOwnedByActiveCtrl ? 1.0 : 0.35;
+          const opacity = isOwnedByActiveCtrl ? 1.0 : 0.2;
 
           // Color coding
           let color = "#10B981"; // Emerald
-          if (isSelected) color = "#00F2FE"; // Bright cyan
-          else if (ac.priority.level === "MINIMUM_FUEL" || ac.priority.level === "EMERGENCY") color = "#EF4444"; // Red
-          else if (ac.priority.level === "MEDICAL") color = "#EC4899"; // Pink/red
-          else if (ac.status === "UNABLE_TO_LAND" || ac.flightPhase === "DIVERTING") color = "#F59E0B"; // Amber
+          if (!isOwnedByActiveCtrl && activeControllerId !== 'ALL') {
+            color = "#475569"; // Muted slate gray for other sectors
+          } else if (isSelected) {
+            color = "#00F2FE"; // Bright cyan
+          } else if (ac.priority.level === "MINIMUM_FUEL" || ac.priority.level === "EMERGENCY") {
+            color = "#EF4444"; // Red
+          } else if (ac.priority.level === "MEDICAL") {
+            color = "#EC4899"; // Pink/red
+          } else if (ac.status === "UNABLE_TO_LAND" || ac.flightPhase === "DIVERTING") {
+            color = "#F59E0B"; // Amber
+          }
 
           // Heading vector line (length ~ 20px)
           const rad = (ac.headingDeg * Math.PI) / 180;

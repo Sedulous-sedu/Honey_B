@@ -1,19 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAtcStore } from '../store/useAtcStore';
 import { Suggestion } from '../types';
-import { Send, AlertTriangle, ShieldCheck, Zap, HelpCircle, MessageSquare } from 'lucide-react';
+import { Send, AlertTriangle, ShieldCheck, Zap, MessageSquare, Lock } from 'lucide-react';
 
 export const HoneyBPanel: React.FC = () => {
   const suggestions = useAtcStore((s) => s.suggestions);
   const sendCommand = useAtcStore((s) => s.sendCommand);
   const activeControllerId = useAtcStore((s) => s.activeControllerId);
+  const controllers = useAtcStore((s) => s.controllers);
   const weather = useAtcStore((s) => s.weather);
   const setSelectedId = useAtcStore((s) => s.setSelectedAircraftId);
 
   const [aiQuestion, setAiQuestion] = useState('');
   const [aiAnswer, setAiAnswer] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
-  const [activeFilter, setActiveFilter] = useState<'ALL' | 'CRITICAL' | 'MINE'>('ALL');
+  const [activeFilter, setActiveFilter] = useState<'ALL' | 'CRITICAL' | 'MINE'>(
+    activeControllerId === 'ALL' ? 'ALL' : 'MINE'
+  );
+
+  // Sync filter when active controller changes
+  useEffect(() => {
+    setActiveFilter(activeControllerId === 'ALL' ? 'ALL' : 'MINE');
+  }, [activeControllerId]);
+
+  const activeCtrl = controllers.find((c) => c.id === activeControllerId);
 
   // Filter suggestions
   const filteredSuggestions = suggestions.filter((s) => {
@@ -63,7 +73,11 @@ export const HoneyBPanel: React.FC = () => {
                 DECISION SUPPORT
               </span>
             </h1>
-            <p className="text-xs text-slate-400 font-mono">Your AI-Assisted ATC Operations Hub</p>
+            <p className="text-xs text-slate-400 font-mono">
+              {activeControllerId === 'ALL'
+                ? 'Supervisor Operations Overview'
+                : `Sector Console: ${activeCtrl?.name || activeControllerId}`}
+            </p>
           </div>
         </div>
       </div>
@@ -123,19 +137,21 @@ export const HoneyBPanel: React.FC = () => {
             <div className="flex space-x-1 text-[10px] font-mono">
               <button
                 onClick={() => setActiveFilter('ALL')}
-                className={`px-1.5 py-0.5 rounded ${activeFilter === 'ALL' ? 'bg-purple-600 text-white' : 'text-slate-400'}`}
+                className={`px-1.5 py-0.5 rounded ${activeFilter === 'ALL' ? 'bg-purple-600 text-white font-bold' : 'text-slate-400'}`}
               >
                 ALL
               </button>
-              <button
-                onClick={() => setActiveFilter('MINE')}
-                className={`px-1.5 py-0.5 rounded ${activeFilter === 'MINE' ? 'bg-purple-600 text-white' : 'text-slate-400'}`}
-              >
-                MINE
-              </button>
+              {activeControllerId !== 'ALL' && (
+                <button
+                  onClick={() => setActiveFilter('MINE')}
+                  className={`px-1.5 py-0.5 rounded ${activeFilter === 'MINE' ? 'bg-cyan-600 text-white font-bold' : 'text-slate-400'}`}
+                >
+                  MINE
+                </button>
+              )}
               <button
                 onClick={() => setActiveFilter('CRITICAL')}
-                className={`px-1.5 py-0.5 rounded ${activeFilter === 'CRITICAL' ? 'bg-rose-600 text-white' : 'text-slate-400'}`}
+                className={`px-1.5 py-0.5 rounded ${activeFilter === 'CRITICAL' ? 'bg-rose-600 text-white font-bold' : 'text-slate-400'}`}
               >
                 URGENT
               </button>
@@ -146,23 +162,29 @@ export const HoneyBPanel: React.FC = () => {
           <div className="space-y-2">
             {filteredSuggestions.length === 0 ? (
               <div className="p-4 rounded-xl bg-[#121B2D] border border-[#1E2E4A] text-center text-xs text-slate-400 font-mono">
-                No active conflicts. Separation nominal.
+                No active conflicts in this sector.
               </div>
             ) : (
               filteredSuggestions.map((sug) => {
                 const isCritical = sug.urgency === 'CRITICAL';
+                const isMyFlight = activeControllerId === 'ALL' || sug.targetControllerId === activeControllerId;
+                const assignedCtrl = controllers.find((c) => c.id === sug.targetControllerId);
+                const assignedCtrlName = assignedCtrl ? assignedCtrl.name : (sug.targetControllerId || 'ATC');
+
                 return (
                   <div
                     key={sug.suggestionId}
                     className={`p-3 rounded-xl border transition-all ${
                       isCritical
                         ? 'bg-rose-950/20 border-rose-500/50 hover:border-rose-400'
-                        : 'bg-[#121B2D] border-[#1E2E4A] hover:border-purple-500/50'
+                        : isMyFlight
+                        ? 'bg-[#121B2D] border-cyan-500/30 hover:border-cyan-400/60'
+                        : 'bg-[#0F1726]/60 border-[#1B2940] opacity-60'
                     }`}
                   >
                     <div className="flex items-start justify-between">
                       <div
-                        className="cursor-pointer"
+                        className="cursor-pointer flex-1 mr-2"
                         onClick={() => setSelectedId(sug.aircraftId)}
                       >
                         <div className="flex items-center space-x-2">
@@ -178,25 +200,38 @@ export const HoneyBPanel: React.FC = () => {
                           >
                             {sug.instructionType}
                           </span>
+                          {/* Controller Ownership Badge */}
+                          <span className="text-[9px] font-mono text-slate-400">
+                            {isMyFlight && activeControllerId !== 'ALL'
+                              ? '● YOUR SECTOR'
+                              : `[${assignedCtrlName}]`}
+                          </span>
                         </div>
                         <p className="text-xs font-semibold text-slate-200 mt-1">
                           {sug.displayText}
                         </p>
                       </div>
 
-                      {/* Send Clearance Button */}
-                      <button
-                        onClick={() => handleSend(sug)}
-                        className={`px-2.5 py-1.5 rounded-lg text-xs font-mono font-bold flex items-center space-x-1.5 transition-all shadow-md shrink-0 ${
-                          isCritical
-                            ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-600/30'
-                            : 'bg-purple-600 hover:bg-purple-500 text-white shadow-purple-600/30'
-                        }`}
-                        title="Issue clearance to aircraft"
-                      >
-                        <span>Send</span>
-                        <Send className="w-3 h-3" />
-                      </button>
+                      {/* Send Clearance Button or Handled Badge */}
+                      {isMyFlight ? (
+                        <button
+                          onClick={() => handleSend(sug)}
+                          className={`px-2.5 py-1.5 rounded-lg text-xs font-mono font-bold flex items-center space-x-1.5 transition-all shadow-md shrink-0 ${
+                            isCritical
+                              ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-600/30'
+                              : 'bg-purple-600 hover:bg-purple-500 text-white shadow-purple-600/30'
+                          }`}
+                          title="Issue clearance to aircraft"
+                        >
+                          <span>Send</span>
+                          <Send className="w-3 h-3" />
+                        </button>
+                      ) : (
+                        <div className="flex items-center space-x-1 px-2 py-1 rounded bg-[#10192A] border border-[#1F2E47] text-[10px] font-mono text-slate-400 shrink-0">
+                          <Lock className="w-3 h-3 text-slate-500" />
+                          <span>Handled by {assignedCtrlName}</span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Rationale */}

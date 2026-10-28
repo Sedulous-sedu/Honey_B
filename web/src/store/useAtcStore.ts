@@ -53,7 +53,7 @@ const API_BASE = `http://${window.location.hostname || 'localhost'}:8000`;
 export const useAtcStore = create<AtcState>((set, get) => ({
   connected: false,
   activePage: 'wall',
-  activeControllerId: 'CTRL-ARR-01', // Default Ahmed
+  activeControllerId: 'ALL', // Default to ALL (Overview Wall Screen)
   selectedAircraftId: 'UAE231', // Default demo flight
   serverTime: '2026-10-28T03:00:00Z',
   simSpeed: 1.0,
