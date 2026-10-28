@@ -10,6 +10,7 @@ import {
 import { activeDataLinkAdapter } from '../services/dataLinkAdapter';
 import { TouchSafeButton } from './TouchSafeButton';
 import { PressAndHoldButton } from './PressAndHoldButton';
+import { AboutModal } from './AboutModal';
 
 interface Props {
   state: ConsolidatedDashboardState;
@@ -27,6 +28,7 @@ export function TabletPilotOverview({
   const { aircraft, landingSequence, holding, reroute, conditions, connectionStatus, connectionLastSeenUtc, notices, messages } = state;
 
   const [pilotActionFeedback, setPilotActionFeedback] = useState<string | null>(null);
+  const [showAbout, setShowAbout] = useState<boolean>(false);
 
   const isDisconnected = connectionStatus === 'DISCONNECTED';
   const ageOfLastUpdate = ageLabel(connectionLastSeenUtc);
@@ -128,14 +130,28 @@ export function TabletPilotOverview({
 
   return (
     <div className="single-glance-tablet-screen" role="region" aria-label="Pilot Single-Glance Overview">
+      {/* About / Info Modal (full logo, shown on demand) */}
+      {showAbout && (
+        <AboutModal
+          onClose={() => setShowAbout(false)}
+          contractVersion={state.contractVersion}
+        />
+      )}
+
       {/* ══════════════════════════════════════════════════════════════════
           AREA 1: COMPACT HEADER
           Flight ID, Connection Status, Age of Latest Ground Update, & One-Tap Nav
          ══════════════════════════════════════════════════════════════════ */}
       <header className="glance-header">
         <div className="glance-header-left">
+          {/* Compact brand mark: real logo image on a warm-cream pill */}
           <div className="glance-brand">
-            <span className="glance-brand-icon">🐝</span>
+            <img
+              src="/honey-b-logo.jpg"
+              alt="Honey B logo"
+              className="glance-brand-mark"
+              draggable={false}
+            />
             <span className="glance-brand-name">Honey B</span>
           </div>
 
@@ -162,7 +178,7 @@ export function TabletPilotOverview({
           </span>
         </div>
 
-        {/* Obvious One-Tap Deep Navigation */}
+        {/* Obvious One-Tap Deep Navigation + About */}
         <div className="glance-header-nav">
           <button
             type="button"
@@ -186,6 +202,17 @@ export function TabletPilotOverview({
             <span className="nav-btn-icon">✈</span>
             <span>Flight Status</span>
             <span className="nav-btn-arrow">›</span>
+          </button>
+
+          {/* Info button — opens the full-logo About screen */}
+          <button
+            type="button"
+            className="glance-info-btn"
+            onClick={() => setShowAbout(true)}
+            aria-label="About Honey B"
+            title="About Honey B"
+          >
+            ⓘ
           </button>
         </div>
       </header>

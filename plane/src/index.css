@@ -7,56 +7,66 @@
 
 /* ── CSS Custom Properties ────────────────────────────────── */
 :root {
-  /* Background layers */
-  --bg-base: #080c14;
-  --bg-surface: #0d1422;
-  --bg-card: #111827;
-  --bg-card-hover: #161f30;
-  --bg-elevated: #1a2438;
-  --bg-overlay: rgba(13, 20, 34, 0.95);
+  /* ── Honey B Brand Palette ──────────────────────────────────
+     Deep charcoal surfaces  · Warm off-white text
+     Restrained blue controls · Gold ONLY on the brand mark
+     ────────────────────────────────────────────────────────── */
 
-  /* Primary palette — aviation teal/cyan */
-  --color-primary: #00d4ff;
-  --color-primary-dim: #0099bb;
-  --color-primary-glow: rgba(0, 212, 255, 0.15);
-  --color-accent: #38bdf8;
+  /* Background layers — deep charcoal family */
+  --bg-base: #141416;
+  --bg-surface: #1C1C1E;
+  --bg-card: #242428;
+  --bg-card-hover: #2C2C32;
+  --bg-elevated: #303038;
+  --bg-overlay: rgba(20, 20, 22, 0.96);
 
-  /* Urgency spectrum */
-  --color-critical: #ff3b5c;
-  --color-critical-bg: rgba(255, 59, 92, 0.12);
-  --color-critical-border: rgba(255, 59, 92, 0.4);
-  --color-high: #ff8c42;
-  --color-high-bg: rgba(255, 140, 66, 0.1);
-  --color-high-border: rgba(255, 140, 66, 0.35);
-  --color-medium: #f5c518;
-  --color-medium-bg: rgba(245, 197, 24, 0.08);
-  --color-medium-border: rgba(245, 197, 24, 0.3);
-  --color-low: #22d3ee;
-  --color-low-bg: rgba(34, 211, 238, 0.07);
-  --color-low-border: rgba(34, 211, 238, 0.25);
-  --color-info: #64748b;
-  --color-info-bg: rgba(100, 116, 139, 0.08);
-  --color-info-border: rgba(100, 116, 139, 0.2);
+  /* Brand mark accent — honey-gold, used ONLY on the logo/mark */
+  --brand-gold: #F5A623;
+  --brand-gold-dim: #C8841A;
+  --brand-gold-subtle: rgba(245, 166, 35, 0.12);
+
+  /* Interactive controls — restrained aviation blue */
+  --color-primary: #4B9EFF;
+  --color-primary-dim: #2D7FE8;
+  --color-primary-glow: rgba(75, 158, 255, 0.15);
+  --color-accent: #7BB8FF;
+
+  /* Urgency spectrum — must not use gold/amber to avoid brand confusion */
+  --color-critical: #FF453A;
+  --color-critical-bg: rgba(255, 69, 58, 0.12);
+  --color-critical-border: rgba(255, 69, 58, 0.4);
+  --color-high: #FF6B35;
+  --color-high-bg: rgba(255, 107, 53, 0.10);
+  --color-high-border: rgba(255, 107, 53, 0.35);
+  --color-medium: #FFB84D;
+  --color-medium-bg: rgba(255, 184, 77, 0.08);
+  --color-medium-border: rgba(255, 184, 77, 0.30);
+  --color-low: #5AC8FA;
+  --color-low-bg: rgba(90, 200, 250, 0.07);
+  --color-low-border: rgba(90, 200, 250, 0.25);
+  --color-info: #8E8E93;
+  --color-info-bg: rgba(142, 142, 147, 0.08);
+  --color-info-border: rgba(142, 142, 147, 0.20);
 
   /* Status colors */
-  --color-live: #22c55e;
-  --color-live-glow: rgba(34, 197, 94, 0.2);
-  --color-stale: #f5c518;
-  --color-disconnected: #ff3b5c;
+  --color-live: #30D158;
+  --color-live-glow: rgba(48, 209, 88, 0.20);
+  --color-stale: #FFB84D;
+  --color-disconnected: #FF453A;
 
-  /* Text hierarchy */
-  --text-primary: #e2e8f0;
-  --text-secondary: #94a3b8;
-  --text-muted: #475569;
-  --text-label: #64748b;
-  --text-value: #f8fafc;
-  --text-highlight: #00d4ff;
+  /* Text hierarchy — warm off-white family */
+  --text-primary: #F5F0E8;
+  --text-secondary: #AEAEB2;
+  --text-muted: #636366;
+  --text-label: #8E8E93;
+  --text-value: #FFFFFF;
+  --text-highlight: #4B9EFF;
 
   /* Borders */
-  --border-subtle: rgba(255, 255, 255, 0.05);
-  --border-card: rgba(255, 255, 255, 0.08);
-  --border-active: rgba(0, 212, 255, 0.3);
-  --border-glow: rgba(0, 212, 255, 0.6);
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-card: rgba(255, 255, 255, 0.09);
+  --border-active: rgba(75, 158, 255, 0.35);
+  --border-glow: rgba(75, 158, 255, 0.60);
 
   /* Typography */
   --font-ui: 'Inter', system-ui, sans-serif;
@@ -78,8 +88,8 @@
   --radius-xl: 20px;
 
   /* Card glow effects */
-  --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 1px 4px rgba(0, 0, 0, 0.3);
-  --card-shadow-active: 0 0 0 1px var(--border-active), 0 8px 32px rgba(0, 212, 255, 0.08);
+  --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.5), 0 1px 4px rgba(0, 0, 0, 0.4);
+  --card-shadow-active: 0 0 0 1px var(--border-active), 0 8px 32px rgba(75, 158, 255, 0.10);
 
   /* Transitions */
   --transition-fast: 150ms ease;
@@ -3643,10 +3653,10 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 12px 18px;
-  background: rgba(15, 23, 42, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-card);
   border-radius: var(--radius-md);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
   flex-shrink: 0;
 }
 
@@ -3656,22 +3666,37 @@ body {
   gap: 16px;
 }
 
+/* ── Honey B Brand Mark (Compact, Header) ── */
 .glance-brand {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  text-decoration: none;
+  cursor: default;
 }
 
-.glance-brand-icon {
-  font-size: 1.35rem;
+/* Compact logo mark: shows only the mark portion, cropped to a square */
+.glance-brand-mark {
+  width: 36px;
+  height: 36px;
+  border-radius: 7px;
+  /* Light bg pill so the cream wing and dark outlines stay crisp on charcoal */
+  background: #F5F0E8;
+  padding: 3px;
+  object-fit: contain;
+  object-position: center;
+  flex-shrink: 0;
+  display: block;
 }
 
 .glance-brand-name {
   font-family: var(--font-display);
-  font-size: 1.15rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  color: #FBBF24;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  /* Warm off-white: brand name is not gold so it cannot be confused with caution */
+  color: var(--text-primary);
+  line-height: 1;
 }
 
 .glance-flight-chip {
@@ -4190,6 +4215,172 @@ body {
   }
 }
 
+/* ──────────────────────────────────────────────────────────────
+   HONEY B ABOUT / INFO MODAL  (full logo display)
+   ────────────────────────────────────────────────────────────── */
 
+/* Backdrop overlay */
+.about-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
 
+/* Modal card */
+.about-modal-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+  max-width: 520px;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: about-modal-in 220ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
 
+@keyframes about-modal-in {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Full logo tile: warm cream background so wing + outlines stay intact */
+.about-modal-logo-tile {
+  background: #F5F0E8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 36px 48px;
+}
+
+.about-modal-logo-img {
+  width: 200px;
+  height: 200px;
+  object-fit: contain;
+  display: block;
+}
+
+/* Info section below the logo */
+.about-modal-body {
+  padding: 28px 32px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.about-modal-title {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-value);
+  letter-spacing: 0.04em;
+}
+
+.about-modal-tagline {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.about-modal-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+}
+
+.about-modal-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+}
+
+.about-modal-meta-row .meta-label {
+  color: var(--text-label);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.72rem;
+}
+
+.about-modal-meta-row .meta-value {
+  font-family: var(--font-data);
+  color: var(--text-primary);
+  font-size: 0.82rem;
+}
+
+.about-modal-disclaimer {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  text-align: center;
+}
+
+.about-modal-close {
+  margin: 0 32px 24px;
+  padding: 14px 0;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: var(--font-ui);
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+  min-height: 48px;
+}
+
+.about-modal-close:hover {
+  background: var(--color-primary-dim);
+  transform: translateY(-1px);
+}
+
+.about-modal-close:active {
+  transform: translateY(0);
+}
+
+/* ── Info button in glance header ── */
+.glance-info-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-card);
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.glance-info-btn:hover {
+  background: var(--color-primary-glow);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* Updated flight chip: use brand blue instead of old cyan */
+.glance-flight-chip {
+  background: rgba(75, 158, 255, 0.08);
+  border-color: rgba(75, 158, 255, 0.3);
+}
+
+.glance-flight-id {
+  color: var(--color-primary);
+}
