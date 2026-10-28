@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AirGroundIntegrationContract",
+  "version": "1.0.0",
+  "description": "JSON Schema for Honey B Air-Ground Integration Contract between plane/ and ground-control/",
+  "definitions": {
+    "MessageEnvelope": {
+      "type": "object",
+      "required": ["contractVersion", "messageId", "flightId", "source", "revision", "timestampUtc", "acknowledgmentState", "payloadType", "payload"],
+      "properties": {
+        "contractVersion": { "type": "string", "const": "1.0.0" },
+        "messageId": { "type": "string" },
+        "flightId": { "type": "string" },
+        "source": { "type": "string", "enum": ["AIRCRAFT", "GROUND_CONTROL"] },
+        "revision": { "type": "integer", "minimum": 0 },
+        "timestampUtc": { "type": "string", "format": "date-time" },
+        "acknowledgmentState": {
+          "type": "string",
+          "enum": ["NONE", "REQUIRED", "ACKNOWLEDGED", "UNABLE", "CLARIFICATION_REQUESTED", "FUEL_CONCERN"]
+        },
+        "payloadType": { "type": "string" },
+        "payload": { "type": "object" }
+      }
+    },
+    "PilotResponsePayload": {
+      "type": "object",
+      "required": ["referencedMessageId", "flightId", "responseType", "timestampUtc"],
+      "properties": {
+        "referencedMessageId": { "type": "string" },
+        "flightId": { "type": "string" },
+        "responseType": {
+          "type": "string",
+          "enum": ["ACKNOWLEDGE", "UNABLE", "REQUEST_CLARIFICATION", "FUEL_CONCERN"]
+        },
+        "pilotNotes": { "type": "string" },
+        "timestampUtc": { "type": "string", "format": "date-time" }
+      }
+    }
+  }
+}
