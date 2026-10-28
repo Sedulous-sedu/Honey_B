@@ -12,12 +12,14 @@ import { RerouteCard } from './components/RerouteCard';
 import { ArrivalConditionsCard } from './components/ArrivalConditionsCard';
 import { OperationalNoticesCard } from './components/OperationalNoticesCard';
 import { MessagesPanel } from './components/MessagesPanel';
+import { TouchSafetyShowcase } from './components/TouchSafetyShowcase';
 
 export default function App() {
   const [scenario, setScenario] = useState<ScenarioName>('NORMAL_ARRIVAL');
   const [state, setState] = useState<ConsolidatedDashboardState | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'detailed'>('overview');
   const [highlightedCardId, setHighlightedCardId] = useState<string | null>(null);
+  const [showTouchSafety, setShowTouchSafety] = useState<boolean>(false);
 
   useEffect(() => {
     // Subscribe to datalink adapter updates
@@ -87,14 +89,31 @@ export default function App() {
         onSelectScenario={handleScenarioChange}
       />
 
-      {/* ── Disclaimer Banner ── */}
+      {/* ── Disclaimer Banner & Touch Safety Toggle ── */}
       <div className="prototype-safety-strip" role="alert">
-        <span className="strip-badge">SIMULATION PROTOTYPE</span>
-        <span>
-          NOT CERTIFIED AVIONICS · FOR DEMONSTRATION PURPOSES ONLY · NOT A SOURCE OF AIR TRAFFIC CLEARANCE
-        </span>
-        <span className="strip-version">CONTRACT V{state?.contractVersion ?? '1.0.0'} · REV #{state?.revision ?? 0}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <span className="strip-badge">SIMULATION PROTOTYPE</span>
+          <span>
+            NOT CERTIFIED AVIONICS · FOR DEMONSTRATION PURPOSES ONLY · NOT A SOURCE OF AIR TRAFFIC CLEARANCE
+          </span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <button
+            type="button"
+            className="touch-safety-toggle-pill"
+            onClick={() => setShowTouchSafety(!showTouchSafety)}
+            title="Open Interactive Cockpit Touch Safety Diagnostic Suite"
+          >
+            🛡 {showTouchSafety ? 'Hide Touch-Safety Suite' : 'Verify Touch-Safety Suite'}
+          </button>
+          <span className="strip-version">CONTRACT V{state?.contractVersion ?? '1.0.0'} · REV #{state?.revision ?? 0}</span>
+        </div>
       </div>
+
+      {/* ── Interactive Touch Safety Verification Suite ── */}
+      {showTouchSafety && (
+        <TouchSafetyShowcase onClose={() => setShowTouchSafety(false)} />
+      )}
 
       {/* ── Disconnected / Delayed Alert Banner ── */}
       {state && (

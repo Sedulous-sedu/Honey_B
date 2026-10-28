@@ -2873,4 +2873,741 @@ body {
   }
 }
 
+/* ==========================================================================
+   COCKPIT TOUCH-SAFETY & ERGONOMIC PROTECTION SYSTEM
+   ========================================================================== */
+
+/* Toggle pill in prototype strip */
+.touch-safety-toggle-pill {
+  background: rgba(0, 212, 255, 0.12);
+  border: 1px solid rgba(0, 212, 255, 0.4);
+  color: #00D4FF;
+  font-family: var(--font-data);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.touch-safety-toggle-pill:hover {
+  background: rgba(0, 212, 255, 0.22);
+  border-color: #00D4FF;
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+}
+
+/* 1. Touch-Safe Button Base */
+.touch-safe-btn {
+  position: relative;
+  min-height: 52px;
+  min-width: 130px;
+  padding: 12px 20px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-ui);
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  transition: transform 0.12s ease, background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  overflow: hidden;
+}
+
+.touch-safe-btn:active,
+.touch-safe-btn.is-pressing {
+  transform: scale(0.975);
+}
+
+.touch-safe-btn-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.touch-safe-feedback-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 2px solid transparent;
+  pointer-events: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.touch-safe-btn.is-pressing .touch-safe-feedback-ring {
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.15);
+}
+
+.touch-safety-alert-label {
+  color: #FBBF24;
+  font-family: var(--font-data);
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+  font-weight: 800;
+  animation: pulse-alert 0.3s ease infinite alternate;
+}
+
+@keyframes pulse-alert {
+  from { opacity: 0.8; }
+  to { opacity: 1; }
+}
+
+.touch-safe-btn.is-duplicate-buffered {
+  border-color: #F59E0B !important;
+  background: rgba(245, 158, 11, 0.15) !important;
+}
+
+/* Button Variants */
+.touch-safe-btn.variant-ack {
+  background: rgba(16, 185, 129, 0.18);
+  border: 1px solid rgba(16, 185, 129, 0.5);
+  color: #34D399;
+}
+.touch-safe-btn.variant-ack:hover {
+  background: rgba(16, 185, 129, 0.28);
+  border-color: #10B981;
+}
+
+.touch-safe-btn.variant-unable {
+  background: rgba(239, 68, 68, 0.18);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  color: #F87171;
+}
+.touch-safe-btn.variant-unable:hover {
+  background: rgba(239, 68, 68, 0.28);
+  border-color: #EF4444;
+}
+
+.touch-safe-btn.variant-secondary {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: var(--text-primary);
+}
+.touch-safe-btn.variant-secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.touch-safe-btn.variant-ghost {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--text-secondary);
+}
+.touch-safe-btn.variant-ghost:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: var(--text-primary);
+}
+
+/* 2. Consequential Press-and-Hold Button */
+.press-hold-container {
+  position: relative;
+  width: 100%;
+}
+
+.press-hold-button {
+  position: relative;
+  width: 100%;
+  min-height: 60px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1.5px solid rgba(16, 185, 129, 0.5);
+  border-radius: var(--radius-md);
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none; /* Prevents scroll while holding */
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.press-hold-container.variant-accept .press-hold-button {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
+.press-hold-container.variant-accept .press-hold-button.is-holding {
+  border-color: #10B981;
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.3);
+}
+
+.press-hold-progress-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.25), rgba(16, 185, 129, 0.65));
+  pointer-events: none;
+  z-index: 1;
+  transition: width 0.04s linear;
+}
+
+.press-hold-content {
+  position: relative;
+  z-index: 2;
+  text-align: left;
+}
+
+.press-hold-primary-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.press-hold-icon {
+  font-size: 1.1rem;
+}
+
+.press-hold-label {
+  font-family: var(--font-ui);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #34D399;
+}
+
+.press-hold-sublabel {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 3px;
+  font-family: var(--font-data);
+}
+
+.press-hold-instruction {
+  font-size: 0.7rem;
+  color: #FCD34D;
+  margin-top: 3px;
+  font-family: var(--font-data);
+  font-weight: 600;
+}
+
+.press-hold-gauge {
+  position: relative;
+  z-index: 2;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+.press-hold-gauge svg {
+  transform: rotate(-90deg);
+}
+
+.press-hold-gauge .gauge-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 3.5;
+}
+
+.press-hold-gauge .gauge-fill {
+  fill: none;
+  stroke: #10B981;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.04s linear;
+}
+
+.safety-cushion-indicator {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+  font-family: var(--font-data);
+  font-size: 0.64rem;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+
+/* 3. Reusable Slide to Confirm */
+.slide-to-confirm-track {
+  position: relative;
+  width: 100%;
+  height: 58px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1.5px solid rgba(0, 212, 255, 0.35);
+  border-radius: var(--radius-md);
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  overflow: hidden;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+.slide-track-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, rgba(0, 212, 255, 0.15), rgba(0, 212, 255, 0.45));
+  pointer-events: none;
+  border-radius: var(--radius-md);
+  z-index: 1;
+}
+
+.slide-track-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-data);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.7);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.slide-chevrons {
+  color: #00D4FF;
+  animation: slide-chevron-pulse 1.4s infinite;
+}
+
+@keyframes slide-chevron-pulse {
+  0%, 100% { opacity: 0.3; transform: translateX(0); }
+  50% { opacity: 1; transform: translateX(4px); }
+}
+
+.slide-handle {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #00D4FF, #0284C7);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  z-index: 3;
+  box-shadow: 0 4px 12px rgba(0, 212, 255, 0.4);
+}
+
+.slide-handle:active {
+  cursor: grabbing;
+  transform: scale(0.98);
+}
+
+.slide-handle-icon {
+  font-size: 1.25rem;
+  color: #0F172A;
+  font-weight: 900;
+}
+
+.slide-to-confirm-track.is-confirmed {
+  border-color: #10B981;
+}
+
+.slide-to-confirm-track.is-confirmed .slide-track-fill {
+  background: rgba(16, 185, 129, 0.45);
+}
+
+.slide-to-confirm-track.is-confirmed .slide-handle {
+  background: linear-gradient(135deg, #34D399, #059669);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.slide-confirmed-text {
+  color: #34D399;
+  font-weight: 800;
+}
+
+.slide-reject-text {
+  color: #EF4444;
+  font-weight: 800;
+}
+
+/* 4. Physical Separation & Inactive Cushion Zones */
+.reroute-action-zone {
+  margin-top: var(--space-lg);
+  padding: 18px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+}
+
+.touch-safety-cushion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-data);
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.reroute-actions-spaced {
+  display: grid;
+  grid-template-columns: 1fr 60px 1fr;
+  align-items: center;
+  gap: 12px;
+}
+
+.action-col-accept,
+.action-col-unable {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.reroute-unable-btn {
+  width: 100%;
+  min-height: 60px;
+}
+
+.touch-safety-buffer-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 100%;
+}
+
+.touch-safety-buffer-zone.vertical {
+  width: 40px;
+  height: auto;
+}
+
+.buffer-divider-line {
+  flex: 1;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.buffer-label {
+  font-family: var(--font-data);
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
+
+.action-note-text {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  font-family: var(--font-data);
+  line-height: 1.3;
+}
+
+/* Modal Touch Safety Spacing */
+.touch-safe-modal-footer {
+  margin-top: var(--space-lg);
+  padding: 16px 20px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  /* Clear margin away from tablet bezel edge */
+  margin-bottom: 6px;
+}
+
+.modal-actions-spaced {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.modal-action-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.modal-touch-btn {
+  width: 100%;
+  min-height: 56px;
+}
+
+.modal-action-subnote {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  font-family: var(--font-data);
+  text-align: center;
+}
+
+/* Message Ack Row Safety Spacing */
+.touch-safe-ack-zone {
+  margin-top: 12px;
+  padding: 8px 0 4px;
+}
+
+.touch-safe-btn-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.touch-safety-small-buffer {
+  width: 2px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0 4px;
+}
+
+/* 5. Touch Safety Test & Verification Deck */
+.touch-safety-test-deck {
+  margin: var(--space-md) 0 var(--space-lg);
+  background: #0B1120;
+  border: 1.5px solid rgba(0, 212, 255, 0.4);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 212, 255, 0.1);
+  animation: slide-deck-in 0.25s ease-out;
+}
+
+@keyframes slide-deck-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.test-deck-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.test-deck-badge {
+  background: rgba(0, 212, 255, 0.18);
+  border: 1px solid rgba(0, 212, 255, 0.4);
+  color: #00D4FF;
+  font-family: var(--font-data);
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 4px;
+  margin-right: 10px;
+}
+
+.test-deck-title h3 {
+  display: inline;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+}
+
+.test-deck-close-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-secondary);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+}
+
+.test-deck-disclaimer {
+  display: flex;
+  gap: 10px;
+  background: rgba(14, 165, 233, 0.08);
+  border: 1px solid rgba(14, 165, 233, 0.25);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: 0.74rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.test-deck-disclaimer code {
+  color: #38BDF8;
+  font-family: var(--font-data);
+}
+
+.test-deck-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.test-card {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  padding: 16px;
+}
+
+.test-card h4 {
+  font-size: 0.88rem;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.test-card-desc {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin-bottom: 14px;
+}
+
+.test-controls-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.test-mutate-btn {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #FBBF24;
+  font-family: var(--font-data);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.test-mutate-btn:hover {
+  background: rgba(245, 158, 11, 0.22);
+}
+
+/* Telemetry Log Table */
+.test-telemetry-zone {
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  padding: 14px;
+}
+
+.telemetry-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.last-confirmed-badge {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34D399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: var(--font-data);
+  font-size: 0.7rem;
+}
+
+.clear-log-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.telemetry-log-table {
+  max-height: 180px;
+  overflow-y: auto;
+  font-family: var(--font-data);
+  font-size: 0.72rem;
+}
+
+.telemetry-empty {
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 10px 0;
+  text-align: center;
+}
+
+.telemetry-row {
+  display: grid;
+  grid-template-columns: 70px 140px 90px 1fr;
+  align-items: center;
+  padding: 6px 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  gap: 8px;
+}
+
+.log-time {
+  color: var(--text-muted);
+}
+
+.log-type {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.log-badge {
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.badge-success {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34D399;
+}
+
+.badge-rejected {
+  background: rgba(245, 158, 11, 0.2);
+  color: #FBBF24;
+}
+
+.badge-cancelled {
+  background: rgba(239, 68, 68, 0.2);
+  color: #F87171;
+}
+
+.log-detail {
+  color: var(--text-primary);
+}
+
+/* Tablet Media Query Touch Enhancements */
+@media (max-width: 900px) {
+  .reroute-actions-spaced {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .touch-safety-buffer-zone {
+    flex-direction: row;
+    height: 30px;
+    width: 100%;
+  }
+  .touch-safety-buffer-zone .buffer-divider-line {
+    height: 1px;
+    width: 100%;
+  }
+  .buffer-label {
+    writing-mode: horizontal-tb;
+    transform: none;
+  }
+  .modal-actions-spaced {
+    flex-direction: column;
+    gap: 14px;
+  }
+}
+
+
 

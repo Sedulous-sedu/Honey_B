@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { GroundMessage, PilotResponseType } from '../types';
 import { formatUtcTime } from '../utils/format';
 import { activeDataLinkAdapter } from '../services/dataLinkAdapter';
+import { TouchSafeButton } from './TouchSafeButton';
 
 interface Props {
   messages: GroundMessage[];
@@ -105,32 +106,42 @@ export function MessagesPanel({ messages, flightId }: Props) {
             <div className="message-subject">{msg.subject}</div>
             <div className="message-body">{msg.body}</div>
 
-            {/* Pilot Actions when Ack is Required */}
+            {/* Pilot Actions with Cockpit Touch Safety Separation */}
             {msg.status !== 'ACKNOWLEDGED' && msg.requiresAck && msg.source !== 'PILOT' && (
-              <div className="message-ack-row">
-                <div className="response-btn-group">
-                  <button
+              <div className="message-ack-row touch-safe-ack-zone">
+                <div className="response-btn-group touch-safe-btn-group">
+                  <TouchSafeButton
+                    actionId={`msg-ack-${msg.id}`}
+                    variant="ack"
                     className="response-btn ack"
                     disabled={!!sending}
-                    onClick={() => handleSendResponse(msg, 'ACKNOWLEDGE')}
+                    onDeliberateClick={() => handleSendResponse(msg, 'ACKNOWLEDGE')}
                     title="Acknowledge message receipt and instructions"
                   >
                     {sending === msg.id + 'ACKNOWLEDGE' ? '…' : '✓ Acknowledge'}
-                  </button>
+                  </TouchSafeButton>
 
-                  <button
+                  <div className="touch-safety-small-buffer" aria-hidden="true" />
+
+                  <TouchSafeButton
+                    actionId={`msg-unable-${msg.id}`}
+                    variant="unable"
                     className="response-btn unable"
                     disabled={!!sending}
-                    onClick={() => handleSendResponse(msg, 'UNABLE')}
+                    onDeliberateClick={() => handleSendResponse(msg, 'UNABLE')}
                     title="Send Unable advisory to Ground Control"
                   >
                     {sending === msg.id + 'UNABLE' ? '…' : '✕ Unable'}
-                  </button>
+                  </TouchSafeButton>
 
-                  <button
+                  <div className="touch-safety-small-buffer" aria-hidden="true" />
+
+                  <TouchSafeButton
+                    actionId={`msg-clarify-${msg.id}`}
+                    variant="secondary"
                     className="response-btn clarify"
                     disabled={!!sending}
-                    onClick={() => {
+                    onDeliberateClick={() => {
                       if (activeMsgId === msg.id) {
                         handleSendResponse(msg, 'REQUEST_CLARIFICATION', customNote);
                       } else {
@@ -140,12 +151,14 @@ export function MessagesPanel({ messages, flightId }: Props) {
                     title="Send Request for Clarification to Ground Control"
                   >
                     ? Clarify
-                  </button>
+                  </TouchSafeButton>
 
-                  <button
+                  <TouchSafeButton
+                    actionId={`msg-fuel-${msg.id}`}
+                    variant="secondary"
                     className="response-btn fuel"
                     disabled={!!sending}
-                    onClick={() => {
+                    onDeliberateClick={() => {
                       if (activeMsgId === msg.id) {
                         handleSendResponse(msg, 'FUEL_CONCERN', customNote);
                       } else {
@@ -155,7 +168,7 @@ export function MessagesPanel({ messages, flightId }: Props) {
                     title="Flag Fuel Concern advisory to Ground Control"
                   >
                     ⛽ Fuel Concern
-                  </button>
+                  </TouchSafeButton>
                 </div>
 
                 {/* Optional Note Expander */}

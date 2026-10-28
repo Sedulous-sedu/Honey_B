@@ -8,6 +8,7 @@ import {
   ageLabel,
 } from '../utils/format';
 import { SuggestedReplyModal } from './SuggestedReplyModal';
+import { TouchSafeButton } from './TouchSafeButton';
 
 interface Props {
   state: ConsolidatedDashboardState;
@@ -313,11 +314,12 @@ export function TabletPilotOverview({
 
               {/* Secondary Suggested Reply Pill Button */}
               {item.suggestedReplyText && (
-                <div className="suggested-reply-wrap">
-                  <button
-                    className="suggested-reply-btn"
-                    onClick={(e) => {
-                      e.stopPropagation(); // Do not trigger card navigation
+                <div className="suggested-reply-wrap" onClick={(e) => e.stopPropagation()}>
+                  <TouchSafeButton
+                    actionId={`reply-chip-${item.id}`}
+                    variant="ghost"
+                    className="suggested-reply-btn touch-safe-reply-btn"
+                    onDeliberateClick={() => {
                       setSelectedReplyItem(item);
                     }}
                     title="Review suggested reply before transmitting"
@@ -331,7 +333,7 @@ export function TabletPilotOverview({
                     </span>
                     <span className="reply-text">"{item.suggestedReplyText}"</span>
                     <span className="reply-arrow">›</span>
-                  </button>
+                  </TouchSafeButton>
                 </div>
               )}
             </div>

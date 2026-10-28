@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import type { PilotResponseType } from '../types';
+import { TouchSafeButton } from './TouchSafeButton';
+import { PressAndHoldButton } from './PressAndHoldButton';
 
 interface Props {
   isOpen: boolean;
@@ -79,14 +81,44 @@ export function SuggestedReplyModal({
           </div>
         </div>
 
-        {/* Modal Actions */}
-        <div className="modal-footer">
-          <button className="modal-btn cancel" onClick={onClose} disabled={isSending}>
-            Cancel (Do Not Send)
-          </button>
-          <button className="modal-btn send" onClick={handleSend} disabled={isSending}>
-            {isSending ? 'Transmitting…' : '✈ Transmit Reply to Ground Control'}
-          </button>
+        {/* Modal Actions with Touch Safety Separation & Inactive Cushion */}
+        <div className="modal-footer touch-safe-modal-footer">
+          <div className="modal-actions-spaced">
+            {/* Cancel / Abort: Large touch target, deliberate tap, safe cushion */}
+            <div className="modal-action-col">
+              <TouchSafeButton
+                actionId="modal-cancel-btn"
+                variant="ghost"
+                className="modal-touch-btn cancel"
+                onDeliberateClick={onClose}
+                disabled={isSending}
+              >
+                ✕ Cancel (Do Not Send)
+              </TouchSafeButton>
+              <div className="modal-action-subnote">No transmission will be made</div>
+            </div>
+
+            {/* Inactive physical buffer to prevent fat-finger or turbulence accidents */}
+            <div className="touch-safety-buffer-zone vertical" aria-hidden="true">
+              <span className="buffer-divider-line" />
+              <span className="buffer-label">CUSHION</span>
+              <span className="buffer-divider-line" />
+            </div>
+
+            {/* Consequential action: Press and Hold 1.0s */}
+            <div className="modal-action-col">
+              <PressAndHoldButton
+                actionId={`modal-transmit-${referencedMessageId ?? 'adhoc'}`}
+                label={isSending ? 'Transmitting…' : '✈ Transmit Reply to Ground'}
+                sublabel="Hold 1.0s to confirm transmission"
+                variant="accept"
+                disabled={isSending}
+                messageIntegrityKey={`${updateTitle}-${defaultText}`}
+                onConfirmed={handleSend}
+              />
+              <div className="modal-action-subnote">Downlinks advisory response only</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import type { GroundProposedReroute } from '../types';
 import { formatUtcTime, ageLabel } from '../utils/format';
+import { TouchSafeButton } from './TouchSafeButton';
+import { PressAndHoldButton } from './PressAndHoldButton';
 
 interface Props {
   reroute?: GroundProposedReroute;
@@ -141,27 +143,51 @@ export function RerouteCard({ reroute, onPilotAccept, onPilotUnable, isStale }: 
         </div>
       </div>
 
-      {/* Action Buttons for Pilot Response */}
+      {/* Action Buttons for Pilot Response with Touch Safety Protection */}
       {(reroute.status === 'AWAITING_RESPONSE' || reroute.status === 'PROPOSED') && !pilotFeedback && (
         <div className="reroute-action-zone">
-          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginBottom: 8, fontStyle: 'italic' }}>
-            Select pilot response to downlink intent to Ground Control:
+          <div className="touch-safety-cushion-header">
+            <span>🛡 TOUCH SAFETY PROTECTED</span>
+            <span>ACCEPTANCE REQUIRES 1.0s HOLD · UNABLE IS INSTANTLY ACCESSIBLE</span>
           </div>
-          <div className="reroute-actions">
-            <button
-              className="reroute-action-btn accept"
-              onClick={handleAccept}
-              title="Acknowledge proposal and signal advisory willingness to accept upon formal clearance"
-            >
-              ✓ Pilot Accepts (Advisory Intent)
-            </button>
-            <button
-              className="reroute-action-btn unable"
-              onClick={handleUnable}
-              title="Advise ATC unable to comply; maintain current cleared route"
-            >
-              ✕ Unable (Maintain Current Route)
-            </button>
+
+          <div className="reroute-actions-spaced">
+            {/* Consequential action: Press-and-hold 1.0s */}
+            <div className="action-col-accept">
+              <PressAndHoldButton
+                actionId={`reroute-accept-${reroute.id}`}
+                label="✓ Pilot Accepts (Advisory Intent)"
+                sublabel="Hold 1.0s to confirm transmission"
+                variant="accept"
+                messageIntegrityKey={`${reroute.id}-${reroute.proposedRoute}-${reroute.status}`}
+                onConfirmed={handleAccept}
+              />
+              <div className="action-note-text">
+                Transmits advisory willingness to Ground. Does NOT alter operative cleared route.
+              </div>
+            </div>
+
+            {/* Inactive physical buffer zone to prevent fat-finger or turbulence accidents */}
+            <div className="touch-safety-buffer-zone" aria-hidden="true">
+              <span className="buffer-divider-line" />
+              <span className="buffer-label">SAFETY SEPARATION</span>
+              <span className="buffer-divider-line" />
+            </div>
+
+            {/* Time-sensitive defensive action: Deliberate short press, easy to reach */}
+            <div className="action-col-unable">
+              <TouchSafeButton
+                actionId={`reroute-unable-${reroute.id}`}
+                variant="unable"
+                className="reroute-unable-btn"
+                onDeliberateClick={handleUnable}
+              >
+                ✕ Unable (Maintain Cleared Route)
+              </TouchSafeButton>
+              <div className="action-note-text">
+                Quick-access non-compliance downlink. Preserves current flight plan.
+              </div>
+            </div>
           </div>
         </div>
       )}

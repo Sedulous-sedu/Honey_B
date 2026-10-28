@@ -157,6 +157,13 @@ export const activeDataLinkAdapter: DataLinkAdapter = new HttpDataLinkAdapter('h
    - When aircraft fuel data is absent, the interface displays **"unavailable"** rather than fabricating an endurance figure.
 4. **Datalink Status**:
    - Clearly differentiates `LIVE`, `DELAYED`, and `DISCONNECTED` states. If updates stop arriving, stale indicators activate and crew is instructed to revert to VHF voice comms.
+5. **Touch-Safety & Ergonomic Pilot Controls**:
+   - **Generous Spacing & Cushion Zones**: "Accept" and "Unable" buttons are physically and visually isolated with inactive buffer zones between them to prevent accidental dual-touches or slip activation in turbulence.
+   - **Edge Clearance**: Critical buttons are placed away from screen edges and tablet bezel holding areas.
+   - **Deliberate Dwell Rejection**: Accidental surface grazes (<120ms) are filtered out, while rapid duplicate activations within a 450ms refractory window are debounced.
+   - **1.0s Consequential Press-and-Hold**: Simulated clearance responses require an unbroken 1.0s hold with visible linear/circular progress, immediately aborted if the finger slips (>14px), touch is interrupted, or message state changes.
+   - **Reusable Slide-to-Confirm**: Reusable slider component (`SlideToConfirm.tsx`) for future runway/takeoff flows with 85% drag threshold and auto spring-back.
+   - **Device Support Dependencies**: Palm/oversized contact patch rejection checks require hardware/OS digitizer reporting (`PointerEvent.width/height` or `Touch.radiusX/radiusY`), supported on iPadOS, Android tablets, and Windows Pen. On mouse inputs, contact size defaults gracefully without blocking valid clicks.
 
 ---
 

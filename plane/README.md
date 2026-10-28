@@ -55,6 +55,17 @@ Each data panel displays its originating source and the last-updated UTC timesta
    - `LIVE`: Ground updates active (<30s).
    - `DELAYED`: Ground updates lagging (30s – 120s), amber advisory banner.
    - `DISCONNECTED`: Link lost (>120s), red alert banner with instruction to revert to primary VHF voice frequency (127.425 MHz).
+5. **Touch-Safety & Ergonomic Pilot Controls**:
+   - **Large Touch Targets & Safety Spacing**: Minimum 52px target height with generous cushions. "Accept" and "Unable" are placed far apart with an inactive physical buffer zone between them to prevent fat-finger or turbulence accidents.
+   - **Edge Clearance & Hand-Rest Area Protection**: Critical actions are kept well away from tablet display edges and bottom corners where pilots rest their palms while holding the device.
+   - **Accidental Touch Rejection (Graze vs. Deliberate Tap)**: Requires a deliberate dwell (>120ms); quick surface grazes or brush contacts are discarded with immediate visual alerts.
+   - **Duplicate Activation Shield**: Suppresses rapid duplicate activations within a 450ms refractory window while preserving distinctly timed intentional inputs.
+   - **1.0-Second Consequential Press-and-Hold**: Simulated clearance responses (e.g., tactical reroute advisory acceptance, downlink transmission) require an unbroken 1.0s hold with visible real-time circular and linear progress. Automatically cancelled if the finger slips off (>14px), touch is interrupted, or if the underlying message/proposal revision updates during the hold.
+   - **Reusable Slide-to-Confirm Component** (`SlideToConfirm.tsx`): Built for future runway crossing or takeoff flows, requiring smooth dragging past an 85% threshold with auto spring-back and palm rejection.
+   - **Device Support Dependencies**:
+     - *Universal (works on all devices/browsers)*: 1.0s press-and-hold progress, slip-off cancellation, dwell timing, duplicate tap debouncing, state-change integrity abortion.
+     - *Device-Dependent (requires hardware/OS digitizer support)*: Palm / oversized contact patch rejection evaluates `PointerEvent.width/height` or `Touch.radiusX/radiusY`. This is supported on iPadOS, Android tablets, and Windows Pen digitizers. On desktop mouse inputs or emulators reporting unit contact geometry (1px), contact patch checks safely pass without blocking valid inputs.
+   - **Vocabulary Precision**: "Acknowledge" is strictly used for informational updates; "Accept" is exclusively reserved for proposals. "Unable" and "Request Clarification" remain instantly reachable without arduous holds.
 
 ---
 
