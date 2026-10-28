@@ -1,0 +1,24 @@
+{
+  "type": "advisory.updated",
+  "version": "v1",
+  "eventId": "evt-215",
+  "revision": 215,
+  "timestamp": "2026-10-28T03:16:00Z",
+  "aircraftId": "UAE231",
+  "payload": {
+    "advisoryId": "ADV-007",
+    "source": "HONEY_B_ADVISORY",
+    "isInstruction": false,
+    "severity": "CAUTION",
+    "category": "WEATHER",
+    "title": "RVR below your usual limit",
+    "summary": "RVR 400 m on 30L. Your approach capability (CAT IIIB) allows landing, expect reduced arrival rate.",
+    "reasoning": [
+      "RVR 400 m reported on runway 30L",
+      "Aircraft capability: CAT IIIB",
+      "LVP active, arrival spacing increased"
+    ],
+    "expiresAt": "2026-10-28T03:31:00Z",
+    "provenance": "AI_DERIVED"
+  }
+}

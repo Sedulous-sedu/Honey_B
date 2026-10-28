@@ -1,0 +1,17 @@
+{
+  "type": "command.status",
+  "version": "v1",
+  "eventId": "evt-211",
+  "revision": 211,
+  "timestamp": "2026-10-28T03:16:10Z",
+  "aircraftId": "UAE231",
+  "payload": {
+    "commandId": "CMD-001",
+    "status": "SUPERSEDED",
+    "previousStatus": "SENT",
+    "response": null,
+    "reason": "Replaced by CMD-002 (Hold DXB VOR)",
+    "supersededBy": "CMD-002",
+    "changedAt": "2026-10-28T03:16:10Z"
+  }
+}

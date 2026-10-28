@@ -1,0 +1,78 @@
+{
+  "$defs": {
+    "Provenance": {
+      "enum": [
+        "SIMULATED",
+        "PILOT_REPORTED",
+        "RULE_BASED",
+        "AI_DERIVED"
+      ],
+      "title": "Provenance",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "advisoryId": {
+      "title": "Advisoryid",
+      "type": "string"
+    },
+    "source": {
+      "default": "HONEY_B_ADVISORY",
+      "title": "Source",
+      "type": "string"
+    },
+    "isInstruction": {
+      "default": false,
+      "title": "Isinstruction",
+      "type": "boolean"
+    },
+    "severity": {
+      "default": "INFO",
+      "title": "Severity",
+      "type": "string"
+    },
+    "category": {
+      "default": "WEATHER",
+      "title": "Category",
+      "type": "string"
+    },
+    "title": {
+      "title": "Title",
+      "type": "string"
+    },
+    "summary": {
+      "title": "Summary",
+      "type": "string"
+    },
+    "reasoning": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Reasoning",
+      "type": "array"
+    },
+    "expiresAt": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Expiresat"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance",
+      "default": "AI_DERIVED"
+    }
+  },
+  "required": [
+    "advisoryId",
+    "title",
+    "summary"
+  ],
+  "title": "AdvisoryPayload",
+  "type": "object"
+}

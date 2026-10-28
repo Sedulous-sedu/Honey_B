@@ -1,0 +1,318 @@
+{
+  "$defs": {
+    "CommandStatus": {
+      "enum": [
+        "SENT",
+        "ACKNOWLEDGED",
+        "STANDBY",
+        "UNABLE",
+        "EXECUTING",
+        "DONE",
+        "CANCELLED",
+        "SUPERSEDED",
+        "EXPIRED"
+      ],
+      "title": "CommandStatus",
+      "type": "string"
+    },
+    "InstructionType": {
+      "enum": [
+        "ALTITUDE",
+        "HEADING",
+        "SPEED",
+        "HOLD",
+        "RUNWAY_CHANGE",
+        "APPROACH_CLEARANCE",
+        "LANDING_CLEARANCE",
+        "DIVERT",
+        "INFORMATION"
+      ],
+      "title": "InstructionType",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "commandId": {
+      "title": "Commandid",
+      "type": "string"
+    },
+    "aircraftId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Aircraftid"
+    },
+    "source": {
+      "default": "ATC",
+      "title": "Source",
+      "type": "string"
+    },
+    "controllerId": {
+      "title": "Controllerid",
+      "type": "string"
+    },
+    "controllerName": {
+      "title": "Controllername",
+      "type": "string"
+    },
+    "instructionType": {
+      "$ref": "#/$defs/InstructionType"
+    },
+    "targetAltitudeFt": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Targetaltitudeft"
+    },
+    "targetHeadingDeg": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Targetheadingdeg"
+    },
+    "turnDirection": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Turndirection"
+    },
+    "targetSpeedKt": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Targetspeedkt"
+    },
+    "fix": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Fix"
+    },
+    "holdAltitudeFt": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Holdaltitudeft"
+    },
+    "expectFurtherClearanceUtc": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Expectfurtherclearanceutc"
+    },
+    "legTimeMin": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Legtimemin"
+    },
+    "newRunway": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Newrunway"
+    },
+    "newApproach": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Newapproach"
+    },
+    "approach": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Approach"
+    },
+    "runway": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Runway"
+    },
+    "windText": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Windtext"
+    },
+    "alternateIcao": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Alternateicao"
+    },
+    "routeText": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Routetext"
+    },
+    "text": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Text"
+    },
+    "displayText": {
+      "title": "Displaytext",
+      "type": "string"
+    },
+    "allowedResponses": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Allowedresponses",
+      "type": "array"
+    },
+    "status": {
+      "$ref": "#/$defs/CommandStatus",
+      "default": "SENT"
+    },
+    "issuedAt": {
+      "title": "Issuedat",
+      "type": "string"
+    },
+    "expiresAt": {
+      "title": "Expiresat",
+      "type": "string"
+    },
+    "supersedes": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Supersedes"
+    },
+    "relatedSuggestionId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Relatedsuggestionid"
+    }
+  },
+  "required": [
+    "commandId",
+    "controllerId",
+    "controllerName",
+    "instructionType",
+    "displayText",
+    "issuedAt",
+    "expiresAt"
+  ],
+  "title": "CommandIssuedPayload",
+  "type": "object"
+}

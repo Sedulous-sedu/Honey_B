@@ -1,0 +1,53 @@
+[
+  {
+    "type": "command.status",
+    "version": "v1",
+    "eventId": "evt-202",
+    "revision": 202,
+    "timestamp": "2026-10-28T03:15:26Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "commandId": "CMD-001",
+      "status": "ACKNOWLEDGED",
+      "previousStatus": "SENT",
+      "response": "WILCO",
+      "reason": null,
+      "supersededBy": null,
+      "changedAt": "2026-10-28T03:15:26Z"
+    }
+  },
+  {
+    "type": "command.status",
+    "version": "v1",
+    "eventId": "evt-203",
+    "revision": 203,
+    "timestamp": "2026-10-28T03:15:28Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "commandId": "CMD-001",
+      "status": "EXECUTING",
+      "previousStatus": "ACKNOWLEDGED",
+      "response": "WILCO",
+      "reason": null,
+      "supersededBy": null,
+      "changedAt": "2026-10-28T03:15:28Z"
+    }
+  },
+  {
+    "type": "command.status",
+    "version": "v1",
+    "eventId": "evt-204",
+    "revision": 204,
+    "timestamp": "2026-10-28T03:16:45Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "commandId": "CMD-001",
+      "status": "DONE",
+      "previousStatus": "EXECUTING",
+      "response": "WILCO",
+      "reason": null,
+      "supersededBy": null,
+      "changedAt": "2026-10-28T03:16:45Z"
+    }
+  }
+]

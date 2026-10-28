@@ -1,0 +1,17 @@
+{
+  "type": "command.status",
+  "version": "v1",
+  "eventId": "evt-210",
+  "revision": 210,
+  "timestamp": "2026-10-28T03:15:30Z",
+  "aircraftId": "UAE231",
+  "payload": {
+    "commandId": "CMD-001",
+    "status": "UNABLE",
+    "previousStatus": "SENT",
+    "response": "UNABLE",
+    "reason": "Unable, fuel state",
+    "supersededBy": null,
+    "changedAt": "2026-10-28T03:15:30Z"
+  }
+}

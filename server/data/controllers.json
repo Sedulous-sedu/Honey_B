@@ -1,0 +1,34 @@
+[
+  {
+    "id": "CTRL-ARR-01",
+    "name": "Ahmed",
+    "role": "APPROACH_NORTH",
+    "sector": "OMDB_ARR_NORTH",
+    "frequency": "124.900",
+    "assignedAircraft": ["UAE231", "SIA317", "IGO1433", "DLH788", "JAL36", "KAL51", "ETH604"]
+  },
+  {
+    "id": "CTRL-ARR-02",
+    "name": "Sara",
+    "role": "APPROACH_SOUTH",
+    "sector": "OMDB_ARR_SOUTH",
+    "frequency": "120.400",
+    "assignedAircraft": ["FDB512", "BAW107", "THY762", "AFR442", "KLM427", "SVA552", "MEA428"]
+  },
+  {
+    "id": "CTRL-DEP-01",
+    "name": "Tariq",
+    "role": "DEPARTURE",
+    "sector": "OMDB_DEP",
+    "frequency": "119.550",
+    "assignedAircraft": ["UAE223", "QFA12", "BAW17", "ASA108", "UAL883", "CPA250"]
+  },
+  {
+    "id": "CTRL-GND-01",
+    "name": "Fatima",
+    "role": "GROUND_CONTROL",
+    "sector": "OMDB_GND",
+    "frequency": "121.750",
+    "assignedAircraft": ["UAE004", "FDX88", "GTI102", "AUH01", "BOX501"]
+  }
+]

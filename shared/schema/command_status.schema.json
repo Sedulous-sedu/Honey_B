@@ -1,0 +1,94 @@
+{
+  "$defs": {
+    "CommandStatus": {
+      "enum": [
+        "SENT",
+        "ACKNOWLEDGED",
+        "STANDBY",
+        "UNABLE",
+        "EXECUTING",
+        "DONE",
+        "CANCELLED",
+        "SUPERSEDED",
+        "EXPIRED"
+      ],
+      "title": "CommandStatus",
+      "type": "string"
+    },
+    "PilotResponse": {
+      "enum": [
+        "WILCO",
+        "UNABLE",
+        "STANDBY"
+      ],
+      "title": "PilotResponse",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "commandId": {
+      "title": "Commandid",
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/$defs/CommandStatus"
+    },
+    "previousStatus": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CommandStatus"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "response": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PilotResponse"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "reason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reason"
+    },
+    "supersededBy": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Supersededby"
+    },
+    "changedAt": {
+      "title": "Changedat",
+      "type": "string"
+    }
+  },
+  "required": [
+    "commandId",
+    "status",
+    "changedAt"
+  ],
+  "title": "CommandStatusPayload",
+  "type": "object"
+}

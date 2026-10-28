@@ -1,0 +1,17 @@
+{
+  "type": "stand.updated",
+  "version": "v1",
+  "eventId": "evt-320",
+  "revision": 320,
+  "timestamp": "2026-10-28T03:22:00Z",
+  "aircraftId": "UAE231",
+  "payload": {
+    "standId": "B14",
+    "terminal": "Terminal 3, Concourse B",
+    "previousStandId": "B12",
+    "reason": "STAND_OCCUPIED_BY_DELAYED_DEPARTURE",
+    "effectiveFrom": "2026-10-28T03:22:00Z",
+    "isClearance": false,
+    "provenance": "SIMULATED"
+  }
+}

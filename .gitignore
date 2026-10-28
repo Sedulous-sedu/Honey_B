@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+server/.venv/
+.pytest_cache/
+
+# Node
+web/node_modules/
+web/dist/
+*.local
+
+# Logs and databases
+*.log
+.env

@@ -1,0 +1,30 @@
+{
+  "properties": {
+    "reportId": {
+      "title": "Reportid",
+      "type": "string"
+    },
+    "accepted": {
+      "title": "Accepted",
+      "type": "boolean"
+    },
+    "note": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Note"
+    }
+  },
+  "required": [
+    "reportId",
+    "accepted"
+  ],
+  "title": "ReportAckPayload",
+  "type": "object"
+}

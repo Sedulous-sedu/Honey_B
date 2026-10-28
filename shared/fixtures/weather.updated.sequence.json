@@ -1,0 +1,261 @@
+[
+  {
+    "type": "weather.updated",
+    "version": "v1",
+    "eventId": "evt-wx-1",
+    "revision": 170,
+    "timestamp": "2026-10-28T03:00:00Z",
+    "aircraftId": null,
+    "payload": {
+      "simTimeOffsetSec": 0,
+      "name": "CLEAR",
+      "observedAt": "2026-10-28T03:00:00Z",
+      "rawMetar": "OMDB 280300Z 32005KT 6000 NSC 23/21 Q1013 NOSIG",
+      "visibilityM": 6000,
+      "rvr": [
+        {
+          "runway": "30L",
+          "valueM": 2000,
+          "trend": "NO_CHANGE"
+        },
+        {
+          "runway": "30R",
+          "valueM": 2000,
+          "trend": "NO_CHANGE"
+        }
+      ],
+      "ceilingFt": 25000,
+      "wind": {
+        "directionDeg": 320,
+        "speedKt": 5
+      },
+      "temperatureC": 23,
+      "qnhHpa": 1013,
+      "flightCategory": "VFR",
+      "lvp": {
+        "active": false,
+        "phase": "NONE"
+      },
+      "alerts": [],
+      "provenance": "SIMULATED"
+    }
+  },
+  {
+    "type": "weather.updated",
+    "version": "v1",
+    "eventId": "evt-wx-2",
+    "revision": 171,
+    "timestamp": "2026-10-28T03:05:00Z",
+    "aircraftId": null,
+    "payload": {
+      "simTimeOffsetSec": 300,
+      "name": "MIST",
+      "observedAt": "2026-10-28T03:05:00Z",
+      "rawMetar": "OMDB 280305Z 33004KT 3000 BR SCT005 22/22 Q1012 NOSIG",
+      "visibilityM": 3000,
+      "rvr": [
+        {
+          "runway": "30L",
+          "valueM": 1800,
+          "trend": "DOWN"
+        },
+        {
+          "runway": "30R",
+          "valueM": 1800,
+          "trend": "DOWN"
+        }
+      ],
+      "ceilingFt": 500,
+      "wind": {
+        "directionDeg": 330,
+        "speedKt": 4
+      },
+      "temperatureC": 22,
+      "qnhHpa": 1012,
+      "flightCategory": "MVFR",
+      "lvp": {
+        "active": false,
+        "phase": "NONE"
+      },
+      "alerts": [
+        "MIST_DEVELOPING"
+      ],
+      "provenance": "SIMULATED"
+    }
+  },
+  {
+    "type": "weather.updated",
+    "version": "v1",
+    "eventId": "evt-wx-3",
+    "revision": 172,
+    "timestamp": "2026-10-28T03:10:00Z",
+    "aircraftId": null,
+    "payload": {
+      "simTimeOffsetSec": 600,
+      "name": "FOG",
+      "observedAt": "2026-10-28T03:10:00Z",
+      "rawMetar": "OMDB 280310Z 33003KT 0800 R30L/0900D FG BKN002 22/22 Q1012 TEMPO 0400",
+      "visibilityM": 800,
+      "rvr": [
+        {
+          "runway": "30L",
+          "valueM": 900,
+          "trend": "DOWN"
+        },
+        {
+          "runway": "30R",
+          "valueM": 950,
+          "trend": "DOWN"
+        }
+      ],
+      "ceilingFt": 200,
+      "wind": {
+        "directionDeg": 330,
+        "speedKt": 3
+      },
+      "temperatureC": 22,
+      "qnhHpa": 1012,
+      "flightCategory": "IFR",
+      "lvp": {
+        "active": true,
+        "phase": "LVP_PREPARATION"
+      },
+      "alerts": [
+        "FOG_APPROACHING",
+        "LVP_PREPARATION"
+      ],
+      "provenance": "SIMULATED"
+    }
+  },
+  {
+    "type": "weather.updated",
+    "version": "v1",
+    "eventId": "evt-wx-4",
+    "revision": 173,
+    "timestamp": "2026-10-28T03:15:00Z",
+    "aircraftId": null,
+    "payload": {
+      "simTimeOffsetSec": 900,
+      "name": "DENSE_FOG",
+      "observedAt": "2026-10-28T03:15:00Z",
+      "rawMetar": "OMDB 280315Z 33004KT 0350 R30L/0400N R30R/0450N FG VV001 22/22 Q1012 NOSIG",
+      "visibilityM": 350,
+      "rvr": [
+        {
+          "runway": "30L",
+          "valueM": 400,
+          "trend": "NO_CHANGE"
+        },
+        {
+          "runway": "30R",
+          "valueM": 450,
+          "trend": "NO_CHANGE"
+        }
+      ],
+      "ceilingFt": 100,
+      "wind": {
+        "directionDeg": 330,
+        "speedKt": 4
+      },
+      "temperatureC": 22,
+      "qnhHpa": 1012,
+      "flightCategory": "LIFR",
+      "lvp": {
+        "active": true,
+        "phase": "LVP_ACTIVE"
+      },
+      "alerts": [
+        "DENSE_FOG",
+        "ARRIVAL_RATE_REDUCED",
+        "LVP_ACTIVE_CAT_II_III_ONLY"
+      ],
+      "provenance": "SIMULATED"
+    }
+  },
+  {
+    "type": "weather.updated",
+    "version": "v1",
+    "eventId": "evt-wx-5",
+    "revision": 174,
+    "timestamp": "2026-10-28T03:30:00Z",
+    "aircraftId": null,
+    "payload": {
+      "simTimeOffsetSec": 1800,
+      "name": "IMPROVING",
+      "observedAt": "2026-10-28T03:30:00Z",
+      "rawMetar": "OMDB 280330Z 31005KT 1000 R30L/1100U FG BKN003 23/21 Q1013 BECMG 2000",
+      "visibilityM": 1000,
+      "rvr": [
+        {
+          "runway": "30L",
+          "valueM": 1100,
+          "trend": "UP"
+        },
+        {
+          "runway": "30R",
+          "valueM": 1200,
+          "trend": "UP"
+        }
+      ],
+      "ceilingFt": 300,
+      "wind": {
+        "directionDeg": 310,
+        "speedKt": 5
+      },
+      "temperatureC": 23,
+      "qnhHpa": 1013,
+      "flightCategory": "IFR",
+      "lvp": {
+        "active": true,
+        "phase": "LVP_ACTIVE"
+      },
+      "alerts": [
+        "VISIBILITY_IMPROVING"
+      ],
+      "provenance": "SIMULATED"
+    }
+  },
+  {
+    "type": "weather.updated",
+    "version": "v1",
+    "eventId": "evt-wx-6",
+    "revision": 175,
+    "timestamp": "2026-10-28T03:40:00Z",
+    "aircraftId": null,
+    "payload": {
+      "simTimeOffsetSec": 2400,
+      "name": "LIFTING",
+      "observedAt": "2026-10-28T03:40:00Z",
+      "rawMetar": "OMDB 280340Z 30006KT 2500 HZ SCT008 24/21 Q1013 NOSIG",
+      "visibilityM": 2500,
+      "rvr": [
+        {
+          "runway": "30L",
+          "valueM": 2000,
+          "trend": "UP"
+        },
+        {
+          "runway": "30R",
+          "valueM": 2000,
+          "trend": "UP"
+        }
+      ],
+      "ceilingFt": 800,
+      "wind": {
+        "directionDeg": 300,
+        "speedKt": 6
+      },
+      "temperatureC": 24,
+      "qnhHpa": 1013,
+      "flightCategory": "MVFR",
+      "lvp": {
+        "active": false,
+        "phase": "LVP_CANCELLED"
+      },
+      "alerts": [
+        "LVP_CANCELLED"
+      ],
+      "provenance": "SIMULATED"
+    }
+  }
+]

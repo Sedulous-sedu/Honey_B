@@ -1,0 +1,30 @@
+[
+  {
+    "type": "error",
+    "version": "v1",
+    "eventId": "evt-err-01",
+    "revision": 261,
+    "timestamp": "2026-10-28T03:18:06Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "code": "COMMAND_SUPERSEDED",
+      "message": "CMD-001 was replaced by CMD-004 before your response arrived.",
+      "relatedEventId": "evt-pilot-22",
+      "commandId": "CMD-001"
+    }
+  },
+  {
+    "type": "error",
+    "version": "v1",
+    "eventId": "evt-err-02",
+    "revision": 262,
+    "timestamp": "2026-10-28T03:18:10Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "code": "UNAUTHORIZED_AIRCRAFT",
+      "message": "Token demo-UAE231 cannot access FDB512.",
+      "relatedEventId": "evt-pilot-23",
+      "commandId": null
+    }
+  }
+]

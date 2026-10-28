@@ -1,0 +1,347 @@
+{
+  "$defs": {
+    "Capability": {
+      "properties": {
+        "lvpApproach": {
+          "$ref": "#/$defs/LvpApproach",
+          "default": "CAT_IIIB"
+        }
+      },
+      "title": "Capability",
+      "type": "object"
+    },
+    "FlightPhase": {
+      "enum": [
+        "PARKED",
+        "TAXI_OUT",
+        "DEPARTURE",
+        "CRUISE",
+        "ARRIVAL",
+        "HOLDING",
+        "APPROACH",
+        "FINAL",
+        "LANDED",
+        "TAXI_IN",
+        "AT_STAND",
+        "DIVERTING"
+      ],
+      "title": "FlightPhase",
+      "type": "string"
+    },
+    "FlightStatus": {
+      "enum": [
+        "NORMAL",
+        "HOLDING",
+        "DIVERTING",
+        "PRIORITY",
+        "UNABLE_TO_LAND"
+      ],
+      "title": "FlightStatus",
+      "type": "string"
+    },
+    "Fuel": {
+      "properties": {
+        "totalKg": {
+          "title": "Totalkg",
+          "type": "number"
+        },
+        "enduranceMin": {
+          "title": "Endurancemin",
+          "type": "number"
+        },
+        "holdingFuelFlowKgH": {
+          "title": "Holdingfuelflowkgh",
+          "type": "number"
+        },
+        "finalReserveKg": {
+          "title": "Finalreservekg",
+          "type": "number"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance",
+          "default": "SIMULATED"
+        }
+      },
+      "required": [
+        "totalKg",
+        "enduranceMin",
+        "holdingFuelFlowKgH",
+        "finalReserveKg"
+      ],
+      "title": "Fuel",
+      "type": "object"
+    },
+    "LvpApproach": {
+      "enum": [
+        "CAT_I",
+        "CAT_II",
+        "CAT_IIIA",
+        "CAT_IIIB"
+      ],
+      "title": "LvpApproach",
+      "type": "string"
+    },
+    "Position": {
+      "properties": {
+        "lat": {
+          "title": "Lat",
+          "type": "number"
+        },
+        "lon": {
+          "title": "Lon",
+          "type": "number"
+        },
+        "distanceToThresholdNm": {
+          "title": "Distancetothresholdnm",
+          "type": "number"
+        }
+      },
+      "required": [
+        "lat",
+        "lon",
+        "distanceToThresholdNm"
+      ],
+      "title": "Position",
+      "type": "object"
+    },
+    "Priority": {
+      "properties": {
+        "level": {
+          "$ref": "#/$defs/PriorityLevel",
+          "default": "NORMAL"
+        },
+        "reasonCodes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Reasoncodes",
+          "type": "array"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance",
+          "default": "RULE_BASED"
+        }
+      },
+      "title": "Priority",
+      "type": "object"
+    },
+    "PriorityLevel": {
+      "enum": [
+        "NORMAL",
+        "ELEVATED",
+        "MINIMUM_FUEL",
+        "MEDICAL",
+        "EMERGENCY"
+      ],
+      "title": "PriorityLevel",
+      "type": "string"
+    },
+    "Provenance": {
+      "enum": [
+        "SIMULATED",
+        "PILOT_REPORTED",
+        "RULE_BASED",
+        "AI_DERIVED"
+      ],
+      "title": "Provenance",
+      "type": "string"
+    },
+    "Speed": {
+      "properties": {
+        "indicatedAirspeedKt": {
+          "title": "Indicatedairspeedkt",
+          "type": "number"
+        },
+        "groundSpeedKt": {
+          "title": "Groundspeedkt",
+          "type": "number"
+        },
+        "airspeedType": {
+          "default": "IAS_APPROX",
+          "title": "Airspeedtype",
+          "type": "string"
+        }
+      },
+      "required": [
+        "indicatedAirspeedKt",
+        "groundSpeedKt"
+      ],
+      "title": "Speed",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "callsign": {
+      "title": "Callsign",
+      "type": "string"
+    },
+    "aircraftType": {
+      "title": "Aircrafttype",
+      "type": "string"
+    },
+    "wakeCategory": {
+      "title": "Wakecategory",
+      "type": "string"
+    },
+    "origin": {
+      "title": "Origin",
+      "type": "string"
+    },
+    "destination": {
+      "title": "Destination",
+      "type": "string"
+    },
+    "flightPhase": {
+      "$ref": "#/$defs/FlightPhase"
+    },
+    "status": {
+      "$ref": "#/$defs/FlightStatus"
+    },
+    "position": {
+      "$ref": "#/$defs/Position"
+    },
+    "altitudeFt": {
+      "title": "Altitudeft",
+      "type": "number"
+    },
+    "headingDeg": {
+      "title": "Headingdeg",
+      "type": "number"
+    },
+    "verticalRateFpm": {
+      "title": "Verticalratefpm",
+      "type": "number"
+    },
+    "speed": {
+      "$ref": "#/$defs/Speed"
+    },
+    "assignedRunway": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Assignedrunway"
+    },
+    "approach": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Approach"
+    },
+    "landingSequence": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Landingsequence"
+    },
+    "etaUtc": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Etautc"
+    },
+    "fuel": {
+      "$ref": "#/$defs/Fuel"
+    },
+    "capability": {
+      "$ref": "#/$defs/Capability"
+    },
+    "assignedControllerId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Assignedcontrollerid"
+    },
+    "priority": {
+      "$ref": "#/$defs/Priority"
+    },
+    "assignedStand": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Assignedstand"
+    },
+    "squawk": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Squawk"
+    },
+    "icao24": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Icao24"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance",
+      "default": "SIMULATED"
+    }
+  },
+  "required": [
+    "callsign",
+    "aircraftType",
+    "wakeCategory",
+    "origin",
+    "destination",
+    "flightPhase",
+    "status",
+    "position",
+    "altitudeFt",
+    "headingDeg",
+    "verticalRateFpm",
+    "speed",
+    "fuel",
+    "capability",
+    "priority"
+  ],
+  "title": "AircraftStatePayload",
+  "type": "object"
+}

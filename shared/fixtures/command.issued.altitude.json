@@ -1,0 +1,27 @@
+{
+  "type": "command.issued",
+  "version": "v1",
+  "eventId": "evt-201",
+  "revision": 201,
+  "timestamp": "2026-10-28T03:15:20Z",
+  "aircraftId": "UAE231",
+  "payload": {
+    "commandId": "CMD-001",
+    "source": "ATC",
+    "controllerId": "CTRL-ARR-01",
+    "controllerName": "Ahmed",
+    "instructionType": "ALTITUDE",
+    "targetAltitudeFt": 3000,
+    "displayText": "Descend and maintain 3000 feet",
+    "allowedResponses": [
+      "WILCO",
+      "UNABLE",
+      "STANDBY"
+    ],
+    "status": "SENT",
+    "issuedAt": "2026-10-28T03:15:20Z",
+    "expiresAt": "2026-10-28T03:16:50Z",
+    "supersedes": null,
+    "relatedSuggestionId": "SUG-014"
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "$defs": {
+    "Provenance": {
+      "enum": [
+        "SIMULATED",
+        "PILOT_REPORTED",
+        "RULE_BASED",
+        "AI_DERIVED"
+      ],
+      "title": "Provenance",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "standId": {
+      "title": "Standid",
+      "type": "string"
+    },
+    "terminal": {
+      "title": "Terminal",
+      "type": "string"
+    },
+    "previousStandId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Previousstandid"
+    },
+    "reason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reason"
+    },
+    "effectiveFrom": {
+      "title": "Effectivefrom",
+      "type": "string"
+    },
+    "isClearance": {
+      "default": false,
+      "title": "Isclearance",
+      "type": "boolean"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance",
+      "default": "SIMULATED"
+    }
+  },
+  "required": [
+    "standId",
+    "terminal",
+    "effectiveFrom"
+  ],
+  "title": "StandUpdatedPayload",
+  "type": "object"
+}

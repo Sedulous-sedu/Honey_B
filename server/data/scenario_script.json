@@ -1,0 +1,51 @@
+[
+  {
+    "timeSec": 60,
+    "type": "WEATHER_CHANGE",
+    "phase": "FOG",
+    "description": "Visibility drops to 800m. Airport initiates LVP_PREPARATION."
+  },
+  {
+    "timeSec": 120,
+    "type": "WEATHER_CHANGE",
+    "phase": "DENSE_FOG",
+    "description": "Dense fog blankets OMDB. Visibility 350m, RVR 400m. LVP_ACTIVE. Arrival spacing doubled."
+  },
+  {
+    "timeSec": 150,
+    "type": "STAND_BLOCK",
+    "standId": "B12",
+    "reason": "Pushback tug hydraulic failure, B12 blocked",
+    "description": "Stand B12 blocked. Arriving flights must be rerouted to Concourse C or Terminal 1."
+  },
+  {
+    "timeSec": 180,
+    "type": "CAPABILITY_CONFLICT",
+    "aircraftId": "IGO1433",
+    "description": "IGO1433 is CAT I certified only. In RVR 400m, landing is illegal. Divert recommended to OMSJ/OMDW."
+  },
+  {
+    "timeSec": 210,
+    "type": "FUEL_ALERT",
+    "aircraftId": "FDB512",
+    "description": "FDB512 endurance drops below holding reserve buffer. Priority approach recommended."
+  },
+  {
+    "timeSec": 270,
+    "type": "MEDICAL_PRIORITY",
+    "aircraftId": "THY762",
+    "description": "THY762 reports medical priority (passenger cardiac event). Expedited descent requested."
+  },
+  {
+    "timeSec": 600,
+    "type": "WEATHER_CHANGE",
+    "phase": "IMPROVING",
+    "description": "Visibility improving to 1000m, RVR 1100m."
+  },
+  {
+    "timeSec": 900,
+    "type": "WEATHER_CHANGE",
+    "phase": "LIFTING",
+    "description": "Visibility 2500m. LVP_CANCELLED. Normal spacing resumed."
+  }
+]

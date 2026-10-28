@@ -1,0 +1,123 @@
+{
+  "icao": "OMDB",
+  "name": "Dubai International Airport",
+  "elevationFt": 62,
+  "center": {
+    "lat": 25.2532,
+    "lon": 55.3657
+  },
+  "runways": [
+    {
+      "id": "12L/30R",
+      "designator1": "12L",
+      "designator2": "30R",
+      "lengthM": 4000,
+      "widthM": 60,
+      "threshold1": {
+        "lat": 25.2662,
+        "lon": 55.3496,
+        "headingDeg": 120,
+        "ilsCategory": "CAT_IIIB",
+        "glideSlopeDeg": 3.0
+      },
+      "threshold2": {
+        "lat": 25.2443,
+        "lon": 55.3852,
+        "headingDeg": 300,
+        "ilsCategory": "CAT_IIIB",
+        "glideSlopeDeg": 3.0
+      }
+    },
+    {
+      "id": "12R/30L",
+      "designator1": "12R",
+      "designator2": "30L",
+      "lengthM": 4450,
+      "widthM": 60,
+      "threshold1": {
+        "lat": 25.2605,
+        "lon": 55.3448,
+        "headingDeg": 120,
+        "ilsCategory": "CAT_IIIB",
+        "glideSlopeDeg": 3.0
+      },
+      "threshold2": {
+        "lat": 25.2384,
+        "lon": 55.3804,
+        "headingDeg": 300,
+        "ilsCategory": "CAT_IIIB",
+        "glideSlopeDeg": 3.0
+      }
+    }
+  ],
+  "holdingFixes": [
+    {
+      "id": "DXB",
+      "name": "DXB VOR",
+      "lat": 25.2528,
+      "lon": 55.4500,
+      "inboundCourseDeg": 300,
+      "altitudeFt": 4000
+    },
+    {
+      "id": "DESDI",
+      "name": "DESDI FIX",
+      "lat": 25.1000,
+      "lon": 55.6500,
+      "inboundCourseDeg": 300,
+      "altitudeFt": 6000
+    }
+  ],
+  "alternates": [
+    {
+      "icao": "OMDW",
+      "name": "Al Maktoum International (DWC)",
+      "distanceNm": 25,
+      "bearingDeg": 205,
+      "ils": "CAT_IIIB",
+      "weather": "CLEAR"
+    },
+    {
+      "icao": "OMSJ",
+      "name": "Sharjah International (SHJ)",
+      "distanceNm": 10,
+      "bearingDeg": 45,
+      "ils": "CAT_IIIB",
+      "weather": "CLEAR"
+    },
+    {
+      "icao": "OMAA",
+      "name": "Abu Dhabi International (AUH)",
+      "distanceNm": 65,
+      "bearingDeg": 230,
+      "ils": "CAT_IIIB",
+      "weather": "CLEAR"
+    }
+  ],
+  "stands": [
+    { "id": "A01", "terminal": "Terminal 3, Concourse A", "size": "SUPER", "status": "OCCUPIED", "currentAircraft": "UAE223" },
+    { "id": "A02", "terminal": "Terminal 3, Concourse A", "size": "SUPER", "status": "FREE", "currentAircraft": null },
+    { "id": "A03", "terminal": "Terminal 3, Concourse A", "size": "SUPER", "status": "FREE", "currentAircraft": null },
+    { "id": "A04", "terminal": "Terminal 3, Concourse A", "size": "WIDE", "status": "FREE", "currentAircraft": null },
+    { "id": "A05", "terminal": "Terminal 3, Concourse A", "size": "WIDE", "status": "FREE", "currentAircraft": null },
+    { "id": "A06", "terminal": "Terminal 3, Concourse A", "size": "WIDE", "status": "FREE", "currentAircraft": null },
+    { "id": "B10", "terminal": "Terminal 3, Concourse B", "size": "WIDE", "status": "OCCUPIED", "currentAircraft": "QFA12" },
+    { "id": "B11", "terminal": "Terminal 3, Concourse B", "size": "WIDE", "status": "FREE", "currentAircraft": null },
+    { "id": "B12", "terminal": "Terminal 3, Concourse B", "size": "WIDE", "status": "BLOCKED", "currentAircraft": "UAE004", "notes": "Delayed pushback due to tug failure" },
+    { "id": "B13", "terminal": "Terminal 3, Concourse B", "size": "WIDE", "status": "FREE", "currentAircraft": null },
+    { "id": "B14", "terminal": "Terminal 3, Concourse B", "size": "WIDE", "status": "RESERVED", "currentAircraft": "UAE231", "notes": "Assigned to demo flight UAE231" },
+    { "id": "B15", "terminal": "Terminal 3, Concourse B", "size": "WIDE", "status": "FREE", "currentAircraft": null },
+    { "id": "B16", "terminal": "Terminal 3, Concourse B", "size": "WIDE", "status": "FREE", "currentAircraft": null },
+    { "id": "C21", "terminal": "Terminal 3, Concourse C", "size": "WIDE", "status": "FREE", "currentAircraft": null },
+    { "id": "C22", "terminal": "Terminal 3, Concourse C", "size": "WIDE", "status": "FREE", "currentAircraft": null },
+    { "id": "C23", "terminal": "Terminal 3, Concourse C", "size": "WIDE", "status": "FREE", "currentAircraft": null },
+    { "id": "C24", "terminal": "Terminal 3, Concourse C", "size": "WIDE", "status": "FREE", "currentAircraft": null },
+    { "id": "D01", "terminal": "Terminal 1, Concourse D", "size": "WIDE", "status": "FREE", "currentAircraft": null },
+    { "id": "D02", "terminal": "Terminal 1, Concourse D", "size": "WIDE", "status": "FREE", "currentAircraft": null },
+    { "id": "D03", "terminal": "Terminal 1, Concourse D", "size": "WIDE", "status": "FREE", "currentAircraft": null },
+    { "id": "F01", "terminal": "Terminal 2", "size": "NARROW", "status": "FREE", "currentAircraft": null },
+    { "id": "F02", "terminal": "Terminal 2", "size": "NARROW", "status": "FREE", "currentAircraft": null },
+    { "id": "F03", "terminal": "Terminal 2", "size": "NARROW", "status": "FREE", "currentAircraft": null },
+    { "id": "F04", "terminal": "Terminal 2", "size": "NARROW", "status": "FREE", "currentAircraft": null }
+  ]
+}

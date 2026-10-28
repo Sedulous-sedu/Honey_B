@@ -1,0 +1,94 @@
+{
+  "type": "state.snapshot",
+  "version": "v1",
+  "eventId": "evt-148",
+  "revision": 148,
+  "timestamp": "2026-10-28T03:09:58Z",
+  "aircraftId": "UAE231",
+  "payload": {
+    "serverTime": "2026-10-28T03:09:58Z",
+    "simSpeed": 1.0,
+    "aircraft": {
+      "callsign": "UAE231",
+      "aircraftType": "B77W",
+      "wakeCategory": "HEAVY",
+      "origin": "EGLL",
+      "destination": "OMDB",
+      "flightPhase": "ARRIVAL",
+      "status": "NORMAL",
+      "position": {
+        "lat": 25.1502,
+        "lon": 55.5011,
+        "distanceToThresholdNm": 14.2
+      },
+      "altitudeFt": 4000,
+      "headingDeg": 300,
+      "verticalRateFpm": -700,
+      "speed": {
+        "indicatedAirspeedKt": 235,
+        "groundSpeedKt": 242,
+        "airspeedType": "IAS_APPROX"
+      },
+      "assignedRunway": "30L",
+      "approach": "ILS 30L",
+      "landingSequence": 3,
+      "etaUtc": "2026-10-28T03:18:00Z",
+      "fuel": {
+        "totalKg": 11200,
+        "enduranceMin": 116,
+        "holdingFuelFlowKgH": 5800,
+        "finalReserveKg": 2900,
+        "provenance": "SIMULATED"
+      },
+      "capability": {
+        "lvpApproach": "CAT_IIIB"
+      },
+      "assignedControllerId": "CTRL-ARR-01",
+      "priority": {
+        "level": "NORMAL",
+        "reasonCodes": [],
+        "provenance": "RULE_BASED"
+      },
+      "provenance": "SIMULATED"
+    },
+    "weather": {
+      "airport": "OMDB",
+      "observedAt": "2026-10-28T03:09:58Z",
+      "rawMetar": "OMDB 280300Z 32005KT 6000 NSC 23/21 Q1013 NOSIG",
+      "visibilityM": 6000,
+      "rvr": [
+        {
+          "runway": "30L",
+          "valueM": 2000,
+          "trend": "NO_CHANGE"
+        },
+        {
+          "runway": "30R",
+          "valueM": 2000,
+          "trend": "NO_CHANGE"
+        }
+      ],
+      "ceilingFt": 25000,
+      "wind": {
+        "directionDeg": 320,
+        "speedKt": 5
+      },
+      "temperatureC": 23,
+      "qnhHpa": 1013,
+      "flightCategory": "VFR",
+      "lvp": {
+        "active": false,
+        "phase": "NONE"
+      },
+      "alerts": [],
+      "provenance": "SIMULATED"
+    },
+    "commands": [],
+    "stand": {
+      "standId": "B14",
+      "terminal": "Terminal 3, Concourse B",
+      "provenance": "SIMULATED"
+    },
+    "advisories": []
+  }
+}

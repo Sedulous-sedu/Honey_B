@@ -1,0 +1,42 @@
+{
+  "properties": {
+    "code": {
+      "title": "Code",
+      "type": "string"
+    },
+    "message": {
+      "title": "Message",
+      "type": "string"
+    },
+    "relatedEventId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Relatedeventid"
+    },
+    "commandId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Commandid"
+    }
+  },
+  "required": [
+    "code",
+    "message"
+  ],
+  "title": "ErrorPayload",
+  "type": "object"
+}

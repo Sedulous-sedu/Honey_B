@@ -1,0 +1,1532 @@
+[
+  {
+    "type": "aircraft.state",
+    "version": "v1",
+    "eventId": "evt-uae231-1",
+    "revision": 150,
+    "timestamp": "2026-10-28T03:10:00Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "callsign": "UAE231",
+      "aircraftType": "B77W",
+      "wakeCategory": "HEAVY",
+      "origin": "EGLL",
+      "destination": "OMDB",
+      "flightPhase": "ARRIVAL",
+      "status": "NORMAL",
+      "position": {
+        "lat": 25.1502,
+        "lon": 55.5011,
+        "distanceToThresholdNm": 14.2
+      },
+      "altitudeFt": 4000,
+      "headingDeg": 300,
+      "verticalRateFpm": -700,
+      "speed": {
+        "indicatedAirspeedKt": 235,
+        "groundSpeedKt": 242,
+        "airspeedType": "IAS_APPROX"
+      },
+      "assignedRunway": "30L",
+      "approach": "ILS 30L",
+      "landingSequence": 3,
+      "etaUtc": "2026-10-28T03:18:00Z",
+      "fuel": {
+        "totalKg": 11200,
+        "enduranceMin": 116,
+        "holdingFuelFlowKgH": 5800,
+        "finalReserveKg": 2900,
+        "provenance": "SIMULATED"
+      },
+      "capability": {
+        "lvpApproach": "CAT_IIIB"
+      },
+      "assignedControllerId": "CTRL-ARR-01",
+      "priority": {
+        "level": "NORMAL",
+        "reasonCodes": [],
+        "provenance": "RULE_BASED"
+      },
+      "provenance": "SIMULATED"
+    }
+  },
+  {
+    "type": "aircraft.state",
+    "version": "v1",
+    "eventId": "evt-uae231-2",
+    "revision": 151,
+    "timestamp": "2026-10-28T03:10:01Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "callsign": "UAE231",
+      "aircraftType": "B77W",
+      "wakeCategory": "HEAVY",
+      "origin": "EGLL",
+      "destination": "OMDB",
+      "flightPhase": "ARRIVAL",
+      "status": "NORMAL",
+      "position": {
+        "lat": 25.1522,
+        "lon": 55.4981,
+        "distanceToThresholdNm": 14.1
+      },
+      "altitudeFt": 3988,
+      "headingDeg": 300,
+      "verticalRateFpm": -700,
+      "speed": {
+        "indicatedAirspeedKt": 235,
+        "groundSpeedKt": 242,
+        "airspeedType": "IAS_APPROX"
+      },
+      "assignedRunway": "30L",
+      "approach": "ILS 30L",
+      "landingSequence": 3,
+      "etaUtc": "2026-10-28T03:18:00Z",
+      "fuel": {
+        "totalKg": 11198,
+        "enduranceMin": 116,
+        "holdingFuelFlowKgH": 5800,
+        "finalReserveKg": 2900,
+        "provenance": "SIMULATED"
+      },
+      "capability": {
+        "lvpApproach": "CAT_IIIB"
+      },
+      "assignedControllerId": "CTRL-ARR-01",
+      "priority": {
+        "level": "NORMAL",
+        "reasonCodes": [],
+        "provenance": "RULE_BASED"
+      },
+      "provenance": "SIMULATED"
+    }
+  },
+  {
+    "type": "aircraft.state",
+    "version": "v1",
+    "eventId": "evt-uae231-3",
+    "revision": 152,
+    "timestamp": "2026-10-28T03:10:02Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "callsign": "UAE231",
+      "aircraftType": "B77W",
+      "wakeCategory": "HEAVY",
+      "origin": "EGLL",
+      "destination": "OMDB",
+      "flightPhase": "ARRIVAL",
+      "status": "NORMAL",
+      "position": {
+        "lat": 25.1542,
+        "lon": 55.4951,
+        "distanceToThresholdNm": 14.1
+      },
+      "altitudeFt": 3977,
+      "headingDeg": 300,
+      "verticalRateFpm": -700,
+      "speed": {
+        "indicatedAirspeedKt": 235,
+        "groundSpeedKt": 242,
+        "airspeedType": "IAS_APPROX"
+      },
+      "assignedRunway": "30L",
+      "approach": "ILS 30L",
+      "landingSequence": 3,
+      "etaUtc": "2026-10-28T03:18:00Z",
+      "fuel": {
+        "totalKg": 11196,
+        "enduranceMin": 116,
+        "holdingFuelFlowKgH": 5800,
+        "finalReserveKg": 2900,
+        "provenance": "SIMULATED"
+      },
+      "capability": {
+        "lvpApproach": "CAT_IIIB"
+      },
+      "assignedControllerId": "CTRL-ARR-01",
+      "priority": {
+        "level": "NORMAL",
+        "reasonCodes": [],
+        "provenance": "RULE_BASED"
+      },
+      "provenance": "SIMULATED"
+    }
+  },
+  {
+    "type": "aircraft.state",
+    "version": "v1",
+    "eventId": "evt-uae231-4",
+    "revision": 153,
+    "timestamp": "2026-10-28T03:10:03Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "callsign": "UAE231",
+      "aircraftType": "B77W",
+      "wakeCategory": "HEAVY",
+      "origin": "EGLL",
+      "destination": "OMDB",
+      "flightPhase": "ARRIVAL",
+      "status": "NORMAL",
+      "position": {
+        "lat": 25.1562,
+        "lon": 55.4921,
+        "distanceToThresholdNm": 14.0
+      },
+      "altitudeFt": 3965,
+      "headingDeg": 300,
+      "verticalRateFpm": -700,
+      "speed": {
+        "indicatedAirspeedKt": 230,
+        "groundSpeedKt": 237,
+        "airspeedType": "IAS_APPROX"
+      },
+      "assignedRunway": "30L",
+      "approach": "ILS 30L",
+      "landingSequence": 3,
+      "etaUtc": "2026-10-28T03:18:00Z",
+      "fuel": {
+        "totalKg": 11194,
+        "enduranceMin": 116,
+        "holdingFuelFlowKgH": 5800,
+        "finalReserveKg": 2900,
+        "provenance": "SIMULATED"
+      },
+      "capability": {
+        "lvpApproach": "CAT_IIIB"
+      },
+      "assignedControllerId": "CTRL-ARR-01",
+      "priority": {
+        "level": "NORMAL",
+        "reasonCodes": [],
+        "provenance": "RULE_BASED"
+      },
+      "provenance": "SIMULATED"
+    }
+  },
+  {
+    "type": "aircraft.state",
+    "version": "v1",
+    "eventId": "evt-uae231-5",
+    "revision": 154,
+    "timestamp": "2026-10-28T03:10:04Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "callsign": "UAE231",
+      "aircraftType": "B77W",
+      "wakeCategory": "HEAVY",
+      "origin": "EGLL",
+      "destination": "OMDB",
+      "flightPhase": "ARRIVAL",
+      "status": "NORMAL",
+      "position": {
+        "lat": 25.1582,
+        "lon": 55.4891,
+        "distanceToThresholdNm": 13.9
+      },
+      "altitudeFt": 3954,
+      "headingDeg": 300,
+      "verticalRateFpm": -700,
+      "speed": {
+        "indicatedAirspeedKt": 230,
+        "groundSpeedKt": 237,
+        "airspeedType": "IAS_APPROX"
+      },
+      "assignedRunway": "30L",
+      "approach": "ILS 30L",
+      "landingSequence": 3,
+      "etaUtc": "2026-10-28T03:18:00Z",
+      "fuel": {
+        "totalKg": 11192,
+        "enduranceMin": 116,
+        "holdingFuelFlowKgH": 5800,
+        "finalReserveKg": 2900,
+        "provenance": "SIMULATED"
+      },
+      "capability": {
+        "lvpApproach": "CAT_IIIB"
+      },
+      "assignedControllerId": "CTRL-ARR-01",
+      "priority": {
+        "level": "NORMAL",
+        "reasonCodes": [],
+        "provenance": "RULE_BASED"
+      },
+      "provenance": "SIMULATED"
+    }
+  },
+  {
+    "type": "aircraft.state",
+    "version": "v1",
+    "eventId": "evt-uae231-6",
+    "revision": 155,
+    "timestamp": "2026-10-28T03:10:05Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "callsign": "UAE231",
+      "aircraftType": "B77W",
+      "wakeCategory": "HEAVY",
+      "origin": "EGLL",
+      "destination": "OMDB",
+      "flightPhase": "ARRIVAL",
+      "status": "NORMAL",
+      "position": {
+        "lat": 25.1602,
+        "lon": 55.4861,
+        "distanceToThresholdNm": 13.9
+      },
+      "altitudeFt": 3942,
+      "headingDeg": 300,
+      "verticalRateFpm": -700,
+      "speed": {
+        "indicatedAirspeedKt": 230,
+        "groundSpeedKt": 237,
+        "airspeedType": "IAS_APPROX"
+      },
+      "assignedRunway": "30L",
+      "approach": "ILS 30L",
+      "landingSequence": 3,
+      "etaUtc": "2026-10-28T03:18:00Z",
+      "fuel": {
+        "totalKg": 11190,
+        "enduranceMin": 116,
+        "holdingFuelFlowKgH": 5800,
+        "finalReserveKg": 2900,
+        "provenance": "SIMULATED"
+      },
+      "capability": {
+        "lvpApproach": "CAT_IIIB"
+      },
+      "assignedControllerId": "CTRL-ARR-01",
+      "priority": {
+        "level": "NORMAL",
+        "reasonCodes": [],
+        "provenance": "RULE_BASED"
+      },
+      "provenance": "SIMULATED"
+    }
+  },
+  {
+    "type": "aircraft.state",
+    "version": "v1",
+    "eventId": "evt-uae231-7",
+    "revision": 156,
+    "timestamp": "2026-10-28T03:10:06Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "callsign": "UAE231",
+      "aircraftType": "B77W",
+      "wakeCategory": "HEAVY",
+      "origin": "EGLL",
+      "destination": "OMDB",
+      "flightPhase": "ARRIVAL",
+      "status": "NORMAL",
+      "position": {
+        "lat": 25.1622,
+        "lon": 55.4831,
+        "distanceToThresholdNm": 13.8
+      },
+      "altitudeFt": 3930,
+      "headingDeg": 300,
+      "verticalRateFpm": -700,
+      "speed": {
+        "indicatedAirspeedKt": 225,
+        "groundSpeedKt": 232,
+        "airspeedType": "IAS_APPROX"
+      },
+      "assignedRunway": "30L",
+      "approach": "ILS 30L",
+      "landingSequence": 3,
+      "etaUtc": "2026-10-28T03:18:00Z",
+      "fuel": {
+        "totalKg": 11188,
+        "enduranceMin": 116,
+        "holdingFuelFlowKgH": 5800,
+        "finalReserveKg": 2900,
+        "provenance": "SIMULATED"
+      },
+      "capability": {
+        "lvpApproach": "CAT_IIIB"
+      },
+      "assignedControllerId": "CTRL-ARR-01",
+      "priority": {
+        "level": "NORMAL",
+        "reasonCodes": [],
+        "provenance": "RULE_BASED"
+      },
+      "provenance": "SIMULATED"
+    }
+  },
+  {
+    "type": "aircraft.state",
+    "version": "v1",
+    "eventId": "evt-uae231-8",
+    "revision": 157,
+    "timestamp": "2026-10-28T03:10:07Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "callsign": "UAE231",
+      "aircraftType": "B77W",
+      "wakeCategory": "HEAVY",
+      "origin": "EGLL",
+      "destination": "OMDB",
+      "flightPhase": "ARRIVAL",
+      "status": "NORMAL",
+      "position": {
+        "lat": 25.1642,
+        "lon": 55.4801,
+        "distanceToThresholdNm": 13.7
+      },
+      "altitudeFt": 3919,
+      "headingDeg": 300,
+      "verticalRateFpm": -700,
+      "speed": {
+        "indicatedAirspeedKt": 225,
+        "groundSpeedKt": 232,
+        "airspeedType": "IAS_APPROX"
+      },
+      "assignedRunway": "30L",
+      "approach": "ILS 30L",
+      "landingSequence": 3,
+      "etaUtc": "2026-10-28T03:18:00Z",
+      "fuel": {
+        "totalKg": 11186,
+        "enduranceMin": 116,
+        "holdingFuelFlowKgH": 5800,
+        "finalReserveKg": 2900,
+        "provenance": "SIMULATED"
+      },
+      "capability": {
+        "lvpApproach": "CAT_IIIB"
+      },
+      "assignedControllerId": "CTRL-ARR-01",
+      "priority": {
+        "level": "NORMAL",
+        "reasonCodes": [],
+        "provenance": "RULE_BASED"
+      },
+      "provenance": "SIMULATED"
+    }
+  },
+  {
+    "type": "aircraft.state",
+    "version": "v1",
+    "eventId": "evt-uae231-9",
+    "revision": 158,
+    "timestamp": "2026-10-28T03:10:08Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "callsign": "UAE231",
+      "aircraftType": "B77W",
+      "wakeCategory": "HEAVY",
+      "origin": "EGLL",
+      "destination": "OMDB",
+      "flightPhase": "ARRIVAL",
+      "status": "NORMAL",
+      "position": {
+        "lat": 25.1662,
+        "lon": 55.4771,
+        "distanceToThresholdNm": 13.7
+      },
+      "altitudeFt": 3907,
+      "headingDeg": 300,
+      "verticalRateFpm": -700,
+      "speed": {
+        "indicatedAirspeedKt": 225,
+        "groundSpeedKt": 232,
+        "airspeedType": "IAS_APPROX"
+      },
+      "assignedRunway": "30L",
+      "approach": "ILS 30L",
+      "landingSequence": 3,
+      "etaUtc": "2026-10-28T03:18:00Z",
+      "fuel": {
+        "totalKg": 11184,
+        "enduranceMin": 116,
+        "holdingFuelFlowKgH": 5800,
+        "finalReserveKg": 2900,
+        "provenance": "SIMULATED"
+      },
+      "capability": {
+        "lvpApproach": "CAT_IIIB"
+      },
+      "assignedControllerId": "CTRL-ARR-01",
+      "priority": {
+        "level": "NORMAL",
+        "reasonCodes": [],
+        "provenance": "RULE_BASED"
+      },
+      "provenance": "SIMULATED"
+    }
+  },
+  {
+    "type": "aircraft.state",
+    "version": "v1",
+    "eventId": "evt-uae231-10",
+    "revision": 159,
+    "timestamp": "2026-10-28T03:10:09Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "callsign": "UAE231",
+      "aircraftType": "B77W",
+      "wakeCategory": "HEAVY",
+      "origin": "EGLL",
+      "destination": "OMDB",
+      "flightPhase": "ARRIVAL",
+      "status": "NORMAL",
+      "position": {
+        "lat": 25.1682,
+        "lon": 55.4741,
+        "distanceToThresholdNm": 13.6
+      },
+      "altitudeFt": 3896,
+      "headingDeg": 300,
+      "verticalRateFpm": -700,
+      "speed": {
+        "indicatedAirspeedKt": 220,
+        "groundSpeedKt": 227,
+        "airspeedType": "IAS_APPROX"
+      },
+      "assignedRunway": "30L",
+      "approach": "ILS 30L",
+      "landingSequence": 3,
+      "etaUtc": "2026-10-28T03:18:00Z",
+      "fuel": {
+        "totalKg": 11182,
+        "enduranceMin": 116,
+        "holdingFuelFlowKgH": 5800,
+        "finalReserveKg": 2900,
+        "provenance": "SIMULATED"
+      },
+      "capability": {
+        "lvpApproach": "CAT_IIIB"
+      },
+      "assignedControllerId": "CTRL-ARR-01",
+      "priority": {
+        "level": "NORMAL",
+        "reasonCodes": [],
+        "provenance": "RULE_BASED"
+      },
+      "provenance": "SIMULATED"
+    }
+  },
+  {
+    "type": "aircraft.state",
+    "version": "v1",
+    "eventId": "evt-uae231-11",
+    "revision": 160,
+    "timestamp": "2026-10-28T03:10:10Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "callsign": "UAE231",
+      "aircraftType": "B77W",
+      "wakeCategory": "HEAVY",
+      "origin": "EGLL",
+      "destination": "OMDB",
+      "flightPhase": "ARRIVAL",
+      "status": "NORMAL",
+      "position": {
+        "lat": 25.1702,
+        "lon": 55.4711,
+        "distanceToThresholdNm": 13.5
+      },
+      "altitudeFt": 3884,
+      "headingDeg": 300,
+      "verticalRateFpm": -700,
+      "speed": {
+        "indicatedAirspeedKt": 220,
+        "groundSpeedKt": 227,
+        "airspeedType": "IAS_APPROX"
+      },
+      "assignedRunway": "30L",
+      "approach": "ILS 30L",
+      "landingSequence": 3,
+      "etaUtc": "2026-10-28T03:18:00Z",
+      "fuel": {
+        "totalKg": 11180,
+        "enduranceMin": 116,
+        "holdingFuelFlowKgH": 5800,
+        "finalReserveKg": 2900,
+        "provenance": "SIMULATED"
+      },
+      "capability": {
+        "lvpApproach": "CAT_IIIB"
+      },
+      "assignedControllerId": "CTRL-ARR-01",
+      "priority": {
+        "level": "NORMAL",
+        "reasonCodes": [],
+        "provenance": "RULE_BASED"
+      },
+      "provenance": "SIMULATED"
+    }
+  },
+  {
+    "type": "aircraft.state",
+    "version": "v1",
+    "eventId": "evt-uae231-12",
+    "revision": 161,
+    "timestamp": "2026-10-28T03:10:11Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "callsign": "UAE231",
+      "aircraftType": "B77W",
+      "wakeCategory": "HEAVY",
+      "origin": "EGLL",
+      "destination": "OMDB",
+      "flightPhase": "ARRIVAL",
+      "status": "NORMAL",
+      "position": {
+        "lat": 25.1722,
+        "lon": 55.4681,
+        "distanceToThresholdNm": 13.5
+      },
+      "altitudeFt": 3872,
+      "headingDeg": 300,
+      "verticalRateFpm": -700,
+      "speed": {
+        "indicatedAirspeedKt": 220,
+        "groundSpeedKt": 227,
+        "airspeedType": "IAS_APPROX"
+      },
+      "assignedRunway": "30L",
+      "approach": "ILS 30L",
+      "landingSequence": 3,
+      "etaUtc": "2026-10-28T03:18:00Z",
+      "fuel": {
+        "totalKg": 11178,
+        "enduranceMin": 116,
+        "holdingFuelFlowKgH": 5800,
+        "finalReserveKg": 2900,
+        "provenance": "SIMULATED"
+      },
+      "capability": {
+        "lvpApproach": "CAT_IIIB"
+      },
+      "assignedControllerId": "CTRL-ARR-01",
+      "priority": {
+        "level": "NORMAL",
+        "reasonCodes": [],
+        "provenance": "RULE_BASED"
+      },
+      "provenance": "SIMULATED"
+    }
+  },
+  {
+    "type": "aircraft.state",
+    "version": "v1",
+    "eventId": "evt-uae231-13",
+    "revision": 162,
+    "timestamp": "2026-10-28T03:10:12Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "callsign": "UAE231",
+      "aircraftType": "B77W",
+      "wakeCategory": "HEAVY",
+      "origin": "EGLL",
+      "destination": "OMDB",
+      "flightPhase": "ARRIVAL",
+      "status": "NORMAL",
+      "position": {
+        "lat": 25.1742,
+        "lon": 55.4651,
+        "distanceToThresholdNm": 13.4
+      },
+      "altitudeFt": 3861,
+      "headingDeg": 300,
+      "verticalRateFpm": -700,
+      "speed": {
+        "indicatedAirspeedKt": 215,
+        "groundSpeedKt": 222,
+        "airspeedType": "IAS_APPROX"
+      },
+      "assignedRunway": "30L",
+      "approach": "ILS 30L",
+      "landingSequence": 3,
+      "etaUtc": "2026-10-28T03:18:00Z",
+      "fuel": {
+        "totalKg": 11176,
+        "enduranceMin": 116,
+        "holdingFuelFlowKgH": 5800,
+        "finalReserveKg": 2900,
+        "provenance": "SIMULATED"
+      },
+      "capability": {
+        "lvpApproach": "CAT_IIIB"
+      },
+      "assignedControllerId": "CTRL-ARR-01",
+      "priority": {
+        "level": "NORMAL",
+        "reasonCodes": [],
+        "provenance": "RULE_BASED"
+      },
+      "provenance": "SIMULATED"
+    }
+  },
+  {
+    "type": "aircraft.state",
+    "version": "v1",
+    "eventId": "evt-uae231-14",
+    "revision": 163,
+    "timestamp": "2026-10-28T03:10:13Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "callsign": "UAE231",
+      "aircraftType": "B77W",
+      "wakeCategory": "HEAVY",
+      "origin": "EGLL",
+      "destination": "OMDB",
+      "flightPhase": "ARRIVAL",
+      "status": "NORMAL",
+      "position": {
+        "lat": 25.1762,
+        "lon": 55.4621,
+        "distanceToThresholdNm": 13.4
+      },
+      "altitudeFt": 3849,
+      "headingDeg": 300,
+      "verticalRateFpm": -700,
+      "speed": {
+        "indicatedAirspeedKt": 215,
+        "groundSpeedKt": 222,
+        "airspeedType": "IAS_APPROX"
+      },
+      "assignedRunway": "30L",
+      "approach": "ILS 30L",
+      "landingSequence": 3,
+      "etaUtc": "2026-10-28T03:18:00Z",
+      "fuel": {
+        "totalKg": 11174,
+        "enduranceMin": 116,
+        "holdingFuelFlowKgH": 5800,
+        "finalReserveKg": 2900,
+        "provenance": "SIMULATED"
+      },
+      "capability": {
+        "lvpApproach": "CAT_IIIB"
+      },
+      "assignedControllerId": "CTRL-ARR-01",
+      "priority": {
+        "level": "NORMAL",
+        "reasonCodes": [],
+        "provenance": "RULE_BASED"
+      },
+      "provenance": "SIMULATED"
+    }
+  },
+  {
+    "type": "aircraft.state",
+    "version": "v1",
+    "eventId": "evt-uae231-15",
+    "revision": 164,
+    "timestamp": "2026-10-28T03:10:14Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "callsign": "UAE231",
+      "aircraftType": "B77W",
+      "wakeCategory": "HEAVY",
+      "origin": "EGLL",
+      "destination": "OMDB",
+      "flightPhase": "ARRIVAL",
+      "status": "NORMAL",
+      "position": {
+        "lat": 25.1782,
+        "lon": 55.4591,
+        "distanceToThresholdNm": 13.3
+      },
+      "altitudeFt": 3838,
+      "headingDeg": 300,
+      "verticalRateFpm": -700,
+      "speed": {
+        "indicatedAirspeedKt": 215,
+        "groundSpeedKt": 222,
+        "airspeedType": "IAS_APPROX"
+      },
+      "assignedRunway": "30L",
+      "approach": "ILS 30L",
+      "landingSequence": 3,
+      "etaUtc": "2026-10-28T03:18:00Z",
+      "fuel": {
+        "totalKg": 11172,
+        "enduranceMin": 116,
+        "holdingFuelFlowKgH": 5800,
+        "finalReserveKg": 2900,
+        "provenance": "SIMULATED"
+      },
+      "capability": {
+        "lvpApproach": "CAT_IIIB"
+      },
+      "assignedControllerId": "CTRL-ARR-01",
+      "priority": {
+        "level": "NORMAL",
+        "reasonCodes": [],
+        "provenance": "RULE_BASED"
+      },
+      "provenance": "SIMULATED"
+    }
+  },
+  {
+    "type": "aircraft.state",
+    "version": "v1",
+    "eventId": "evt-uae231-16",
+    "revision": 165,
+    "timestamp": "2026-10-28T03:10:15Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "callsign": "UAE231",
+      "aircraftType": "B77W",
+      "wakeCategory": "HEAVY",
+      "origin": "EGLL",
+      "destination": "OMDB",
+      "flightPhase": "ARRIVAL",
+      "status": "NORMAL",
+      "position": {
+        "lat": 25.1802,
+        "lon": 55.4561,
+        "distanceToThresholdNm": 13.2
+      },
+      "altitudeFt": 3826,
+      "headingDeg": 300,
+      "verticalRateFpm": -700,
+      "speed": {
+        "indicatedAirspeedKt": 210,
+        "groundSpeedKt": 217,
+        "airspeedType": "IAS_APPROX"
+      },
+      "assignedRunway": "30L",
+      "approach": "ILS 30L",
+      "landingSequence": 3,
+      "etaUtc": "2026-10-28T03:18:00Z",
+      "fuel": {
+        "totalKg": 11170,
+        "enduranceMin": 116,
+        "holdingFuelFlowKgH": 5800,
+        "finalReserveKg": 2900,
+        "provenance": "SIMULATED"
+      },
+      "capability": {
+        "lvpApproach": "CAT_IIIB"
+      },
+      "assignedControllerId": "CTRL-ARR-01",
+      "priority": {
+        "level": "NORMAL",
+        "reasonCodes": [],
+        "provenance": "RULE_BASED"
+      },
+      "provenance": "SIMULATED"
+    }
+  },
+  {
+    "type": "aircraft.state",
+    "version": "v1",
+    "eventId": "evt-uae231-17",
+    "revision": 166,
+    "timestamp": "2026-10-28T03:10:16Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "callsign": "UAE231",
+      "aircraftType": "B77W",
+      "wakeCategory": "HEAVY",
+      "origin": "EGLL",
+      "destination": "OMDB",
+      "flightPhase": "ARRIVAL",
+      "status": "NORMAL",
+      "position": {
+        "lat": 25.1822,
+        "lon": 55.4531,
+        "distanceToThresholdNm": 13.2
+      },
+      "altitudeFt": 3814,
+      "headingDeg": 300,
+      "verticalRateFpm": -700,
+      "speed": {
+        "indicatedAirspeedKt": 210,
+        "groundSpeedKt": 217,
+        "airspeedType": "IAS_APPROX"
+      },
+      "assignedRunway": "30L",
+      "approach": "ILS 30L",
+      "landingSequence": 3,
+      "etaUtc": "2026-10-28T03:18:00Z",
+      "fuel": {
+        "totalKg": 11168,
+        "enduranceMin": 116,
+        "holdingFuelFlowKgH": 5800,
+        "finalReserveKg": 2900,
+        "provenance": "SIMULATED"
+      },
+      "capability": {
+        "lvpApproach": "CAT_IIIB"
+      },
+      "assignedControllerId": "CTRL-ARR-01",
+      "priority": {
+        "level": "NORMAL",
+        "reasonCodes": [],
+        "provenance": "RULE_BASED"
+      },
+      "provenance": "SIMULATED"
+    }
+  },
+  {
+    "type": "aircraft.state",
+    "version": "v1",
+    "eventId": "evt-uae231-18",
+    "revision": 167,
+    "timestamp": "2026-10-28T03:10:17Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "callsign": "UAE231",
+      "aircraftType": "B77W",
+      "wakeCategory": "HEAVY",
+      "origin": "EGLL",
+      "destination": "OMDB",
+      "flightPhase": "ARRIVAL",
+      "status": "NORMAL",
+      "position": {
+        "lat": 25.1842,
+        "lon": 55.4501,
+        "distanceToThresholdNm": 13.1
+      },
+      "altitudeFt": 3803,
+      "headingDeg": 300,
+      "verticalRateFpm": -700,
+      "speed": {
+        "indicatedAirspeedKt": 210,
+        "groundSpeedKt": 217,
+        "airspeedType": "IAS_APPROX"
+      },
+      "assignedRunway": "30L",
+      "approach": "ILS 30L",
+      "landingSequence": 3,
+      "etaUtc": "2026-10-28T03:18:00Z",
+      "fuel": {
+        "totalKg": 11166,
+        "enduranceMin": 116,
+        "holdingFuelFlowKgH": 5800,
+        "finalReserveKg": 2900,
+        "provenance": "SIMULATED"
+      },
+      "capability": {
+        "lvpApproach": "CAT_IIIB"
+      },
+      "assignedControllerId": "CTRL-ARR-01",
+      "priority": {
+        "level": "NORMAL",
+        "reasonCodes": [],
+        "provenance": "RULE_BASED"
+      },
+      "provenance": "SIMULATED"
+    }
+  },
+  {
+    "type": "aircraft.state",
+    "version": "v1",
+    "eventId": "evt-uae231-19",
+    "revision": 168,
+    "timestamp": "2026-10-28T03:10:18Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "callsign": "UAE231",
+      "aircraftType": "B77W",
+      "wakeCategory": "HEAVY",
+      "origin": "EGLL",
+      "destination": "OMDB",
+      "flightPhase": "ARRIVAL",
+      "status": "NORMAL",
+      "position": {
+        "lat": 25.1862,
+        "lon": 55.4471,
+        "distanceToThresholdNm": 13.0
+      },
+      "altitudeFt": 3791,
+      "headingDeg": 300,
+      "verticalRateFpm": -700,
+      "speed": {
+        "indicatedAirspeedKt": 205,
+        "groundSpeedKt": 212,
+        "airspeedType": "IAS_APPROX"
+      },
+      "assignedRunway": "30L",
+      "approach": "ILS 30L",
+      "landingSequence": 3,
+      "etaUtc": "2026-10-28T03:18:00Z",
+      "fuel": {
+        "totalKg": 11164,
+        "enduranceMin": 116,
+        "holdingFuelFlowKgH": 5800,
+        "finalReserveKg": 2900,
+        "provenance": "SIMULATED"
+      },
+      "capability": {
+        "lvpApproach": "CAT_IIIB"
+      },
+      "assignedControllerId": "CTRL-ARR-01",
+      "priority": {
+        "level": "NORMAL",
+        "reasonCodes": [],
+        "provenance": "RULE_BASED"
+      },
+      "provenance": "SIMULATED"
+    }
+  },
+  {
+    "type": "aircraft.state",
+    "version": "v1",
+    "eventId": "evt-uae231-20",
+    "revision": 169,
+    "timestamp": "2026-10-28T03:10:19Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "callsign": "UAE231",
+      "aircraftType": "B77W",
+      "wakeCategory": "HEAVY",
+      "origin": "EGLL",
+      "destination": "OMDB",
+      "flightPhase": "ARRIVAL",
+      "status": "NORMAL",
+      "position": {
+        "lat": 25.1882,
+        "lon": 55.4441,
+        "distanceToThresholdNm": 13.0
+      },
+      "altitudeFt": 3780,
+      "headingDeg": 300,
+      "verticalRateFpm": -700,
+      "speed": {
+        "indicatedAirspeedKt": 205,
+        "groundSpeedKt": 212,
+        "airspeedType": "IAS_APPROX"
+      },
+      "assignedRunway": "30L",
+      "approach": "ILS 30L",
+      "landingSequence": 3,
+      "etaUtc": "2026-10-28T03:18:00Z",
+      "fuel": {
+        "totalKg": 11162,
+        "enduranceMin": 116,
+        "holdingFuelFlowKgH": 5800,
+        "finalReserveKg": 2900,
+        "provenance": "SIMULATED"
+      },
+      "capability": {
+        "lvpApproach": "CAT_IIIB"
+      },
+      "assignedControllerId": "CTRL-ARR-01",
+      "priority": {
+        "level": "NORMAL",
+        "reasonCodes": [],
+        "provenance": "RULE_BASED"
+      },
+      "provenance": "SIMULATED"
+    }
+  },
+  {
+    "type": "aircraft.state",
+    "version": "v1",
+    "eventId": "evt-uae231-21",
+    "revision": 170,
+    "timestamp": "2026-10-28T03:10:20Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "callsign": "UAE231",
+      "aircraftType": "B77W",
+      "wakeCategory": "HEAVY",
+      "origin": "EGLL",
+      "destination": "OMDB",
+      "flightPhase": "ARRIVAL",
+      "status": "NORMAL",
+      "position": {
+        "lat": 25.1902,
+        "lon": 55.4411,
+        "distanceToThresholdNm": 12.9
+      },
+      "altitudeFt": 3768,
+      "headingDeg": 300,
+      "verticalRateFpm": -700,
+      "speed": {
+        "indicatedAirspeedKt": 205,
+        "groundSpeedKt": 212,
+        "airspeedType": "IAS_APPROX"
+      },
+      "assignedRunway": "30L",
+      "approach": "ILS 30L",
+      "landingSequence": 3,
+      "etaUtc": "2026-10-28T03:18:00Z",
+      "fuel": {
+        "totalKg": 11160,
+        "enduranceMin": 116,
+        "holdingFuelFlowKgH": 5800,
+        "finalReserveKg": 2900,
+        "provenance": "SIMULATED"
+      },
+      "capability": {
+        "lvpApproach": "CAT_IIIB"
+      },
+      "assignedControllerId": "CTRL-ARR-01",
+      "priority": {
+        "level": "NORMAL",
+        "reasonCodes": [],
+        "provenance": "RULE_BASED"
+      },
+      "provenance": "SIMULATED"
+    }
+  },
+  {
+    "type": "aircraft.state",
+    "version": "v1",
+    "eventId": "evt-uae231-22",
+    "revision": 171,
+    "timestamp": "2026-10-28T03:10:21Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "callsign": "UAE231",
+      "aircraftType": "B77W",
+      "wakeCategory": "HEAVY",
+      "origin": "EGLL",
+      "destination": "OMDB",
+      "flightPhase": "ARRIVAL",
+      "status": "NORMAL",
+      "position": {
+        "lat": 25.1922,
+        "lon": 55.4381,
+        "distanceToThresholdNm": 12.8
+      },
+      "altitudeFt": 3756,
+      "headingDeg": 300,
+      "verticalRateFpm": -700,
+      "speed": {
+        "indicatedAirspeedKt": 200,
+        "groundSpeedKt": 207,
+        "airspeedType": "IAS_APPROX"
+      },
+      "assignedRunway": "30L",
+      "approach": "ILS 30L",
+      "landingSequence": 3,
+      "etaUtc": "2026-10-28T03:18:00Z",
+      "fuel": {
+        "totalKg": 11158,
+        "enduranceMin": 116,
+        "holdingFuelFlowKgH": 5800,
+        "finalReserveKg": 2900,
+        "provenance": "SIMULATED"
+      },
+      "capability": {
+        "lvpApproach": "CAT_IIIB"
+      },
+      "assignedControllerId": "CTRL-ARR-01",
+      "priority": {
+        "level": "NORMAL",
+        "reasonCodes": [],
+        "provenance": "RULE_BASED"
+      },
+      "provenance": "SIMULATED"
+    }
+  },
+  {
+    "type": "aircraft.state",
+    "version": "v1",
+    "eventId": "evt-uae231-23",
+    "revision": 172,
+    "timestamp": "2026-10-28T03:10:22Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "callsign": "UAE231",
+      "aircraftType": "B77W",
+      "wakeCategory": "HEAVY",
+      "origin": "EGLL",
+      "destination": "OMDB",
+      "flightPhase": "ARRIVAL",
+      "status": "NORMAL",
+      "position": {
+        "lat": 25.1942,
+        "lon": 55.4351,
+        "distanceToThresholdNm": 12.8
+      },
+      "altitudeFt": 3745,
+      "headingDeg": 300,
+      "verticalRateFpm": -700,
+      "speed": {
+        "indicatedAirspeedKt": 200,
+        "groundSpeedKt": 207,
+        "airspeedType": "IAS_APPROX"
+      },
+      "assignedRunway": "30L",
+      "approach": "ILS 30L",
+      "landingSequence": 3,
+      "etaUtc": "2026-10-28T03:18:00Z",
+      "fuel": {
+        "totalKg": 11156,
+        "enduranceMin": 116,
+        "holdingFuelFlowKgH": 5800,
+        "finalReserveKg": 2900,
+        "provenance": "SIMULATED"
+      },
+      "capability": {
+        "lvpApproach": "CAT_IIIB"
+      },
+      "assignedControllerId": "CTRL-ARR-01",
+      "priority": {
+        "level": "NORMAL",
+        "reasonCodes": [],
+        "provenance": "RULE_BASED"
+      },
+      "provenance": "SIMULATED"
+    }
+  },
+  {
+    "type": "aircraft.state",
+    "version": "v1",
+    "eventId": "evt-uae231-24",
+    "revision": 173,
+    "timestamp": "2026-10-28T03:10:23Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "callsign": "UAE231",
+      "aircraftType": "B77W",
+      "wakeCategory": "HEAVY",
+      "origin": "EGLL",
+      "destination": "OMDB",
+      "flightPhase": "ARRIVAL",
+      "status": "NORMAL",
+      "position": {
+        "lat": 25.1962,
+        "lon": 55.4321,
+        "distanceToThresholdNm": 12.7
+      },
+      "altitudeFt": 3733,
+      "headingDeg": 300,
+      "verticalRateFpm": -700,
+      "speed": {
+        "indicatedAirspeedKt": 200,
+        "groundSpeedKt": 207,
+        "airspeedType": "IAS_APPROX"
+      },
+      "assignedRunway": "30L",
+      "approach": "ILS 30L",
+      "landingSequence": 3,
+      "etaUtc": "2026-10-28T03:18:00Z",
+      "fuel": {
+        "totalKg": 11154,
+        "enduranceMin": 116,
+        "holdingFuelFlowKgH": 5800,
+        "finalReserveKg": 2900,
+        "provenance": "SIMULATED"
+      },
+      "capability": {
+        "lvpApproach": "CAT_IIIB"
+      },
+      "assignedControllerId": "CTRL-ARR-01",
+      "priority": {
+        "level": "NORMAL",
+        "reasonCodes": [],
+        "provenance": "RULE_BASED"
+      },
+      "provenance": "SIMULATED"
+    }
+  },
+  {
+    "type": "aircraft.state",
+    "version": "v1",
+    "eventId": "evt-uae231-25",
+    "revision": 174,
+    "timestamp": "2026-10-28T03:10:24Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "callsign": "UAE231",
+      "aircraftType": "B77W",
+      "wakeCategory": "HEAVY",
+      "origin": "EGLL",
+      "destination": "OMDB",
+      "flightPhase": "ARRIVAL",
+      "status": "NORMAL",
+      "position": {
+        "lat": 25.1982,
+        "lon": 55.4291,
+        "distanceToThresholdNm": 12.6
+      },
+      "altitudeFt": 3722,
+      "headingDeg": 300,
+      "verticalRateFpm": -700,
+      "speed": {
+        "indicatedAirspeedKt": 195,
+        "groundSpeedKt": 202,
+        "airspeedType": "IAS_APPROX"
+      },
+      "assignedRunway": "30L",
+      "approach": "ILS 30L",
+      "landingSequence": 3,
+      "etaUtc": "2026-10-28T03:18:00Z",
+      "fuel": {
+        "totalKg": 11152,
+        "enduranceMin": 116,
+        "holdingFuelFlowKgH": 5800,
+        "finalReserveKg": 2900,
+        "provenance": "SIMULATED"
+      },
+      "capability": {
+        "lvpApproach": "CAT_IIIB"
+      },
+      "assignedControllerId": "CTRL-ARR-01",
+      "priority": {
+        "level": "NORMAL",
+        "reasonCodes": [],
+        "provenance": "RULE_BASED"
+      },
+      "provenance": "SIMULATED"
+    }
+  },
+  {
+    "type": "aircraft.state",
+    "version": "v1",
+    "eventId": "evt-uae231-26",
+    "revision": 175,
+    "timestamp": "2026-10-28T03:10:25Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "callsign": "UAE231",
+      "aircraftType": "B77W",
+      "wakeCategory": "HEAVY",
+      "origin": "EGLL",
+      "destination": "OMDB",
+      "flightPhase": "ARRIVAL",
+      "status": "NORMAL",
+      "position": {
+        "lat": 25.2002,
+        "lon": 55.4261,
+        "distanceToThresholdNm": 12.6
+      },
+      "altitudeFt": 3710,
+      "headingDeg": 300,
+      "verticalRateFpm": -700,
+      "speed": {
+        "indicatedAirspeedKt": 195,
+        "groundSpeedKt": 202,
+        "airspeedType": "IAS_APPROX"
+      },
+      "assignedRunway": "30L",
+      "approach": "ILS 30L",
+      "landingSequence": 3,
+      "etaUtc": "2026-10-28T03:18:00Z",
+      "fuel": {
+        "totalKg": 11150,
+        "enduranceMin": 116,
+        "holdingFuelFlowKgH": 5800,
+        "finalReserveKg": 2900,
+        "provenance": "SIMULATED"
+      },
+      "capability": {
+        "lvpApproach": "CAT_IIIB"
+      },
+      "assignedControllerId": "CTRL-ARR-01",
+      "priority": {
+        "level": "NORMAL",
+        "reasonCodes": [],
+        "provenance": "RULE_BASED"
+      },
+      "provenance": "SIMULATED"
+    }
+  },
+  {
+    "type": "aircraft.state",
+    "version": "v1",
+    "eventId": "evt-uae231-27",
+    "revision": 176,
+    "timestamp": "2026-10-28T03:10:26Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "callsign": "UAE231",
+      "aircraftType": "B77W",
+      "wakeCategory": "HEAVY",
+      "origin": "EGLL",
+      "destination": "OMDB",
+      "flightPhase": "ARRIVAL",
+      "status": "NORMAL",
+      "position": {
+        "lat": 25.2022,
+        "lon": 55.4231,
+        "distanceToThresholdNm": 12.5
+      },
+      "altitudeFt": 3698,
+      "headingDeg": 300,
+      "verticalRateFpm": -700,
+      "speed": {
+        "indicatedAirspeedKt": 195,
+        "groundSpeedKt": 202,
+        "airspeedType": "IAS_APPROX"
+      },
+      "assignedRunway": "30L",
+      "approach": "ILS 30L",
+      "landingSequence": 3,
+      "etaUtc": "2026-10-28T03:18:00Z",
+      "fuel": {
+        "totalKg": 11148,
+        "enduranceMin": 116,
+        "holdingFuelFlowKgH": 5800,
+        "finalReserveKg": 2900,
+        "provenance": "SIMULATED"
+      },
+      "capability": {
+        "lvpApproach": "CAT_IIIB"
+      },
+      "assignedControllerId": "CTRL-ARR-01",
+      "priority": {
+        "level": "NORMAL",
+        "reasonCodes": [],
+        "provenance": "RULE_BASED"
+      },
+      "provenance": "SIMULATED"
+    }
+  },
+  {
+    "type": "aircraft.state",
+    "version": "v1",
+    "eventId": "evt-uae231-28",
+    "revision": 177,
+    "timestamp": "2026-10-28T03:10:27Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "callsign": "UAE231",
+      "aircraftType": "B77W",
+      "wakeCategory": "HEAVY",
+      "origin": "EGLL",
+      "destination": "OMDB",
+      "flightPhase": "ARRIVAL",
+      "status": "NORMAL",
+      "position": {
+        "lat": 25.2042,
+        "lon": 55.4201,
+        "distanceToThresholdNm": 12.4
+      },
+      "altitudeFt": 3687,
+      "headingDeg": 300,
+      "verticalRateFpm": -700,
+      "speed": {
+        "indicatedAirspeedKt": 190,
+        "groundSpeedKt": 197,
+        "airspeedType": "IAS_APPROX"
+      },
+      "assignedRunway": "30L",
+      "approach": "ILS 30L",
+      "landingSequence": 3,
+      "etaUtc": "2026-10-28T03:18:00Z",
+      "fuel": {
+        "totalKg": 11146,
+        "enduranceMin": 116,
+        "holdingFuelFlowKgH": 5800,
+        "finalReserveKg": 2900,
+        "provenance": "SIMULATED"
+      },
+      "capability": {
+        "lvpApproach": "CAT_IIIB"
+      },
+      "assignedControllerId": "CTRL-ARR-01",
+      "priority": {
+        "level": "NORMAL",
+        "reasonCodes": [],
+        "provenance": "RULE_BASED"
+      },
+      "provenance": "SIMULATED"
+    }
+  },
+  {
+    "type": "aircraft.state",
+    "version": "v1",
+    "eventId": "evt-uae231-29",
+    "revision": 178,
+    "timestamp": "2026-10-28T03:10:28Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "callsign": "UAE231",
+      "aircraftType": "B77W",
+      "wakeCategory": "HEAVY",
+      "origin": "EGLL",
+      "destination": "OMDB",
+      "flightPhase": "ARRIVAL",
+      "status": "NORMAL",
+      "position": {
+        "lat": 25.2062,
+        "lon": 55.4171,
+        "distanceToThresholdNm": 12.4
+      },
+      "altitudeFt": 3675,
+      "headingDeg": 300,
+      "verticalRateFpm": -700,
+      "speed": {
+        "indicatedAirspeedKt": 190,
+        "groundSpeedKt": 197,
+        "airspeedType": "IAS_APPROX"
+      },
+      "assignedRunway": "30L",
+      "approach": "ILS 30L",
+      "landingSequence": 3,
+      "etaUtc": "2026-10-28T03:18:00Z",
+      "fuel": {
+        "totalKg": 11144,
+        "enduranceMin": 116,
+        "holdingFuelFlowKgH": 5800,
+        "finalReserveKg": 2900,
+        "provenance": "SIMULATED"
+      },
+      "capability": {
+        "lvpApproach": "CAT_IIIB"
+      },
+      "assignedControllerId": "CTRL-ARR-01",
+      "priority": {
+        "level": "NORMAL",
+        "reasonCodes": [],
+        "provenance": "RULE_BASED"
+      },
+      "provenance": "SIMULATED"
+    }
+  },
+  {
+    "type": "aircraft.state",
+    "version": "v1",
+    "eventId": "evt-uae231-30",
+    "revision": 179,
+    "timestamp": "2026-10-28T03:10:29Z",
+    "aircraftId": "UAE231",
+    "payload": {
+      "callsign": "UAE231",
+      "aircraftType": "B77W",
+      "wakeCategory": "HEAVY",
+      "origin": "EGLL",
+      "destination": "OMDB",
+      "flightPhase": "ARRIVAL",
+      "status": "NORMAL",
+      "position": {
+        "lat": 25.2082,
+        "lon": 55.4141,
+        "distanceToThresholdNm": 12.3
+      },
+      "altitudeFt": 3664,
+      "headingDeg": 300,
+      "verticalRateFpm": -700,
+      "speed": {
+        "indicatedAirspeedKt": 190,
+        "groundSpeedKt": 197,
+        "airspeedType": "IAS_APPROX"
+      },
+      "assignedRunway": "30L",
+      "approach": "ILS 30L",
+      "landingSequence": 3,
+      "etaUtc": "2026-10-28T03:18:00Z",
+      "fuel": {
+        "totalKg": 11142,
+        "enduranceMin": 116,
+        "holdingFuelFlowKgH": 5800,
+        "finalReserveKg": 2900,
+        "provenance": "SIMULATED"
+      },
+      "capability": {
+        "lvpApproach": "CAT_IIIB"
+      },
+      "assignedControllerId": "CTRL-ARR-01",
+      "priority": {
+        "level": "NORMAL",
+        "reasonCodes": [],
+        "provenance": "RULE_BASED"
+      },
+      "provenance": "SIMULATED"
+    }
+  }
+]

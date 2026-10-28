@@ -1,0 +1,95 @@
+{
+  "$defs": {
+    "InstructionType": {
+      "enum": [
+        "ALTITUDE",
+        "HEADING",
+        "SPEED",
+        "HOLD",
+        "RUNWAY_CHANGE",
+        "APPROACH_CLEARANCE",
+        "LANDING_CLEARANCE",
+        "DIVERT",
+        "INFORMATION"
+      ],
+      "title": "InstructionType",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "suggestionId": {
+      "title": "Suggestionid",
+      "type": "string"
+    },
+    "aircraftId": {
+      "title": "Aircraftid",
+      "type": "string"
+    },
+    "instructionType": {
+      "$ref": "#/$defs/InstructionType"
+    },
+    "displayText": {
+      "title": "Displaytext",
+      "type": "string"
+    },
+    "params": {
+      "additionalProperties": true,
+      "title": "Params",
+      "type": "object"
+    },
+    "reasonCodes": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Reasoncodes",
+      "type": "array"
+    },
+    "reasonText": {
+      "title": "Reasontext",
+      "type": "string"
+    },
+    "urgency": {
+      "default": "MEDIUM",
+      "title": "Urgency",
+      "type": "string"
+    },
+    "timeToDecisionPointSec": {
+      "default": 120,
+      "title": "Timetodecisionpointsec",
+      "type": "integer"
+    },
+    "affectedAircraft": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Affectedaircraft",
+      "type": "array"
+    },
+    "status": {
+      "default": "ACTIVE",
+      "title": "Status",
+      "type": "string"
+    },
+    "targetControllerId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Targetcontrollerid"
+    }
+  },
+  "required": [
+    "suggestionId",
+    "aircraftId",
+    "instructionType",
+    "displayText",
+    "reasonText"
+  ],
+  "title": "SuggestionItem",
+  "type": "object"
+}

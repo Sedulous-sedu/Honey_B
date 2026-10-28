@@ -1,0 +1,164 @@
+{
+  "$defs": {
+    "FlightCategory": {
+      "enum": [
+        "VFR",
+        "MVFR",
+        "IFR",
+        "LIFR"
+      ],
+      "title": "FlightCategory",
+      "type": "string"
+    },
+    "LvpInfo": {
+      "properties": {
+        "active": {
+          "title": "Active",
+          "type": "boolean"
+        },
+        "phase": {
+          "$ref": "#/$defs/LvpPhase"
+        }
+      },
+      "required": [
+        "active",
+        "phase"
+      ],
+      "title": "LvpInfo",
+      "type": "object"
+    },
+    "LvpPhase": {
+      "enum": [
+        "NONE",
+        "LVP_PREPARATION",
+        "LVP_ACTIVE",
+        "LVP_CANCELLED"
+      ],
+      "title": "LvpPhase",
+      "type": "string"
+    },
+    "Provenance": {
+      "enum": [
+        "SIMULATED",
+        "PILOT_REPORTED",
+        "RULE_BASED",
+        "AI_DERIVED"
+      ],
+      "title": "Provenance",
+      "type": "string"
+    },
+    "RvrItem": {
+      "properties": {
+        "runway": {
+          "title": "Runway",
+          "type": "string"
+        },
+        "valueM": {
+          "title": "Valuem",
+          "type": "number"
+        },
+        "trend": {
+          "default": "NO_CHANGE",
+          "title": "Trend",
+          "type": "string"
+        }
+      },
+      "required": [
+        "runway",
+        "valueM"
+      ],
+      "title": "RvrItem",
+      "type": "object"
+    },
+    "Wind": {
+      "properties": {
+        "directionDeg": {
+          "title": "Directiondeg",
+          "type": "number"
+        },
+        "speedKt": {
+          "title": "Speedkt",
+          "type": "number"
+        }
+      },
+      "required": [
+        "directionDeg",
+        "speedKt"
+      ],
+      "title": "Wind",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "airport": {
+      "default": "OMDB",
+      "title": "Airport",
+      "type": "string"
+    },
+    "observedAt": {
+      "title": "Observedat",
+      "type": "string"
+    },
+    "rawMetar": {
+      "title": "Rawmetar",
+      "type": "string"
+    },
+    "visibilityM": {
+      "title": "Visibilitym",
+      "type": "number"
+    },
+    "rvr": {
+      "items": {
+        "$ref": "#/$defs/RvrItem"
+      },
+      "title": "Rvr",
+      "type": "array"
+    },
+    "ceilingFt": {
+      "title": "Ceilingft",
+      "type": "number"
+    },
+    "wind": {
+      "$ref": "#/$defs/Wind"
+    },
+    "temperatureC": {
+      "title": "Temperaturec",
+      "type": "number"
+    },
+    "qnhHpa": {
+      "title": "Qnhhpa",
+      "type": "number"
+    },
+    "flightCategory": {
+      "$ref": "#/$defs/FlightCategory"
+    },
+    "lvp": {
+      "$ref": "#/$defs/LvpInfo"
+    },
+    "alerts": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Alerts",
+      "type": "array"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance",
+      "default": "SIMULATED"
+    }
+  },
+  "required": [
+    "observedAt",
+    "rawMetar",
+    "visibilityM",
+    "rvr",
+    "ceilingFt",
+    "wind",
+    "temperatureC",
+    "qnhHpa",
+    "flightCategory",
+    "lvp"
+  ],
+  "title": "WeatherPayload",
+  "type": "object"
+}
