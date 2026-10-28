@@ -76,12 +76,14 @@ export default function App() {
 
   return (
     <div className="app-container">
-      {/* ── Cockpit Top Bar ── */}
-      <TopBar
-        aircraft={state?.aircraft}
-        connectionStatus={state?.connectionStatus ?? 'DISCONNECTED'}
-        lastSeenUtc={state?.connectionLastSeenUtc ?? ''}
-      />
+      {/* ── Cockpit Top Bar (Shown in Detailed Screens View) ── */}
+      {activeTab === 'detailed' && (
+        <TopBar
+          aircraft={state?.aircraft}
+          connectionStatus={state?.connectionStatus ?? 'DISCONNECTED'}
+          lastSeenUtc={state?.connectionLastSeenUtc ?? ''}
+        />
+      )}
 
       {/* ── Demo Scenario Switcher Bar ── */}
       <ScenarioSelector
@@ -218,19 +220,21 @@ export default function App() {
         </section>
       )}
 
-      {/* ── Cockpit Footer ── */}
-      <footer className="cockpit-footer">
-        <div className="footer-left">
-          <span>Honey B AMS Prototype · UAE Hackathon 2026</span>
-          <span className="footer-separator">|</span>
-          <span>Dual Source Fusion: Aircraft FMS &amp; Ground AMAN</span>
-        </div>
-        <div className="footer-right">
-          <span>Active Scenario: <strong>{scenario.replace(/_/g, ' ')}</strong></span>
-          <span className="footer-separator">|</span>
-          <span>Datalink: {state?.connectionStatus}</span>
-        </div>
-      </footer>
+      {/* ── Cockpit Footer (Shown in Detailed View) ── */}
+      {activeTab === 'detailed' && (
+        <footer className="cockpit-footer">
+          <div className="footer-left">
+            <span>Honey B AMS Prototype · UAE Hackathon 2026</span>
+            <span className="footer-separator">|</span>
+            <span>Dual Source Fusion: Aircraft FMS &amp; Ground AMAN</span>
+          </div>
+          <div className="footer-right">
+            <span>Active Scenario: <strong>{scenario.replace(/_/g, ' ')}</strong></span>
+            <span className="footer-separator">|</span>
+            <span>Datalink: {state?.connectionStatus}</span>
+          </div>
+        </footer>
+      )}
     </div>
   );
 }

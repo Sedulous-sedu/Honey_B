@@ -3619,21 +3619,21 @@ body {
   justify-content: space-between;
   max-width: 1360px;
   margin: 0 auto;
-  padding: 16px 24px;
-  min-height: calc(100vh - 120px);
-  max-height: calc(100vh - 90px);
+  padding: 12px 20px;
+  height: calc(100vh - 100px);
+  max-height: calc(100vh - 100px);
   box-sizing: border-box;
-  gap: 16px;
+  gap: 12px;
   overflow: hidden;
 }
 
 /* On standard cockpit tablet displays (e.g. 1024x768 to 1366x768), prevent any page scroll */
 @media (max-height: 850px) {
   .single-glance-tablet-screen {
-    padding: 10px 18px;
-    gap: 12px;
-    min-height: calc(100vh - 95px);
-    max-height: calc(100vh - 80px);
+    padding: 8px 16px;
+    gap: 10px;
+    height: calc(100vh - 90px);
+    max-height: calc(100vh - 90px);
   }
 }
 
