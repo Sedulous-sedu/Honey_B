@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useAtcStore } from '../store/useAtcStore';
-import { Aircraft } from '../types';
+import { Eye, EyeOff, ZoomIn, ZoomOut } from 'lucide-react';
 
 export const RadarScope: React.FC = () => {
   const aircraft = useAtcStore((s) => s.aircraft);
@@ -11,26 +11,22 @@ export const RadarScope: React.FC = () => {
   const weather = useAtcStore((s) => s.weather);
 
   const activeCtrl = controllers.find((c) => c.id === activeControllerId);
-  const [zoom, setZoom] = useState(1.0);
+  const [zoom, setZoom] = useState(1.1);
+  const [showLabels, setShowLabels] = useState(true);
 
   // OMDB center reference: 25.2532 N, 55.3657 E
   const centerLat = 25.2532;
   const centerLon = 55.3657;
 
-  // Scale: 30 NM range radius corresponds to 340 SVG units
-  // 1 NM = ~11.33 SVG units
-  const nmToPx = 11.33 * zoom;
+  // Scale: 30 NM radius maps to ~330 SVG units
+  const nmToPx = 11.5 * zoom;
   const viewSize = 750;
   const halfView = viewSize / 2;
 
   // Lat/Lon to Radar SVG coordinates
   const project = (lat: number, lon: number): [number, number] => {
-    // 1 deg lat ~ 60 NM
-    // 1 deg lon ~ 60 * cos(lat) NM ~ 54.26 NM at lat 25.25
     const dLatNm = (lat - centerLat) * 60.0;
     const dLonNm = (lon - centerLon) * (60.0 * Math.cos((centerLat * Math.PI) / 180.0));
-
-    // SVG: X is East (+dLon), Y is North (-dLat because SVG Y is down)
     const x = halfView + dLonNm * nmToPx;
     const y = halfView - dLatNm * nmToPx;
     return [x, y];
@@ -39,8 +35,6 @@ export const RadarScope: React.FC = () => {
   const flightsList = useMemo(() => Object.values(aircraft), [aircraft]);
 
   // OMDB Runways:
-  // 12L/30R: 12L (25.2662, 55.3496) -> 30R (25.2443, 55.3852)
-  // 12R/30L: 12R (25.2605, 55.3448) -> 30L (25.2384, 55.3804)
   const [rwy12L_x, rwy12L_y] = project(25.2662, 55.3496);
   const [rwy30R_x, rwy30R_y] = project(25.2443, 55.3852);
 
@@ -52,11 +46,11 @@ export const RadarScope: React.FC = () => {
 
   return (
     <div className="relative w-full h-full bg-[#070B12] rounded-lg border border-[#162338] overflow-hidden flex flex-col shadow-2xl">
-      {/* Top Header / Status overlay on radar */}
+      {/* Top Status Header */}
       <div className="absolute top-3 left-4 z-10 flex items-center space-x-3 bg-[#0B1322]/90 px-3 py-1.5 rounded-lg border border-[#1F2E47] backdrop-blur-sm shadow-lg">
         <div className="flex items-center space-x-2">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span className="text-xs font-mono font-bold tracking-wider text-emerald-400">SURVEILLANCE PRIMARY/MSSR</span>
+          <span className="text-xs font-mono font-bold tracking-wider text-emerald-400">SURVEILLANCE RADAR</span>
         </div>
         <span className="text-xs font-mono text-slate-400">RANGE: {Math.round(30 / zoom)} NM</span>
 
@@ -77,19 +71,32 @@ export const RadarScope: React.FC = () => {
         )}
       </div>
 
-      {/* Zoom controls */}
-      <div className="absolute bottom-4 right-4 z-10 flex flex-col space-y-1">
+      {/* Quick Radar Tools (Zoom & Declutter) */}
+      <div className="absolute bottom-4 right-4 z-10 flex flex-col space-y-1.5">
         <button
-          onClick={() => setZoom((z) => Math.min(2.5, z + 0.25))}
-          className="w-8 h-8 rounded bg-[#101B2E] border border-[#233552] text-slate-200 font-mono font-bold hover:bg-[#1A2C4A] transition-colors"
+          onClick={() => setShowLabels((v) => !v)}
+          className={`p-2 rounded-lg border text-xs font-mono font-bold flex items-center justify-center transition-colors ${
+            showLabels
+              ? 'bg-[#121E36] border-cyan-500/40 text-cyan-300'
+              : 'bg-[#101B2E] border-[#233552] text-slate-400'
+          }`}
+          title="Toggle data block declutter"
         >
-          +
+          {showLabels ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
         </button>
         <button
-          onClick={() => setZoom((z) => Math.max(0.5, z - 0.25))}
-          className="w-8 h-8 rounded bg-[#101B2E] border border-[#233552] text-slate-200 font-mono font-bold hover:bg-[#1A2C4A] transition-colors"
+          onClick={() => setZoom((z) => Math.min(2.2, z + 0.2))}
+          className="p-2 rounded-lg bg-[#101B2E] border border-[#233552] text-slate-200 hover:bg-[#1A2C4A] transition-colors"
+          title="Zoom In"
         >
-          −
+          <ZoomIn className="w-4 h-4" />
+        </button>
+        <button
+          onClick={() => setZoom((z) => Math.max(0.6, z - 0.2))}
+          className="p-2 rounded-lg bg-[#101B2E] border border-[#233552] text-slate-200 hover:bg-[#1A2C4A] transition-colors"
+          title="Zoom Out"
+        >
+          <ZoomOut className="w-4 h-4" />
         </button>
       </div>
 
@@ -106,7 +113,7 @@ export const RadarScope: React.FC = () => {
           </radialGradient>
         </defs>
 
-        {/* Radar Background */}
+        {/* Background */}
         <rect width={viewSize} height={viewSize} fill="url(#radarSweep)" />
 
         {/* Crosshair Center Lines */}
@@ -140,7 +147,7 @@ export const RadarScope: React.FC = () => {
           );
         })}
 
-        {/* OMDB Runway Lines */}
+        {/* OMDB Runways */}
         {/* RWY 12L/30R */}
         <line
           x1={rwy12L_x}
@@ -151,7 +158,7 @@ export const RadarScope: React.FC = () => {
           strokeWidth="4"
           strokeLinecap="round"
         />
-        {/* Extended Centerline 30R approach */}
+        {/* Extended Centerline 30R */}
         <line
           x1={rwy30R_x}
           y1={rwy30R_y}
@@ -173,7 +180,7 @@ export const RadarScope: React.FC = () => {
           strokeWidth="4"
           strokeLinecap="round"
         />
-        {/* Extended Centerline 30L approach */}
+        {/* Extended Centerline 30L */}
         <line
           x1={rwy30L_x}
           y1={rwy30L_y}
@@ -185,9 +192,8 @@ export const RadarScope: React.FC = () => {
         />
         <text x={rwy30L_x + 6} y={rwy30L_y + 12} fill="#64748B" fontSize="10" fontFamily="monospace">30L</text>
 
-        {/* DXB VOR Holding Fix Pattern */}
+        {/* DXB VOR Holding Fix */}
         <g>
-          {/* Fix symbol */}
           <polygon
             points={`${dxbVor_x},${dxbVor_y - 7} ${dxbVor_x + 6},${dxbVor_y + 5} ${dxbVor_x - 6},${dxbVor_y + 5}`}
             fill="#3B82F6"
@@ -196,7 +202,6 @@ export const RadarScope: React.FC = () => {
           <text x={dxbVor_x + 10} y={dxbVor_y + 4} fill="#60A5FA" fontSize="11" fontFamily="monospace" fontWeight="bold">
             DXB VOR
           </text>
-          {/* Holding pattern race-track oval */}
           <ellipse
             cx={dxbVor_x + 20}
             cy={dxbVor_y}
@@ -211,7 +216,7 @@ export const RadarScope: React.FC = () => {
           />
         </g>
 
-        {/* Aircraft Blips and Data Blocks */}
+        {/* Aircraft Blips & Airplanes */}
         {flightsList.map((ac) => {
           const [px, py] = project(ac.position.lat, ac.position.lon);
           const isSelected = selectedId === ac.callsign;
@@ -223,24 +228,24 @@ export const RadarScope: React.FC = () => {
           // Color coding
           let color = "#10B981"; // Emerald
           if (!isOwnedByActiveCtrl && activeControllerId !== 'ALL') {
-            color = "#475569"; // Muted slate gray for other sectors
+            color = "#475569";
           } else if (isSelected) {
             color = "#00F2FE"; // Bright cyan
           } else if (ac.priority.level === "MINIMUM_FUEL" || ac.priority.level === "EMERGENCY") {
             color = "#EF4444"; // Red
           } else if (ac.priority.level === "MEDICAL") {
-            color = "#EC4899"; // Pink/red
+            color = "#EC4899"; // Pink
           } else if (ac.status === "UNABLE_TO_LAND" || ac.flightPhase === "DIVERTING") {
             color = "#F59E0B"; // Amber
           }
 
-          // Heading vector line (length ~ 20px)
+          // Heading vector
           const rad = (ac.headingDeg * Math.PI) / 180;
           const vecLength = 22;
           const vx = px + Math.sin(rad) * vecLength;
           const vy = py - Math.cos(rad) * vecLength;
 
-          // Vertical trend arrow
+          // Vertical trend
           let vTrend = "";
           if (ac.verticalRateFpm < -200) vTrend = "↓";
           else if (ac.verticalRateFpm > 200) vTrend = "↑";
@@ -250,57 +255,51 @@ export const RadarScope: React.FC = () => {
               key={ac.callsign}
               opacity={opacity}
               onClick={() => setSelectedId(ac.callsign)}
-              className="cursor-pointer transition-opacity duration-200"
+              className="cursor-pointer transition-all duration-300"
             >
-              {/* Selected highlight pulse */}
+              {/* Selected Target Ring */}
               {isSelected && (
-                <circle cx={px} cy={py} r={16} fill="none" stroke="#00F2FE" strokeWidth="1.5" className="radar-target-pulse" />
+                <circle cx={px} cy={py} r={18} fill="none" stroke="#00F2FE" strokeWidth="1.5" className="radar-target-pulse" />
               )}
 
-              {/* Target Symbol (Triangle rotated to heading) */}
-              <g transform={`rotate(${ac.headingDeg} ${px} ${py})`}>
-                <polygon
-                  points={`${px},${py - 7} ${px + 5},${py + 5} ${px - 5},${py + 5}`}
+              {/* Realistic Commercial Airplane Silhouette SVG */}
+              <g transform={`translate(${px}, ${py}) rotate(${ac.headingDeg}) scale(0.9)`}>
+                {/* Airplane SVG Path */}
+                <path
+                  d="M0,-12 L1.5,-7 L9,-1 L9,1.5 L1.5,0.5 L1.5,6.5 L4.5,9.5 L4.5,11 L0,9.8 L-4.5,11 L-4.5,9.5 L-1.5,6.5 L-1.5,0.5 L-9,1.5 L-9,-1 L-1.5,-7 Z"
                   fill={color}
-                  stroke="#070B12"
-                  strokeWidth="1"
+                  stroke="#050811"
+                  strokeWidth="0.8"
                 />
               </g>
 
-              {/* Velocity / Heading Vector */}
-              <line x1={px} y1={py} x2={vx} y2={vy} stroke={color} strokeWidth="1.5" strokeOpacity="0.8" />
+              {/* Heading / Velocity Vector */}
+              <line x1={px} y1={py} x2={vx} y2={vy} stroke={color} strokeWidth="1.2" strokeOpacity="0.8" />
 
-              {/* Leader Line to Data Block */}
-              <line x1={px} y1={py} x2={px + 18} y2={py - 14} stroke="#475569" strokeWidth="0.8" />
-              <line x1={px + 18} y1={py - 14} x2={px + 30} y2={py - 14} stroke="#475569" strokeWidth="0.8" />
-
-              {/* Data Block (Standard ATC 3-line format) */}
-              <g transform={`translate(${px + 22}, ${py - 30})`}>
-                {/* Background box for high legibility */}
-                <rect
-                  x="-2"
-                  y="-2"
-                  width="78"
-                  height="34"
-                  fill="#0B1322"
-                  fillOpacity="0.88"
-                  stroke={isSelected ? "#00F2FE" : "#1F2E47"}
-                  strokeWidth={isSelected ? "1.2" : "0.7"}
-                  rx="3"
-                />
-                {/* Line 1: Callsign & Wake */}
-                <text x="2" y="8" fill={color} fontSize="10" fontFamily="monospace" fontWeight="bold">
-                  {ac.callsign}
-                </text>
-                {/* Line 2: Altitude & Trend */}
-                <text x="2" y="18" fill="#E2E8F0" fontSize="9.5" fontFamily="monospace">
-                  {ac.altitudeFt > 6000 ? `FL${Math.round(ac.altitudeFt / 100)}` : `${ac.altitudeFt} ${vTrend}`}
-                </text>
-                {/* Line 3: Ground Speed & Runway */}
-                <text x="2" y="28" fill="#94A3B8" fontSize="9" fontFamily="monospace">
-                  {Math.round(ac.speed.groundSpeedKt)}K {ac.assignedRunway || ""}
-                </text>
-              </g>
+              {/* Data Block (Clean, Compact, Non-overlapping) */}
+              {(showLabels || isSelected) && (
+                <g transform={`translate(${px + 14}, ${py - 20})`}>
+                  <rect
+                    x="0"
+                    y="0"
+                    width="62"
+                    height="24"
+                    fill="#0A111E"
+                    fillOpacity="0.9"
+                    stroke={isSelected ? "#00F2FE" : "#1B2A42"}
+                    strokeWidth={isSelected ? "1.2" : "0.7"}
+                    rx="3"
+                  />
+                  {/* Line 1: Callsign */}
+                  <text x="3" y="10" fill={color} fontSize="9.5" fontFamily="monospace" fontWeight="bold">
+                    {ac.callsign}
+                  </text>
+                  {/* Line 2: Altitude & Speed */}
+                  <text x="3" y="19" fill="#E2E8F0" fontSize="8.5" fontFamily="monospace">
+                    {ac.altitudeFt > 6000 ? `FL${Math.round(ac.altitudeFt / 100)}` : `${ac.altitudeFt}${vTrend}`} {Math.round(ac.speed.groundSpeedKt)}K
+                  </text>
+                </g>
+              )}
             </g>
           );
         })}

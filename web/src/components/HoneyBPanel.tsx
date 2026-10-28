@@ -14,6 +14,7 @@ export const HoneyBPanel: React.FC = () => {
   const [aiQuestion, setAiQuestion] = useState('');
   const [aiAnswer, setAiAnswer] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
+  const [showAllSuggestions, setShowAllSuggestions] = useState(false);
   const [activeFilter, setActiveFilter] = useState<'ALL' | 'CRITICAL' | 'MINE'>(
     activeControllerId === 'ALL' ? 'ALL' : 'MINE'
   );
@@ -165,7 +166,7 @@ export const HoneyBPanel: React.FC = () => {
                 No active conflicts in this sector.
               </div>
             ) : (
-              filteredSuggestions.map((sug) => {
+              (showAllSuggestions ? filteredSuggestions : filteredSuggestions.slice(0, 3)).map((sug) => {
                 const isCritical = sug.urgency === 'CRITICAL';
                 const isMyFlight = activeControllerId === 'ALL' || sug.targetControllerId === activeControllerId;
                 const assignedCtrl = controllers.find((c) => c.id === sug.targetControllerId);
@@ -241,6 +242,17 @@ export const HoneyBPanel: React.FC = () => {
                   </div>
                 );
               })
+            )}
+
+            {filteredSuggestions.length > 3 && (
+              <button
+                onClick={() => setShowAllSuggestions((v) => !v)}
+                className="w-full py-1.5 text-center rounded-lg bg-[#111A2C] hover:bg-[#16233B] border border-[#1E2E4A] text-xs font-mono text-cyan-300 font-bold transition-colors"
+              >
+                {showAllSuggestions
+                  ? '▲ Show Top 3 Critical Only'
+                  : `▼ View All ${filteredSuggestions.length} Suggestions`}
+              </button>
             )}
           </div>
         </div>
