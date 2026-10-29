@@ -64,12 +64,133 @@ def ask_ai(prompt: str, context: Optional[Dict[str, Any]] = None) -> str:
     if "rank" in p_lower or "why" in p_lower:
         return (
             "Priority sequencing rules follow ICAO safety hierarchy: "
-            "1. In-flight emergency / Mayday. 2. Medical emergency on board (THY762). "
-            "3. Minimum fuel reserve margin (FDB512). 4. Aircraft unable to land in current RVR (IGO1433 CAT I limit). "
-            "5. Arrival spacing by wake turbulence and LVP category."
+            "1. Confirmed MAYDAY (Distress). 2. Confirmed PAN PAN (Urgency, including confirmed medical emergencies per GCAA eAIC 2020-06). "
+            "3. Minimum fuel advisory monitoring (FDB512) without automatic emergency inference. "
+            "4. Aircraft below RVR minima (IGO1433 CAT I limit). "
+            "5. Arrival spacing by wake turbulence and LVO category."
         )
 
     return (
         f"{grounded_summary} "
-        f"Honey B recommends maintaining 6 NM arrival spacing during LVP and expediting FDB512 and THY762."
+        f"Honey B recommends maintaining GCAA OMDB wake/LVO spacing and reviewing FDB512 and THY762 declarations."
     )
+
+
+def explain_risk_evaluation(evaluation_dict: Dict[str, Any]) -> Dict[str, str]:
+    """
+    Explains structured deterministic Emergency Sequence Risk Advisor outputs in plain language.
+    Uses Gemini only if GEMINI_API_KEY is available, with strict guardrails so it never invents numbers,
+    overrides hard constraints, or decides the landing sequence.
+    """
+    status = evaluation_dict.get("evaluationStatus", "UNKNOWN")
+    target_id = evaluation_dict.get("emergencyAircraftId", "UNKNOWN")
+    decl_type = evaluation_dict.get("declarationType", "NONE")
+    decl_status = evaluation_dict.get("declarationStatus", "NONE")
+    reasons = evaluation_dict.get("statusReasons", [])
+    rec_cands = evaluation_dict.get("recommendedCandidates", [])
+    rej_cands = evaluation_dict.get("rejectedCandidates", [])
+    policy_ver = evaluation_dict.get("policyVersion", "OMDB-KC-2026.10-v1.0.0")
+
+    # Build deterministic grounded summary first (authoritative fallback & LLM grounding input)
+    lines = [
+        f"[{policy_ver}] Evaluation for {target_id} (Declaration: {decl_type} / {decl_status}) -> {status}."
+    ]
+    if status == "FEASIBLE_CANDIDATES_AVAILABLE" and rec_cands:
+        top = rec_cands[0]
+        gained_min = top.get("emergencyTimeGainedMin", 0.0)
+        emerg_margin = top.get("emergencyLandingFuelMarginKg")
+        disp_count = top.get("displacedAircraftCount", 0)
+        total_delay_min = top.get("totalAddedDelayMin", 0.0)
+        min_disp_margin = top.get("minDisplacedFuelMarginKg")
+        worst_disp_cs = top.get("worstDisplacedCallsign") or "none"
+        lines.append(
+            f"Top feasible option '{top.get('label')}' on RWY {top.get('emergencyRunway')} gains "
+            f"{gained_min} min for {target_id} (estimated landing fuel margin: {emerg_margin} kg above final reserve)."
+        )
+        lines.append(
+            f"Impact on other traffic: {disp_count} displaced flight(s), +{total_delay_min} min total delay, "
+            f"lowest displaced fuel margin is {min_disp_margin} kg ({worst_disp_cs})."
+        )
+    elif status == "MANUAL_REVIEW_REQUIRED":
+        lines.append(
+            "Automated resequencing recommendation withheld pending manual controller review: "
+            + "; ".join(reasons)
+        )
+    elif status == "NO_FEASIBLE_PLAN":
+        lines.append(
+            "All candidate resequencing options violated one or more hard operational constraints: "
+            + "; ".join(reasons)
+        )
+
+    if rej_cands:
+        rej_summaries = []
+        for rc in rej_cands[:3]:
+            failures = ", ".join(rc.get("hardConstraintFailures", []))
+            rej_summaries.append(f"{rc.get('label')} rejected ({failures})")
+        lines.append("Rejected alternatives: " + "; ".join(rej_summaries) + ".")
+
+    lines.append(
+        "Controller review is required before approving an estimated sequence advisory or issuing formal ATC clearances."
+    )
+    deterministic_text = " ".join(lines)
+
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if api_key:
+        try:
+            from google import genai
+            client = genai.Client(api_key=api_key)
+            prompt_payload = {
+                "evaluationStatus": status,
+                "emergencyAircraftId": target_id,
+                "declarationType": decl_type,
+                "declarationStatus": decl_status,
+                "statusReasons": reasons,
+                "recommendedCandidates": [
+                    {
+                        "candidateId": c.get("candidateId"),
+                        "label": c.get("label"),
+                        "emergencyRunway": c.get("emergencyRunway"),
+                        "emergencyTimeGainedMin": c.get("emergencyTimeGainedMin"),
+                        "emergencyLandingFuelMarginKg": c.get("emergencyLandingFuelMarginKg"),
+                        "displacedAircraftCount": c.get("displacedAircraftCount"),
+                        "totalAddedDelayMin": c.get("totalAddedDelayMin"),
+                        "minDisplacedFuelMarginKg": c.get("minDisplacedFuelMarginKg"),
+                        "worstDisplacedCallsign": c.get("worstDisplacedCallsign"),
+                    }
+                    for c in rec_cands
+                ],
+                "rejectedCandidates": [
+                    {
+                        "candidateId": c.get("candidateId"),
+                        "label": c.get("label"),
+                        "hardConstraintFailures": c.get("hardConstraintFailures"),
+                    }
+                    for c in rej_cands[:4]
+                ],
+            }
+            system_instruction = (
+                "You are an ATC decision-support explanation assistant for Dubai International (OMDB). "
+                "Summarize the provided JSON risk evaluation in 3-4 concise sentences of plain English. "
+                "STRICT RULES: (1) Use ONLY the exact numbers, callsigns, and constraint codes present in the JSON. "
+                "(2) NEVER invent numbers, probabilities, or fuel values. "
+                "(3) NEVER override a constraint failure or recommend an infeasible candidate. "
+                "(4) State clearly that controller review and formal ATC clearances are required."
+            )
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=f"{system_instruction}\n\nStructured Evaluation JSON:\n{json.dumps(prompt_payload)}",
+            )
+            if response and response.text:
+                return {
+                    "explanation": response.text.strip(),
+                    "source": "GEMINI_GROUNDED",
+                    "guardrailNote": "LLM explanation only summarizes structured deterministic Risk Advisor outputs. It never creates numbers, overrides constraints, or decides the sequence.",
+                }
+        except Exception:
+            pass
+
+    return {
+        "explanation": deterministic_text,
+        "source": "DETERMINISTIC_TEMPLATE_FALLBACK",
+        "guardrailNote": "Deterministic plain-language explanation generated directly from structured Risk Advisor outputs. Never creates numbers, overrides constraints, or decides the sequence.",
+    }

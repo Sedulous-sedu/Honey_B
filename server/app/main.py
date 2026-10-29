@@ -20,13 +20,23 @@ from app.models import (
     PilotResponse,
     InstructionType,
     ErrorPayload,
-    ReportAckPayload
+    ReportAckPayload,
+    EmergencyDeclarationType,
+    DeclarationStatus,
+    PriorityLevel,
+    RunwayOperationalState,
+    RunwayOperationalStatus,
+    RunwayMode,
+    Provenance,
 )
 from app.simulator import Simulator
 from app.weather import WeatherManager
 from app.command_manager import CommandManager
 from app.suggestion import SuggestionEngine
-from app.ai import ask_ai
+from app.ai import ask_ai, explain_risk_evaluation
+from app.risk_advisor import EmergencySequenceRiskAdvisor
+from app.knowledge_core import default_knowledge_core
+import copy
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("HoneyB_GroundHub")
@@ -110,6 +120,8 @@ async def simulation_loop():
                 "eventLog": state.event_log[:20],
                 "commands": [c.model_dump() for c in list(state.commands.values())[-15:]],
                 "stands": list(state.stands.values()),
+                "runwayStates": {k: v.model_dump() for k, v in state.runway_states.items()},
+                "approvedSequenceAdvisory": state.approved_sequence_advisory,
                 "metrics": {
                     "totalFlights": len(state.aircraft),
                     "atRiskCount": sum(1 for a in state.aircraft.values() if a.priority.level in ["MINIMUM_FUEL", "EMERGENCY", "MEDICAL"]),
@@ -165,7 +177,8 @@ def build_snapshot(role: str, aircraft_id: Optional[str] = None) -> Dict[str, An
                 "terminal": stand_data["terminal"] if stand_data else "Terminal 3",
                 "provenance": "SIMULATED"
             },
-            "advisories": advisories
+            "advisories": advisories,
+            "approvedSequenceAdvisory": state.approved_sequence_advisory,
         }
     else:
         # Controller / Wall receives complete operations snapshot
@@ -180,6 +193,8 @@ def build_snapshot(role: str, aircraft_id: Optional[str] = None) -> Dict[str, An
             "claims": state.claims,
             "suggestions": [s.model_dump() for s in state.suggestions.values()],
             "advisories": [a.model_dump() for alist in state.advisories.values() for a in alist],
+            "runwayStates": {k: v.model_dump() for k, v in state.runway_states.items()},
+            "approvedSequenceAdvisory": state.approved_sequence_advisory,
             "eventLog": state.event_log[:50]
         }
 
@@ -437,6 +452,238 @@ class ChatRequest(BaseModel):
 def api_chat(req: ChatRequest):
     reply = ask_ai(req.prompt)
     return {"reply": reply}
+
+# ── Emergency Sequence Change Risk Advisor Endpoints (Phase 3) ────────────────
+
+class RiskAdvisorEvaluateRequest(BaseModel):
+    emergencyAircraftId: str
+    includeAiExplanation: bool = True
+    overrideDeclarationType: Optional[EmergencyDeclarationType] = None
+    overrideDeclarationStatus: Optional[DeclarationStatus] = None
+    overrideRunwayStates: Optional[Dict[str, RunwayOperationalState]] = None
+
+
+class ApproveSequenceRequest(BaseModel):
+    emergencyAircraftId: str
+    candidateId: str
+    controllerId: str = "CTRL-ARR-01"
+    controllerNotes: Optional[str] = None
+
+
+class DeclarationUpdateRequest(BaseModel):
+    aircraftId: str
+    declarationType: EmergencyDeclarationType
+    declarationStatus: DeclarationStatus = DeclarationStatus.CONFIRMED
+    controllerId: str = "CTRL-ARR-01"
+    emergencyNature: Optional[str] = None
+
+
+class RunwayStateUpdateRequest(BaseModel):
+    runway: str
+    serviceable: bool = True
+    status: RunwayOperationalStatus = RunwayOperationalStatus.OPEN
+    mode: RunwayMode = RunwayMode.MIXED
+    smrServiceable: bool = True
+    reason: Optional[str] = None
+
+
+@app.get("/api/risk-advisor/knowledge-core")
+def get_risk_advisor_knowledge_core():
+    """Returns the versioned OMDB Knowledge Core metadata and policy parameters."""
+    return {
+        "metadata": default_knowledge_core.get_metadata_summary(),
+        "policy": default_knowledge_core.raw,
+        "runwayStates": {k: v.model_dump() for k, v in state.runway_states.items()},
+        "approvedSequenceAdvisory": state.approved_sequence_advisory,
+    }
+
+
+@app.post("/api/risk-advisor/evaluate")
+def evaluate_emergency_sequence(req: RiskAdvisorEvaluateRequest):
+    """
+    Pure, non-mutating evaluation of an emergency arrival resequencing request.
+    Never issues an ATC command, never mutates live aircraft or sequence state.
+    """
+    if req.emergencyAircraftId not in state.aircraft:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Aircraft '{req.emergencyAircraftId}' not found in live state.",
+        )
+    if not state.weather:
+        raise HTTPException(status_code=503, detail="Weather state not initialized.")
+
+    # Deep-copy live state so optional what-if overrides cannot mutate live state
+    ac_snapshot = [copy.deepcopy(a) for a in state.aircraft.values()]
+    if req.overrideDeclarationType is not None or req.overrideDeclarationStatus is not None:
+        for a in ac_snapshot:
+            if a.callsign == req.emergencyAircraftId:
+                if req.overrideDeclarationType is not None:
+                    a.priority.declarationType = req.overrideDeclarationType
+                    if req.overrideDeclarationType in (
+                        EmergencyDeclarationType.MAYDAY,
+                        EmergencyDeclarationType.PAN_PAN,
+                    ):
+                        a.priority.level = PriorityLevel.EMERGENCY
+                if req.overrideDeclarationStatus is not None:
+                    a.priority.declarationStatus = req.overrideDeclarationStatus
+
+    rwy_snapshot = (
+        req.overrideRunwayStates
+        if req.overrideRunwayStates is not None
+        else state.runway_states
+    )
+
+    eval_result = EmergencySequenceRiskAdvisor.evaluate(
+        aircraft_list=ac_snapshot,
+        weather=state.weather,
+        target_aircraft_id=req.emergencyAircraftId,
+        sim_time_iso=state.get_sim_time_iso(),
+        runway_states=rwy_snapshot,
+        knowledge_core=default_knowledge_core,
+    )
+    out_dict = eval_result.model_dump()
+    if req.includeAiExplanation:
+        out_dict["llmExplanation"] = explain_risk_evaluation(out_dict)
+    else:
+        out_dict["llmExplanation"] = None
+    return out_dict
+
+
+@app.post("/api/risk-advisor/approve-sequence")
+async def approve_emergency_sequence(req: ApproveSequenceRequest):
+    """
+    Records a controller-approved estimated landing sequence advisory.
+    Strictly separate from evaluation AND strictly separate from issuing a formal ATC command.
+    Does not issue any clearance or change operative routes.
+    """
+    if req.emergencyAircraftId not in state.aircraft:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Aircraft '{req.emergencyAircraftId}' not found.",
+        )
+    if not state.weather:
+        raise HTTPException(status_code=503, detail="Weather state not initialized.")
+
+    eval_result = EmergencySequenceRiskAdvisor.evaluate(
+        aircraft_list=list(state.aircraft.values()),
+        weather=state.weather,
+        target_aircraft_id=req.emergencyAircraftId,
+        sim_time_iso=state.get_sim_time_iso(),
+        runway_states=state.runway_states,
+        knowledge_core=default_knowledge_core,
+    )
+
+    chosen = next(
+        (c for c in eval_result.recommendedCandidates if c.candidateId == req.candidateId),
+        None,
+    )
+    if not chosen or not chosen.feasible or eval_result.evaluationStatus != "FEASIBLE_CANDIDATES_AVAILABLE":
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"Cannot approve candidate '{req.candidateId}': candidate is not in recommended feasible options "
+                f"(evaluationStatus={eval_result.evaluationStatus})."
+            ),
+        )
+
+    now_iso = state.get_sim_time_iso()
+    advisory_record = {
+        "advisoryId": state.next_advisory_id(),
+        "source": "CONTROLLER_APPROVED_ESTIMATE",
+        "isClearance": False,
+        "disclaimer": (
+            "CONTROLLER-APPROVED ESTIMATED SEQUENCE — NOT AN OPERATIVE ATC CLEARANCE. "
+            "Operative heading/altitude/speed/approach instructions must be issued via formal ATC commands."
+        ),
+        "approvedByControllerId": req.controllerId,
+        "approvedAtUtc": now_iso,
+        "policyVersion": eval_result.policyVersion,
+        "emergencyAircraftId": req.emergencyAircraftId,
+        "candidateId": chosen.candidateId,
+        "candidateLabel": chosen.label,
+        "strategyType": chosen.strategyType,
+        "emergencyRunway": chosen.emergencyRunway,
+        "emergencyTimeGainedMin": chosen.emergencyTimeGainedMin,
+        "totalAddedDelayMin": chosen.totalAddedDelayMin,
+        "proposedOrder": chosen.proposedOrder,
+        "runwayOrders": chosen.runwayOrders,
+        "controllerNotes": req.controllerNotes,
+        "perAircraftMap": {
+            imp.callsign: imp.model_dump() for imp in chosen.perAircraftImpacts
+        },
+    }
+    state.approved_sequence_advisory = advisory_record
+    state.log_event(
+        "SEQUENCE_ADVISORY_APPROVED",
+        f"Controller {req.controllerId} approved estimated sequence '{chosen.label}' for {req.emergencyAircraftId} "
+        f"(gains {chosen.emergencyTimeGainedMin:.1f}m; advisory only, not a clearance).",
+    )
+
+    # Broadcast advisory notification to connected ground/pilot clients
+    adv_env = state.create_envelope("sequence.advisory", advisory_record, aircraft_id=None)
+    await manager.broadcast_event(adv_env)
+    return advisory_record
+
+
+@app.post("/api/risk-advisor/declaration")
+async def update_emergency_declaration(req: DeclarationUpdateRequest):
+    """
+    Allows the controller to confirm or update an aircraft's emergency declaration status
+    (e.g., confirming PAN PAN / MAYDAY with Pilot-in-Command per GCAA eAIC 2020-06).
+    Does not automatically resequence or issue clearances.
+    """
+    ac = state.aircraft.get(req.aircraftId)
+    if not ac:
+        raise HTTPException(status_code=404, detail=f"Aircraft '{req.aircraftId}' not found")
+
+    now_iso = state.get_sim_time_iso()
+    ac.priority.declarationType = req.declarationType
+    ac.priority.declarationStatus = req.declarationStatus
+    ac.priority.declaredAtUtc = now_iso
+    ac.priority.confirmedByControllerId = (
+        req.controllerId if req.declarationStatus == DeclarationStatus.CONFIRMED else None
+    )
+    if req.emergencyNature is not None:
+        ac.priority.emergencyNature = req.emergencyNature
+    if req.declarationType in (EmergencyDeclarationType.MAYDAY, EmergencyDeclarationType.PAN_PAN):
+        ac.priority.level = PriorityLevel.EMERGENCY
+        ac.priority.provenance = Provenance.PILOT_REPORTED
+        code = f"DECLARED_{req.declarationType.value}"
+        if code not in ac.priority.reasonCodes:
+            ac.priority.reasonCodes.append(code)
+
+    state.log_event(
+        "EMERGENCY_DECLARATION",
+        f"{req.aircraftId} declaration updated to {req.declarationType.value} ({req.declarationStatus.value}) by {req.controllerId}.",
+    )
+    ac_env = state.create_envelope("aircraft.state", ac, aircraft_id=req.aircraftId)
+    await manager.broadcast_event(ac_env)
+    return ac.model_dump()
+
+
+@app.post("/api/risk-advisor/runway-state")
+async def update_runway_state(req: RunwayStateUpdateRequest):
+    """Updates operational state (OPEN/CLOSED/LVO_DEDICATED_DEPARTURE/SMR) of an OMDB runway."""
+    now_iso = state.get_sim_time_iso()
+    rwy_state = RunwayOperationalState(
+        runway=req.runway,
+        serviceable=req.serviceable,
+        status=req.status,
+        mode=req.mode,
+        smrServiceable=req.smrServiceable,
+        reason=req.reason,
+        observedAtUtc=now_iso,
+        provenance=Provenance.AUTHORITATIVE,
+    )
+    state.runway_states[req.runway] = rwy_state
+    if state.weather:
+        state.weather.runwayStates = state.runway_states
+        state.weather.smrServiceable = all(r.smrServiceable for r in state.runway_states.values())
+    state.log_event(
+        "RUNWAY_STATE",
+        f"RWY {req.runway} set to {req.status.value} (mode={req.mode.value}, serviceable={req.serviceable}).",
+    )
+    return rwy_state.model_dump()
 
 # ── Pilot Dashboard & Response Endpoints (Air-Ground Contract v1.0.0) ────────
 # Called by the pilot-system HttpDataLinkAdapter.

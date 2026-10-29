@@ -19,6 +19,8 @@ interface AtcState {
   claims: Record<string, any>;
   eventLog: EventLogEntry[];
   metrics: Metrics;
+  runwayStates: Record<string, any>;
+  approvedSequenceAdvisory: any | null;
 
   trafficFilter: 'ALL' | 'ARR' | 'DEP' | 'OTHER';
   searchTerm: string;
@@ -68,12 +70,14 @@ export const useAtcStore = create<AtcState>((set, get) => ({
   claims: {},
   eventLog: [],
   metrics: {
-    totalFlights: 28,
+    totalFlights: 15,
     atRiskCount: 2,
     delayedMinutes: 0,
     fcfsBaselineDelayMin: 0,
     conflictsAvoided: 0
   },
+  runwayStates: {},
+  approvedSequenceAdvisory: null,
 
   trafficFilter: 'ALL',
   searchTerm: '',
@@ -103,7 +107,9 @@ export const useAtcStore = create<AtcState>((set, get) => ({
       controllers: snap.controllers || get().controllers,
       claims: snap.claims || get().claims,
       suggestions: snap.suggestions || get().suggestions,
-      eventLog: snap.eventLog || get().eventLog
+      eventLog: snap.eventLog || get().eventLog,
+      runwayStates: snap.runwayStates || get().runwayStates,
+      approvedSequenceAdvisory: snap.approvedSequenceAdvisory !== undefined ? snap.approvedSequenceAdvisory : get().approvedSequenceAdvisory,
     });
   },
 
@@ -165,7 +171,9 @@ export const useAtcStore = create<AtcState>((set, get) => ({
       eventLog: data.eventLog || state.eventLog,
       metrics: data.metrics || state.metrics,
       commands: data.commands || state.commands,
-      stands: data.stands || state.stands
+      stands: data.stands || state.stands,
+      runwayStates: data.runwayStates || state.runwayStates,
+      approvedSequenceAdvisory: data.approvedSequenceAdvisory !== undefined ? data.approvedSequenceAdvisory : state.approvedSequenceAdvisory,
     }));
   },
 

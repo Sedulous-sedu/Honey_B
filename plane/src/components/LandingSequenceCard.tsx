@@ -20,10 +20,16 @@ export function LandingSequenceCard({ sequence, isStale }: Props) {
     );
   }
 
+  const isControllerEstimate = sequence.advisorySource === 'CONTROLLER_APPROVED_ESTIMATE';
   const statusColor =
-    sequence.status === 'CONFIRMED' ? 'var(--color-live)' : 'var(--color-medium)';
-  const statusLabel =
-    sequence.status === 'CONFIRMED' ? '✓ CONFIRMED' : '~ ESTIMATED';
+    sequence.status === 'CONFIRMED' && !isControllerEstimate
+      ? 'var(--color-live)'
+      : 'var(--color-medium)';
+  const statusLabel = isControllerEstimate
+    ? '~ CONTROLLER-APPROVED ESTIMATE'
+    : sequence.status === 'CONFIRMED'
+    ? '✓ CONFIRMED'
+    : '~ ESTIMATED';
 
   return (
     <div className={`card ${isStale ? 'stale' : ''}`}>
@@ -94,6 +100,39 @@ export function LandingSequenceCard({ sequence, isStale }: Props) {
             {sequence.status}
           </span>
         </div>
+        {sequence.advisorySource && (
+          <div className="data-row">
+            <span className="data-label">Sequence Source</span>
+            <span className="data-value" style={{ fontSize: '0.78rem' }}>
+              {sequence.advisorySource}
+              {sequence.approvedByControllerId ? ` (${sequence.approvedByControllerId})` : ''}
+            </span>
+          </div>
+        )}
+        {sequence.approvedAtUtc && (
+          <div className="data-row">
+            <span className="data-label">Approved At</span>
+            <span className="data-value muted">
+              {formatUtcTime(sequence.approvedAtUtc)}
+            </span>
+          </div>
+        )}
+        {sequence.disclaimerText && (
+          <div
+            style={{
+              marginTop: 8,
+              padding: '6px 8px',
+              borderRadius: 6,
+              background: 'rgba(245, 158, 11, 0.12)',
+              border: '1px solid rgba(245, 158, 11, 0.35)',
+              color: 'var(--color-medium)',
+              fontSize: '0.72rem',
+              fontFamily: 'var(--font-data)',
+            }}
+          >
+            {sequence.disclaimerText}
+          </div>
+        )}
       </div>
     </div>
   );

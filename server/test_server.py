@@ -95,3 +95,87 @@ def test_stand_reassign():
     res = client.post("/demo/stand", json={"aircraftId": "UAE231", "standId": "B16"})
     assert res.status_code == 200
     assert res.json()["standId"] == "B16"
+
+
+def test_risk_advisor_api_non_mutating_and_approval_separation():
+    # Reset state first
+    client.post("/demo/reset")
+
+    # 1. Knowledge core endpoint
+    kc_res = client.get("/api/risk-advisor/knowledge-core")
+    assert kc_res.status_code == 200
+    kc_data = kc_res.json()
+    assert kc_data["metadata"]["policyVersion"] == "OMDB-KC-2026.10-v1.0.0"
+
+    # 2. Evaluate FDB512 without confirmed emergency -> MANUAL_REVIEW_REQUIRED, zero state mutation
+    rev_before = state.revision
+    cmd_count_before = len(state.commands)
+    eval_unconfirmed = client.post("/api/risk-advisor/evaluate", json={
+        "emergencyAircraftId": "FDB512",
+        "includeAiExplanation": True,
+    })
+    assert eval_unconfirmed.status_code == 200
+    u_data = eval_unconfirmed.json()
+    assert u_data["evaluationStatus"] == "MANUAL_REVIEW_REQUIRED"
+    assert len(u_data["recommendedCandidates"]) == 0
+    assert u_data["llmExplanation"] is not None
+    assert state.revision == rev_before
+    assert len(state.commands) == cmd_count_before
+    assert state.approved_sequence_advisory is None
+
+    # Attempting to approve a candidate when unconfirmed must be rejected with 400
+    bad_approve = client.post("/api/risk-advisor/approve-sequence", json={
+        "emergencyAircraftId": "FDB512",
+        "candidateId": "CAND_SWAP_30R_UP2",
+        "controllerId": "CTRL-ARR-02",
+    })
+    assert bad_approve.status_code == 400
+
+    # 3. Evaluate with what-if override (MAYDAY + CONFIRMED) without mutating live FDB512 state
+    eval_whatif = client.post("/api/risk-advisor/evaluate", json={
+        "emergencyAircraftId": "FDB512",
+        "overrideDeclarationType": "MAYDAY",
+        "overrideDeclarationStatus": "CONFIRMED",
+        "includeAiExplanation": True,
+    })
+    assert eval_whatif.status_code == 200
+    w_data = eval_whatif.json()
+    assert w_data["evaluationStatus"] == "FEASIBLE_CANDIDATES_AVAILABLE"
+    assert len(w_data["recommendedCandidates"]) >= 1
+    assert len(w_data["recommendedCandidates"]) <= 3
+    # Live state must still have declarationType == NONE!
+    assert state.aircraft["FDB512"].priority.declarationType.value == "NONE"
+    assert len(state.commands) == cmd_count_before
+
+    # 4. Controller confirms declaration via /api/risk-advisor/declaration, then approves estimated sequence
+    decl_res = client.post("/api/risk-advisor/declaration", json={
+        "aircraftId": "FDB512",
+        "declarationType": "MAYDAY",
+        "declarationStatus": "CONFIRMED",
+        "controllerId": "CTRL-ARR-02",
+    })
+    assert decl_res.status_code == 200
+
+    top_cand_id = w_data["recommendedCandidates"][0]["candidateId"]
+    app_res = client.post("/api/risk-advisor/approve-sequence", json={
+        "emergencyAircraftId": "FDB512",
+        "candidateId": top_cand_id,
+        "controllerId": "CTRL-ARR-02",
+        "controllerNotes": "Approve estimated sequence for MAYDAY FDB512",
+    })
+    assert app_res.status_code == 200
+    adv_data = app_res.json()
+    assert adv_data["source"] == "CONTROLLER_APPROVED_ESTIMATE"
+    assert adv_data["isClearance"] is False
+    # Approval of estimated sequence MUST NOT issue a formal ATC command!
+    assert len(state.commands) == cmd_count_before
+
+    # 5. Pilot dashboard reflects CONTROLLER_APPROVED_ESTIMATE distinctly from clearances
+    dash_res = client.get("/api/dashboard/FDB512")
+    assert dash_res.status_code == 200
+    dash = dash_res.json()
+    assert dash["landingSequence"]["advisorySource"] == "CONTROLLER_APPROVED_ESTIMATE"
+    assert dash["landingSequence"]["isClearance"] is False
+    assert dash["landingSequence"]["approvedByControllerId"] == "CTRL-ARR-02"
+    assert "NOT AN OPERATIVE ATC CLEARANCE" in dash["landingSequence"]["disclaimerText"]
+

@@ -44,7 +44,17 @@ export function TabletPilotOverview({
     : null;
 
   // ── Determine the Single Latest Instruction or Proposal ──
-  // Priority order: Tactical Reroute Proposal > Active Hold > Runway Reversal > Datalink Lost > Nominal Arrival Sequence
+  // Priority order: Unread Formal ATC Clearance > Tactical Reroute Proposal > Active Hold > Runway Reversal > Datalink Lost > Nominal Arrival Sequence
+  const unreadAtcCommand = messages.find(
+    (m) => m.source === 'ATC' && m.status === 'UNREAD' && m.requiresAck
+  );
+  const airportDisplayName =
+    conditions.airportIcao === 'OMDB'
+      ? 'Dubai International (OMDB)'
+      : conditions.airportIcao === 'EGLL'
+      ? 'London Heathrow'
+      : conditions.airportIcao;
+
   let mainInstructionSource = 'SOURCE: GROUND CONTROL (ATC / AMAN)';
   let mainInstructionTime = landingSequence.lastUpdatedUtc;
   let mainInstructionSentence = '';
@@ -53,7 +63,14 @@ export function TabletPilotOverview({
   let defaultAckText = '';
   let defaultUnableText = '';
 
-  if (reroute && (reroute.status === 'PROPOSED' || reroute.status === 'AWAITING_RESPONSE')) {
+  if (unreadAtcCommand) {
+    mainInstructionSource = `SOURCE: GROUND CONTROL (${unreadAtcCommand.subject.toUpperCase()})`;
+    mainInstructionTime = unreadAtcCommand.timestampUtc;
+    mainInstructionSentence = unreadAtcCommand.body;
+    requiresResponse = true;
+    defaultAckText = `Wilco, ${unreadAtcCommand.body}`;
+    defaultUnableText = `Unable ${unreadAtcCommand.subject}; maintaining current flight parameters.`;
+  } else if (reroute && (reroute.status === 'PROPOSED' || reroute.status === 'AWAITING_RESPONSE')) {
     mainInstructionSource = 'SOURCE: GROUND CONTROL (TACTICAL REROUTE)';
     mainInstructionTime = reroute.proposedAtUtc;
     mainInstructionSentence = `ATC proposes tactical reroute via ${reroute.routeDiff} (+${reroute.estimatedTimeImpactMin} min) for arrival spacing.`;
@@ -85,10 +102,15 @@ export function TabletPilotOverview({
     requiresResponse = true;
     defaultAckText = 'Copy, monitoring primary VHF voice frequency 127.425 MHz.';
     defaultUnableText = 'Unable CPDLC restoration; remaining on voice.';
+  } else if (landingSequence.advisorySource === 'CONTROLLER_APPROVED_ESTIMATE') {
+    mainInstructionSource = `SOURCE: CONTROLLER_APPROVED_ESTIMATE (${landingSequence.approvedByControllerId ?? 'ATC'})`;
+    mainInstructionTime = landingSequence.approvedAtUtc ?? landingSequence.lastUpdatedUtc;
+    mainInstructionSentence = `Controller-approved estimated sequence into ${airportDisplayName}: position #${landingSequence.sequenceNumber} for Runway ${landingSequence.assignedRunway ?? '30L'} (advisory estimate only — not an operative ATC clearance).`;
+    requiresResponse = false;
   } else {
     mainInstructionSource = 'SOURCE: GROUND CONTROL (AMAN SEQUENCING)';
     mainInstructionTime = landingSequence.lastUpdatedUtc;
-    mainInstructionSentence = `Cleared for standard arrival into London Heathrow, number ${landingSequence.sequenceNumber} in sequence for Runway ${landingSequence.assignedRunway ?? '27R'}.`;
+    mainInstructionSentence = `Cleared for standard arrival into ${airportDisplayName}, number ${landingSequence.sequenceNumber} in sequence for Runway ${landingSequence.assignedRunway ?? '27R'}.`;
     requiresResponse = false;
   }
 
@@ -335,8 +357,14 @@ export function TabletPilotOverview({
         {/* When no response is pending */}
         {!requiresResponse && (
           <div className="main-card-nominal-status">
-            <span className="nominal-check-icon">✓</span>
-            <span>Operative arrival plan confirmed · No pending ATC response required</span>
+            <span className="nominal-check-icon">
+              {landingSequence.advisorySource === 'CONTROLLER_APPROVED_ESTIMATE' ? '~' : '✓'}
+            </span>
+            <span>
+              {landingSequence.advisorySource === 'CONTROLLER_APPROVED_ESTIMATE'
+                ? 'Estimated Sequence Advisory Only (Not an ATC Clearance) · No pilot response required'
+                : 'Operative arrival plan confirmed · No pending ATC response required'}
+            </span>
           </div>
         )}
       </section>
@@ -359,7 +387,11 @@ export function TabletPilotOverview({
             #{landingSequence.sequenceNumber} <span className="summary-unit">of {landingSequence.totalInSequence}</span>
           </div>
           <div className="summary-tile-sub">
-            {landingSequence.status === 'CONFIRMED' ? 'Confirmed by AMAN' : 'Estimated sequence'}
+            {landingSequence.advisorySource === 'CONTROLLER_APPROVED_ESTIMATE'
+              ? `Controller Estimate (${formatUtcTime(landingSequence.approvedAtUtc ?? landingSequence.lastUpdatedUtc)}) · Not Clearance`
+              : landingSequence.status === 'CONFIRMED'
+              ? 'Confirmed by AMAN'
+              : 'Estimated sequence'}
           </div>
         </div>
 

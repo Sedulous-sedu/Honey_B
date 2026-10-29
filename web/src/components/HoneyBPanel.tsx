@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAtcStore } from '../store/useAtcStore';
 import { Suggestion } from '../types';
-import { Send, AlertTriangle, ShieldCheck, Zap, MessageSquare, Lock } from 'lucide-react';
+import { Send, AlertTriangle, ShieldCheck, Zap, MessageSquare, Lock, ShieldAlert } from 'lucide-react';
+import { EmergencyAdvisorModal } from './EmergencyAdvisorModal';
 
 export const HoneyBPanel: React.FC = () => {
   const suggestions = useAtcStore((s) => s.suggestions);
@@ -9,12 +10,15 @@ export const HoneyBPanel: React.FC = () => {
   const activeControllerId = useAtcStore((s) => s.activeControllerId);
   const controllers = useAtcStore((s) => s.controllers);
   const weather = useAtcStore((s) => s.weather);
+  const selectedAircraftId = useAtcStore((s) => s.selectedAircraftId);
+  const approvedSequenceAdvisory = useAtcStore((s) => s.approvedSequenceAdvisory);
   const setSelectedId = useAtcStore((s) => s.setSelectedAircraftId);
 
   const [aiQuestion, setAiQuestion] = useState('');
   const [aiAnswer, setAiAnswer] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [showAllSuggestions, setShowAllSuggestions] = useState(false);
+  const [advisorModalOpen, setAdvisorModalOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState<'ALL' | 'CRITICAL' | 'MINE'>(
     activeControllerId === 'ALL' ? 'ALL' : 'MINE'
   );
@@ -116,10 +120,50 @@ export const HoneyBPanel: React.FC = () => {
             <div className="mt-3 p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-200 flex items-start space-x-2">
               <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
               <div>
-                <span className="font-bold">Low Visibility Procedures:</span> Dense fog (RVR 400m). Spacing doubled to 6 NM. CAT I aircraft must divert.
+                <span className="font-bold">Low Visibility Procedures:</span> Dense fog (RVR 400m). GCAA OMDB LVO spacing active. CAT I aircraft must divert.
               </div>
             </div>
           )}
+        </div>
+
+        {/* Section 1B: Emergency Sequence Change Risk Advisor Launcher */}
+        <div className="bg-gradient-to-br from-[#161F36] to-[#121A2D] rounded-xl p-3 border border-amber-500/40 shadow-md">
+          <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center space-x-2">
+              <div className="w-6 h-6 rounded-md bg-amber-500/20 text-amber-300 flex items-center justify-center">
+                <ShieldAlert className="w-3.5 h-3.5" />
+              </div>
+              <h2 className="text-xs font-mono font-bold tracking-wider text-amber-200 uppercase">
+                Emergency Sequence Risk Advisor
+              </h2>
+            </div>
+            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+              OMDB KC v1.0
+            </span>
+          </div>
+          <p className="text-[11px] text-slate-300 leading-snug mb-2">
+            Compare baseline vs candidate arrival resequencing, displaced flight fuel margins, wake/LVO spacing, and deterministic stress scenarios.
+          </p>
+
+          {approvedSequenceAdvisory && (
+            <div className="mb-2 p-2 rounded-lg bg-emerald-950/40 border border-emerald-500/40 text-[10px] font-mono text-emerald-200">
+              <div className="font-bold text-emerald-300">
+                ACTIVE APPROVED ESTIMATE ({approvedSequenceAdvisory.emergencyAircraftId})
+              </div>
+              <div>{approvedSequenceAdvisory.candidateLabel}</div>
+              <div className="text-emerald-400/80">
+                Source: {approvedSequenceAdvisory.source} @ {approvedSequenceAdvisory.approvedAtUtc.slice(11, 19)}Z
+              </div>
+            </div>
+          )}
+
+          <button
+            onClick={() => setAdvisorModalOpen(true)}
+            className="w-full py-2 px-3 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-mono font-bold flex items-center justify-center space-x-1.5 shadow-md transition-colors"
+          >
+            <ShieldAlert className="w-3.5 h-3.5" />
+            <span>Evaluate Emergency Resequencing</span>
+          </button>
         </div>
 
         {/* Section 2: Suggested Commands (Matching Photo) */}
@@ -306,6 +350,12 @@ export const HoneyBPanel: React.FC = () => {
           )}
         </div>
       </div>
+
+      <EmergencyAdvisorModal
+        isOpen={advisorModalOpen}
+        onClose={() => setAdvisorModalOpen(false)}
+        initialAircraftId={selectedAircraftId}
+      />
     </div>
   );
 };
