@@ -10,6 +10,16 @@
       "title": "FlightCategory",
       "type": "string"
     },
+    "LvpApproach": {
+      "enum": [
+        "CAT_I",
+        "CAT_II",
+        "CAT_IIIA",
+        "CAT_IIIB"
+      ],
+      "title": "LvpApproach",
+      "type": "string"
+    },
     "LvpInfo": {
       "properties": {
         "active": {
@@ -39,12 +49,97 @@
     },
     "Provenance": {
       "enum": [
+        "AUTHORITATIVE",
         "SIMULATED",
         "PILOT_REPORTED",
         "RULE_BASED",
-        "AI_DERIVED"
+        "AI_DERIVED",
+        "DEMO_ASSUMPTION"
       ],
       "title": "Provenance",
+      "type": "string"
+    },
+    "RunwayMode": {
+      "enum": [
+        "ARRIVAL",
+        "DEPARTURE",
+        "MIXED",
+        "CLOSED"
+      ],
+      "title": "RunwayMode",
+      "type": "string"
+    },
+    "RunwayOperationalState": {
+      "properties": {
+        "runway": {
+          "title": "Runway",
+          "type": "string"
+        },
+        "serviceable": {
+          "default": true,
+          "title": "Serviceable",
+          "type": "boolean"
+        },
+        "status": {
+          "$ref": "#/$defs/RunwayOperationalStatus",
+          "default": "OPEN"
+        },
+        "mode": {
+          "$ref": "#/$defs/RunwayMode",
+          "default": "MIXED"
+        },
+        "ilsCategory": {
+          "$ref": "#/$defs/LvpApproach",
+          "default": "CAT_IIIB"
+        },
+        "smrServiceable": {
+          "default": true,
+          "title": "Smrserviceable",
+          "type": "boolean"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "observedAtUtc": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Observedatutc"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance",
+          "default": "AUTHORITATIVE"
+        }
+      },
+      "required": [
+        "runway"
+      ],
+      "title": "RunwayOperationalState",
+      "type": "object"
+    },
+    "RunwayOperationalStatus": {
+      "enum": [
+        "OPEN",
+        "CLOSED",
+        "LVO_DEDICATED_DEPARTURE",
+        "RESTRICTED"
+      ],
+      "title": "RunwayOperationalStatus",
       "type": "string"
     },
     "RvrItem": {
@@ -134,6 +229,37 @@
     },
     "lvp": {
       "$ref": "#/$defs/LvpInfo"
+    },
+    "smrServiceable": {
+      "default": true,
+      "title": "Smrserviceable",
+      "type": "boolean"
+    },
+    "runwayStates": {
+      "additionalProperties": {
+        "$ref": "#/$defs/RunwayOperationalState"
+      },
+      "title": "Runwaystates",
+      "type": "object"
+    },
+    "dataFreshnessSec": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0.0,
+      "title": "Datafreshnesssec"
+    },
+    "missingDataReasons": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Missingdatareasons",
+      "type": "array"
     },
     "alerts": {
       "items": {

@@ -8,7 +8,9 @@ from app.models import (
     FlightPhase,
     FlightStatus,
     PriorityLevel,
-    LvpPhase
+    LvpPhase,
+    DeclarationStatus,
+    EmergencyDeclarationType
 )
 from app.command_manager import CommandManager
 from app.weather import WeatherManager
@@ -78,6 +80,7 @@ class Simulator:
                         ac.fuel.enduranceMin = 32
                         ac.priority.level = PriorityLevel.MINIMUM_FUEL
                         ac.priority.reasonCodes = ["LOW_FUEL_MARGIN"]
+                        # Note: MINIMUM_FUEL is an advisory state; do NOT infer MAYDAY/PAN PAN declaration
                     state.log_event("SCENARIO", ev["description"])
 
                 elif ev_type == "MEDICAL_PRIORITY":
@@ -86,6 +89,10 @@ class Simulator:
                     if ac:
                         ac.priority.level = PriorityLevel.MEDICAL
                         ac.priority.reasonCodes = ["MEDICAL_ON_BOARD"]
+                        # Per GCAA eAIC 2020-06, medical report awaits PIC confirmation of PAN PAN / MAYDAY
+                        if ac.priority.declarationType == EmergencyDeclarationType.NONE:
+                            ac.priority.declarationStatus = DeclarationStatus.UNCONFIRMED
+                            ac.priority.emergencyNature = "MEDICAL_REPORT_AWAITING_CONFIRMATION"
                     state.log_event("SCENARIO", ev["description"])
 
     @staticmethod
@@ -181,19 +188,39 @@ class Simulator:
         """Kinematics, fuel burn, and position advancement."""
         lvp_active = state.weather.lvp.active if state.weather else False
 
+        now_iso = state.get_sim_time_iso()
         for ac in state.aircraft.values():
-            # 1. Fuel burn
-            burn_rate_kg_s = (ac.fuel.holdingFuelFlowKgH / 3600.0) if ac.flightPhase == FlightPhase.HOLDING else ((ac.fuel.holdingFuelFlowKgH * 0.9) / 3600.0)
-            burned = burn_rate_kg_s * dt
-            ac.fuel.totalKg = max(0.0, ac.fuel.totalKg - burned)
-            ac.fuel.enduranceMin = (ac.fuel.totalKg / (ac.fuel.holdingFuelFlowKgH / 60.0)) if ac.fuel.holdingFuelFlowKgH > 0 else 999.0
+            if not ac.isStale:
+                ac.observedAtUtc = now_iso
+                ac.dataFreshnessSec = 0.0
+            else:
+                ac.dataFreshnessSec = (ac.dataFreshnessSec or 0.0) + dt
 
-            # Low fuel check
-            if (ac.fuel.totalKg - ac.fuel.finalReserveKg) < 400 or ac.fuel.enduranceMin < 40:
-                if ac.priority.level == PriorityLevel.NORMAL:
-                    ac.priority.level = PriorityLevel.MINIMUM_FUEL
-                    if "LOW_FUEL_MARGIN" not in ac.priority.reasonCodes:
-                        ac.priority.reasonCodes.append("LOW_FUEL_MARGIN")
+            # 1. Fuel burn (only when fuel telemetry is available)
+            if (
+                ac.fuel.totalKg is not None
+                and ac.fuel.holdingFuelFlowKgH is not None
+                and ac.fuel.finalReserveKg is not None
+            ):
+                burn_rate_kg_s = (
+                    (ac.fuel.holdingFuelFlowKgH / 3600.0)
+                    if ac.flightPhase == FlightPhase.HOLDING
+                    else (((ac.fuel.approachFuelFlowKgH or (ac.fuel.holdingFuelFlowKgH * 0.9)) / 3600.0))
+                )
+                burned = burn_rate_kg_s * dt
+                ac.fuel.totalKg = max(0.0, ac.fuel.totalKg - burned)
+                ac.fuel.enduranceMin = (
+                    (ac.fuel.totalKg / (ac.fuel.holdingFuelFlowKgH / 60.0))
+                    if ac.fuel.holdingFuelFlowKgH > 0
+                    else 999.0
+                )
+
+                # Low fuel check (advisory MINIMUM_FUEL only; never auto-declares MAYDAY)
+                if (ac.fuel.totalKg - ac.fuel.finalReserveKg) < 400 or ac.fuel.enduranceMin < 40:
+                    if ac.priority.level == PriorityLevel.NORMAL:
+                        ac.priority.level = PriorityLevel.MINIMUM_FUEL
+                        if "LOW_FUEL_MARGIN" not in ac.priority.reasonCodes:
+                            ac.priority.reasonCodes.append("LOW_FUEL_MARGIN")
 
             # 2. Altitude transition
             if ac.targetAltitudeFt is not None and abs(ac.altitudeFt - ac.targetAltitudeFt) > 1:

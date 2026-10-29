@@ -21,6 +21,7 @@ class WeatherManager:
             state.current_weather_idx = idx
             wx_data = state.weather_timeline[idx].copy()
             wx_data["observedAt"] = state.get_sim_time_iso()
+            wx_data["runwayStates"] = {k: v.model_dump() for k, v in state.runway_states.items()}
             state.weather = WeatherPayload(**wx_data)
             state.log_event("WEATHER", f"Weather changed to phase '{phase_name}'. LVP is {'ACTIVE' if state.weather.lvp.active else 'INACTIVE'}.")
             return state.weather
@@ -37,5 +38,6 @@ class WeatherManager:
                     state.current_weather_idx = i
                     wx_data = item.copy()
                     wx_data["observedAt"] = state.get_sim_time_iso()
+                    wx_data["runwayStates"] = {k: v.model_dump() for k, v in state.runway_states.items()}
                     state.weather = WeatherPayload(**wx_data)
                     state.log_event("WEATHER", f"Simulated weather transition to {item['name']}: Visibility {item['visibilityM']}m.")

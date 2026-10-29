@@ -438,11 +438,44 @@ def api_chat(req: ChatRequest):
     reply = ask_ai(req.prompt)
     return {"reply": reply}
 
-# ── Pilot Dashboard Endpoint ────────────────────────────────────────────────
-# Called by the pilot-system HttpDataLinkAdapter every 5 seconds.
+# ── Pilot Dashboard & Response Endpoints (Air-Ground Contract v1.0.0) ────────
+# Called by the pilot-system HttpDataLinkAdapter.
 # Returns a ConsolidatedDashboardState shaped to match the integration contract.
 
-from datetime import datetime
+class PilotHttpResponseRequest(BaseModel):
+    referencedMessageId: str
+    flightId: str
+    responseType: str
+    pilotNotes: Optional[str] = None
+    timestampUtc: Optional[str] = None
+
+@app.post("/api/pilot-response")
+async def api_pilot_response(req: PilotHttpResponseRequest):
+    tx_id = f"TX-{state.next_event_id()}"
+    mapped_map = {
+        "ACKNOWLEDGE": PilotResponse.WILCO,
+        "WILCO": PilotResponse.WILCO,
+        "UNABLE": PilotResponse.UNABLE,
+        "REQUEST_CLARIFICATION": PilotResponse.STANDBY,
+        "STANDBY": PilotResponse.STANDBY,
+        "FUEL_CONCERN": PilotResponse.UNABLE,
+    }
+    resp_enum = mapped_map.get(req.responseType.upper(), PilotResponse.WILCO)
+    status_payload, err = CommandManager.handle_pilot_response(
+        req.referencedMessageId,
+        req.flightId,
+        resp_enum,
+        req.pilotNotes,
+    )
+    if status_payload:
+        st_env = state.create_envelope("command.status", status_payload, aircraft_id=req.flightId)
+        await manager.broadcast_event(st_env)
+    else:
+        state.log_event(
+            "PILOT_RESPONSE",
+            f"{req.flightId} sent {req.responseType} for {req.referencedMessageId}: {req.pilotNotes or ''}",
+        )
+    return {"success": True, "transmissionId": tx_id}
 
 @app.get("/api/dashboard/{aircraft_id}")
 def pilot_dashboard(aircraft_id: str):
@@ -451,57 +484,145 @@ def pilot_dashboard(aircraft_id: str):
         raise HTTPException(status_code=404, detail=f"Aircraft '{aircraft_id}' not found")
 
     wx = state.weather
-    now = datetime.utcnow().isoformat() + "Z"
+    now = state.get_sim_time_iso()
+    obs_utc = ac.observedAtUtc or now
 
-    # Fuel endurance in minutes above final reserve
-    fuel_above_reserve = max(0, ac.fuelKg - ac.finalReserveKg)
-    hold_endurance_min = int(fuel_above_reserve / ac.fuelFlowKgH * 60) if ac.fuelFlowKgH > 0 else 0
+    # Fuel endurance in minutes above final reserve (respecting missing-data invariant)
+    if (
+        ac.fuel.totalKg is not None
+        and ac.fuel.finalReserveKg is not None
+        and ac.fuel.holdingFuelFlowKgH is not None
+        and not ac.fuel.missingDataReasons
+    ):
+        fuel_above_reserve = max(0.0, ac.fuel.totalKg - ac.fuel.finalReserveKg)
+        hold_endurance_min = (
+            int(fuel_above_reserve / ac.fuel.holdingFuelFlowKgH * 60)
+            if ac.fuel.holdingFuelFlowKgH > 0
+            else 0
+        )
+        fuel_block = {
+            "fuelOnBoardKg": int(ac.fuel.totalKg),
+            "fuelFlowKgPerHr": int(ac.fuel.holdingFuelFlowKgH),
+            "finalReserveFuelKg": int(ac.fuel.finalReserveKg),
+            "alternatesFuelKg": int(ac.fuel.alternatesFuelKg or 1500),
+            "holdingEnduranceMinutes": hold_endurance_min,
+            "fuelTrendAssumptions": "Based on current fuel flow. Hold endurance is above final reserve.",
+        }
+    else:
+        fuel_block = {
+            "unavailableReason": (
+                "; ".join(ac.fuel.missingDataReasons)
+                if ac.fuel.missingDataReasons
+                else "Fuel or final reserve telemetry unavailable"
+            )
+        }
 
-    # Holding active?
-    holding_active = ac.status in ("HOLDING", "HOLD")
+    holding_active = ac.flightPhase == "HOLDING" or ac.status == "HOLDING"
 
-    # Notices: build from active suggestions for this aircraft
+    # Arrival queue count & baseline sequence position
+    arrivals = [
+        a for a in state.aircraft.values()
+        if a.flightPhase in ("ARRIVAL", "APPROACH", "FINAL", "HOLDING")
+    ]
+    arrivals.sort(key=lambda a: (a.landingSequence if a.landingSequence is not None else 999, a.position.distanceToThresholdNm))
+    seq_idx = next((idx + 1 for idx, a in enumerate(arrivals) if a.callsign == aircraft_id), ac.landingSequence or 1)
+    total_in_seq = max(len(arrivals), seq_idx)
+
+    # Check if a controller-approved estimated sequence advisory exists for this aircraft
+    seq_status = "CONFIRMED"
+    target_landing_utc = ac.etaUtc or now
+    delay_minutes = 0
+    delay_reason = (
+        f"LVP phase: {wx.lvp.phase.value}" if (wx and wx.lvp.phase.value != "NONE") else "Standard arrival sequence."
+    )
+    advisory_source = "AMAN_BASELINE"
+    approved_by = None
+    approved_at = None
+    disclaimer_text = None
+
+    if state.approved_sequence_advisory:
+        adv_entry = state.approved_sequence_advisory.get("perAircraftMap", {}).get(aircraft_id)
+        if adv_entry:
+            seq_idx = adv_entry.get("proposedSequenceNumber", seq_idx)
+            target_landing_utc = adv_entry.get("proposedLandingTimeUtc", target_landing_utc)
+            delay_minutes = max(0, int(round(adv_entry.get("landingTimeDeltaSec", 0) / 60.0)))
+            seq_status = "ESTIMATED"
+            advisory_source = "CONTROLLER_APPROVED_ESTIMATE"
+            approved_by = state.approved_sequence_advisory.get("approvedByControllerId")
+            approved_at = state.approved_sequence_advisory.get("approvedAtUtc")
+            disclaimer_text = "CONTROLLER-APPROVED ESTIMATED SEQUENCE — NOT AN OPERATIVE ATC CLEARANCE"
+            delay_reason = (
+                f"Estimated sequence ({state.approved_sequence_advisory.get('candidateLabel', 'Emergency Resequence')}) "
+                f"approved by {approved_by or 'ATC'} at {approved_at or now}. Formal ATC clearance still required."
+            )
+
+    # Operational notices from active suggestions for this aircraft
     notices = []
-    for sg in state.suggestions:
-        if sg.aircraftId == aircraft_id:
+    for sg in state.suggestions.values():
+        if sg.aircraftId == aircraft_id and sg.status == "ACTIVE":
             notices.append({
                 "id": sg.suggestionId,
-                "flightId": aircraft_id,
-                "source": "GROUND_CONTROL",
-                "timestampUtc": now,
-                "status": "UNREAD",
-                "subject": sg.instruction.get("displayText", "Advisory"),
-                "body": sg.reason,
-                "requiresAck": sg.urgency in ("CRITICAL", "HIGH"),
-                "pilotResponse": None,
+                "urgency": sg.urgency if sg.urgency in ("CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO") else "MEDIUM",
+                "category": "WEATHER" if "VIS" in " ".join(sg.reasonCodes) else ("DELAY" if "HOLD" in " ".join(sg.reasonCodes) else "OTHER"),
+                "title": sg.displayText,
+                "body": sg.reasonText,
+                "source": "OMDB GROUND CONTROL",
+                "issuedAtUtc": now,
+                "isStale": ac.isStale,
             })
 
-    # Last command for this aircraft
+    # Commands mapped to pilot messages
     messages = []
-    for cmd in reversed(state.commands):
+    cmd_status_map = {
+        "SENT": "UNREAD",
+        "STANDBY": "READ",
+        "ACKNOWLEDGED": "ACKNOWLEDGED",
+        "EXECUTING": "ACKNOWLEDGED",
+        "DONE": "ACKNOWLEDGED",
+        "UNABLE": "ACKNOWLEDGED",
+        "SUPERSEDED": "READ",
+        "CANCELLED": "READ",
+        "EXPIRED": "READ",
+    }
+    for cmd in reversed(list(state.commands.values())):
         if cmd.aircraftId == aircraft_id:
             messages.append({
                 "id": cmd.commandId,
                 "flightId": aircraft_id,
-                "source": "GROUND_CONTROL",
+                "source": "ATC",
                 "timestampUtc": cmd.issuedAt,
-                "status": cmd.status,
-                "subject": cmd.instruction.get("displayText", "ATC Instruction"),
-                "body": cmd.instruction.get("displayText", ""),
-                "requiresAck": True,
-                "pilotResponse": cmd.pilotResponse,
+                "status": cmd_status_map.get(cmd.status.value, "UNREAD"),
+                "subject": f"ATC {cmd.instructionType.value} Clearance",
+                "body": cmd.displayText,
+                "requiresAck": cmd.status.value in ("SENT", "STANDBY"),
             })
-            break  # only latest command
 
-    # LVP phase → flight category string
-    lvp = wx.lvpPhase if wx else "NONE"
-    flight_cat = {"LVP_ACTIVE": "LIFR", "LVP_PREPARATION": "IFR", "NONE": "VFR"}.get(lvp, "IFR")
+    lvp_phase = wx.lvp.phase.value if wx else "NONE"
+    active_rwy = ac.assignedRunway or "30L"
+    phase_map = {
+        "ARRIVAL": "DESCENT",
+        "APPROACH": "APPROACH",
+        "FINAL": "LANDING",
+        "HOLDING": "HOLDING",
+        "DIVERTING": "CRUISE",
+        "LANDED": "LANDING",
+        "TAXI_IN": "TAXI_IN",
+        "AT_STAND": "ARRIVED",
+        "PARKED": "PREFLIGHT",
+        "TAXI_OUT": "TAXI_OUT",
+        "DEPARTURE": "CLIMB",
+    }
+    pilot_phase = phase_map.get(ac.flightPhase.value, "DESCENT")
+
+    conn_status = "LIVE"
+    if ac.isStale or (ac.dataFreshnessSec and ac.dataFreshnessSec > 30):
+        conn_status = "DELAYED" if (ac.dataFreshnessSec or 0) <= 120 else "DISCONNECTED"
 
     return {
         "contractVersion": "1.0.0",
         "flightId": aircraft_id,
-        "connectionStatus": "LIVE",
-        "connectionLastSeenUtc": now,
+        "connectionStatus": conn_status,
+        "connectionLastSeenUtc": obs_utc,
         "revision": state.revision,
         "generatedAtUtc": now,
         "aircraft": {
@@ -510,57 +631,65 @@ def pilot_dashboard(aircraft_id: str):
             "aircraftType": ac.aircraftType,
             "originIcao": ac.origin,
             "destinationIcao": ac.destination,
-            "flightPhase": ac.status,
-            "altitudeFt": ac.altitudeFt,
-            "verticalSpeedFpm": ac.verticalRateFpm,
-            "indicatedAirspeedKts": ac.groundSpeedKt,
-            "groundspeedKts": ac.groundSpeedKt,
+            "flightPhase": pilot_phase,
+            "altitudeFt": int(round(ac.altitudeFt)),
+            "verticalSpeedFpm": int(round(ac.verticalRateFpm)),
+            "indicatedAirspeedKts": int(round(ac.speed.indicatedAirspeedKt)),
+            "groundspeedKts": int(round(ac.speed.groundSpeedKt)),
+            "mach": 0.72,
             "position": {
-                "latitude": ac.lat,
-                "longitude": ac.lon,
-                "headingDegTrue": ac.headingDeg,
-                "remainingDistanceNm": round(ac.distanceToRunwayNm, 1),
-                "formattedCoordinates": f"{abs(ac.lat):.4f}{'N' if ac.lat>=0 else 'S'} {abs(ac.lon):.4f}{'E' if ac.lon>=0 else 'W'}",
+                "latitude": ac.position.lat,
+                "longitude": ac.position.lon,
+                "headingDegTrue": int(round(ac.headingDeg)),
+                "remainingDistanceNm": round(ac.position.distanceToThresholdNm, 1),
+                "formattedCoordinates": f"{abs(ac.position.lat):.4f}{'N' if ac.position.lat >= 0 else 'S'} {abs(ac.position.lon):.4f}{'E' if ac.position.lon >= 0 else 'W'}",
             },
-            "currentClearedRoute": f"{ac.origin} -> OMDB RWY {ac.assignedRunway}",
-            "fmsEtaUtc": ac.eta,
-            "fuel": {
-                "fuelOnBoardKg": int(ac.fuelKg),
-                "fuelFlowKgPerHr": int(ac.fuelFlowKgH),
-                "finalReserveFuelKg": int(ac.finalReserveKg),
-                "holdingEnduranceMinutes": hold_endurance_min,
-                "fuelTrendAssumptions": "Based on current fuel flow. Hold endurance is above final reserve.",
-            },
+            "currentClearedRoute": f"{ac.origin} STAR DESDI ILS RWY {active_rwy} {ac.destination}",
+            "fmsEtaUtc": ac.etaUtc or now,
+            "fmsEtaCalculatedAtUtc": obs_utc,
+            "fuel": fuel_block,
             "source": "AIRCRAFT",
-            "lastUpdatedUtc": now,
+            "lastUpdatedUtc": obs_utc,
         },
         "landingSequence": {
-            "assignedRunway": ac.assignedRunway,
-            "status": "CONFIRMED",
-            "targetLandingTimeUtc": ac.eta,
-            "delayMinutes": 0,
-            "delayReasonText": f"LVP phase: {lvp}" if lvp != "NONE" else "Normal arrival sequence.",
+            "sequenceNumber": seq_idx,
+            "totalInSequence": total_in_seq,
+            "assignedRunway": active_rwy,
+            "status": seq_status,
+            "targetLandingTimeUtc": target_landing_utc,
+            "delayMinutes": delay_minutes,
+            "delayReasonText": delay_reason,
+            "advisorySource": advisory_source,
+            "approvedByControllerId": approved_by,
+            "approvedAtUtc": approved_at,
+            "isClearance": False,
+            "disclaimerText": disclaimer_text,
             "source": "GROUND_CONTROL",
-            "lastUpdatedUtc": now,
+            "lastUpdatedUtc": approved_at or now,
         },
         "holding": {
             "active": holding_active,
-            "holdingFix": "DXB VOR" if holding_active else None,
+            "fix": "DXB VOR" if holding_active else None,
+            "assignedAltitudeFt": int(round(ac.altitudeFt)) if holding_active else None,
+            "predictedDelayMinutes": delay_minutes if holding_active else 0,
             "predictedDelayDisclaimer": "DECISION SUPPORT ONLY — NOT AN ATC CLEARANCE",
+            "predictionReason": delay_reason if holding_active else None,
             "source": "GROUND_CONTROL",
             "lastUpdatedUtc": now,
         },
         "conditions": {
             "airportIcao": "OMDB",
-            "activeRunway": ac.assignedRunway,
-            "approachType": f"ILS CAT {'IIIB' if lvp == 'LVP_ACTIVE' else 'I'} RWY {ac.assignedRunway}",
-            "windDirectionDeg": wx.windDir if wx else 0,
-            "windSpeedKts": wx.windSpeedKt if wx else 0,
-            "visibilityMeters": wx.visibilityM if wx else 9999,
-            "qnhHpa": wx.qnh if wx else 1013,
-            "flightCategory": flight_cat,
-            "rawMetar": wx.metar if wx else "",
-            "source": "OMDB METAR",
+            "activeRunway": active_rwy,
+            "approachType": f"ILS CAT {'IIIB' if lvp_phase == 'LVP_ACTIVE' else 'I'} RWY {active_rwy}",
+            "windDirectionDeg": int(round(wx.wind.directionDeg)) if wx else 320,
+            "windSpeedKts": int(round(wx.wind.speedKt)) if wx else 5,
+            "visibilityMeters": int(round(wx.visibilityM)) if wx else 6000,
+            "cloudBase": f"BKN {int(round(wx.ceilingFt))}ft" if wx else "NSC",
+            "temperatureC": int(round(wx.temperatureC)) if wx else 23,
+            "qnhHpa": int(round(wx.qnhHpa)) if wx else 1013,
+            "notams": list(wx.alerts) if (wx and wx.alerts) else ["OMDB Standard Operations"],
+            "source": "OMDB ATIS / METAR",
+            "observedAtUtc": wx.observedAt if wx else now,
             "lastUpdatedUtc": now,
         },
         "notices": notices,

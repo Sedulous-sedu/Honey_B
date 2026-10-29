@@ -15,7 +15,12 @@ from app.models import (
     CommandStatus,
     PriorityLevel,
     FlightPhase,
-    FlightStatus
+    FlightStatus,
+    RunwayOperationalState,
+    RunwayOperationalStatus,
+    RunwayMode,
+    LvpApproach,
+    DeclarationStatus
 )
 
 class AppState:
@@ -36,6 +41,8 @@ class AppState:
         self.scenario_script: List[Dict[str, Any]] = []
         self.executed_scenario_events: Set[int] = set()
         self.pending_status_events: List[Dict[str, Any]] = []
+        self.runway_states: Dict[str, RunwayOperationalState] = {}
+        self.approved_sequence_advisory: Optional[Dict[str, Any]] = None
 
         self.sim_time_sec: float = 0.0
         self.sim_start_time = datetime.datetime(2026, 10, 28, 3, 0, 0, tzinfo=datetime.timezone.utc)
@@ -93,6 +100,53 @@ class AppState:
         self.advisories.clear()
         self.event_log.clear()
         self.executed_scenario_events.clear()
+        self.approved_sequence_advisory = None
+
+        now_iso = self.get_sim_time_iso()
+        self.runway_states = {
+            "30L": RunwayOperationalState(
+                runway="30L",
+                serviceable=True,
+                status=RunwayOperationalStatus.OPEN,
+                mode=RunwayMode.ARRIVAL,
+                ilsCategory=LvpApproach.CAT_IIIB,
+                smrServiceable=True,
+                observedAtUtc=now_iso,
+                provenance=Provenance.AUTHORITATIVE
+            ),
+            "30R": RunwayOperationalState(
+                runway="30R",
+                serviceable=True,
+                status=RunwayOperationalStatus.OPEN,
+                mode=RunwayMode.MIXED,
+                ilsCategory=LvpApproach.CAT_IIIB,
+                smrServiceable=True,
+                observedAtUtc=now_iso,
+                provenance=Provenance.AUTHORITATIVE
+            ),
+            "12L": RunwayOperationalState(
+                runway="12L",
+                serviceable=True,
+                status=RunwayOperationalStatus.RESTRICTED,
+                mode=RunwayMode.CLOSED,
+                ilsCategory=LvpApproach.CAT_IIIB,
+                smrServiceable=True,
+                reason="Opposite direction to active 30L/30R configuration",
+                observedAtUtc=now_iso,
+                provenance=Provenance.AUTHORITATIVE
+            ),
+            "12R": RunwayOperationalState(
+                runway="12R",
+                serviceable=True,
+                status=RunwayOperationalStatus.RESTRICTED,
+                mode=RunwayMode.CLOSED,
+                ilsCategory=LvpApproach.CAT_IIIB,
+                smrServiceable=True,
+                reason="Opposite direction to active 30L/30R configuration",
+                observedAtUtc=now_iso,
+                provenance=Provenance.AUTHORITATIVE
+            ),
+        }
 
         # Load airport
         with open(os.path.join(self.data_dir, "airport.json")) as f:
@@ -108,7 +162,9 @@ class AppState:
         with open(os.path.join(self.data_dir, "weather_timeline.json")) as f:
             self.weather_timeline = json.load(f)
             self.current_weather_idx = 0
-            self.weather = WeatherPayload(**self.weather_timeline[0])
+            wx_init = self.weather_timeline[0].copy()
+            wx_init["runwayStates"] = {k: v.model_dump() for k, v in self.runway_states.items()}
+            self.weather = WeatherPayload(**wx_init)
 
         # Load scenario script
         with open(os.path.join(self.data_dir, "scenario_script.json")) as f:
@@ -117,7 +173,22 @@ class AppState:
         # Load flights
         with open(os.path.join(self.data_dir, "flights.json")) as f:
             flights_list = json.load(f)
-            self.aircraft = {fl["aircraftId"]: AircraftStatePayload(**fl) for fl in flights_list}
+            self.aircraft = {}
+            for fl in flights_list:
+                ac_obj = AircraftStatePayload(**fl)
+                if not ac_obj.observedAtUtc:
+                    ac_obj.observedAtUtc = now_iso
+                if ac_obj.fuel.holdingFuelFlowKgH is not None:
+                    if ac_obj.fuel.approachFuelFlowKgH is None:
+                        ac_obj.fuel.approachFuelFlowKgH = round(ac_obj.fuel.holdingFuelFlowKgH * 0.92, 1)
+                    if ac_obj.fuel.descentFuelFlowKgH is None:
+                        ac_obj.fuel.descentFuelFlowKgH = round(ac_obj.fuel.holdingFuelFlowKgH * 0.85, 1)
+                if ac_obj.flightPhase == FlightPhase.FINAL or ac_obj.position.distanceToThresholdNm <= 6.0:
+                    if ac_obj.flightPhase in (FlightPhase.FINAL, FlightPhase.APPROACH):
+                        ac_obj.slotFrozen = True
+                if ac_obj.priority.level == PriorityLevel.MEDICAL and ac_obj.priority.declarationStatus == DeclarationStatus.NONE:
+                    ac_obj.priority.declarationStatus = DeclarationStatus.UNCONFIRMED
+                self.aircraft[fl["aircraftId"]] = ac_obj
 
         # Initialize base advisory for UAE231
         adv = AdvisoryPayload(

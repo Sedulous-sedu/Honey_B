@@ -2,10 +2,12 @@
   "$defs": {
     "Provenance": {
       "enum": [
+        "AUTHORITATIVE",
         "SIMULATED",
         "PILOT_REPORTED",
         "RULE_BASED",
-        "AI_DERIVED"
+        "AI_DERIVED",
+        "DEMO_ASSUMPTION"
       ],
       "title": "Provenance",
       "type": "string"

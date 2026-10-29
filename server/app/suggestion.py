@@ -48,6 +48,8 @@ class SuggestionEngine:
 
         # 2. Check low fuel / minimum fuel (e.g. FDB512)
         for ac in arrivals:
+            if ac.fuel.totalKg is None or ac.fuel.finalReserveKg is None or ac.fuel.enduranceMin is None:
+                continue
             margin = ac.fuel.totalKg - ac.fuel.finalReserveKg
             if ac.fuel.enduranceMin < 45 or margin < 500 or ac.priority.level == PriorityLevel.MINIMUM_FUEL:
                 sug_id = f"SUG-FUEL-{ac.callsign}"
@@ -58,7 +60,7 @@ class SuggestionEngine:
                     displayText=f"{ac.callsign} Expedite approach RWY {ac.assignedRunway or '30R'}, direct threshold",
                     params={"approach": f"ILS {ac.assignedRunway or '30R'}"},
                     reasonCodes=["LOW_FUEL_MARGIN", "PRIORITY_APPROACH_REQUIRED"],
-                    reasonText=f"Fuel endurance is {round(ac.fuel.enduranceMin)} min (reserve margin: {round(margin)} kg). Expedite sequence to prevent Mayday.",
+                    reasonText=f"Fuel endurance is {round(ac.fuel.enduranceMin)} min (reserve margin: {round(margin)} kg). Advisory MINIMUM FUEL state — use Risk Advisor to evaluate sequence impact or confirm if pilot declares MAYDAY FUEL.",
                     urgency="CRITICAL",
                     timeToDecisionPointSec=45,
                     affectedAircraft=[ac.callsign],
@@ -69,6 +71,11 @@ class SuggestionEngine:
         for ac in arrivals:
             if ac.priority.level == PriorityLevel.MEDICAL:
                 sug_id = f"SUG-MED-{ac.callsign}"
+                decl_note = (
+                    f"Confirmed {ac.priority.declarationType.value} declaration."
+                    if ac.priority.declarationStatus == "CONFIRMED" and ac.priority.declarationType != "NONE"
+                    else "Medical report onboard — confirm PAN PAN / MAYDAY declaration with PIC per GCAA eAIC 2020-06 before emergency resequencing."
+                )
                 new_suggestions[sug_id] = SuggestionItem(
                     suggestionId=sug_id,
                     aircraftId=ac.callsign,
@@ -76,7 +83,7 @@ class SuggestionEngine:
                     displayText=f"{ac.callsign} Descend and maintain 3000 ft, priority medical handling",
                     params={"targetAltitudeFt": 3000},
                     reasonCodes=["MEDICAL_ON_BOARD", "EXPEDITE_APPROACH"],
-                    reasonText="Passenger medical emergency confirmed. Expedited approach profile and priority runway slot allocated.",
+                    reasonText=decl_note,
                     urgency="HIGH",
                     timeToDecisionPointSec=90,
                     affectedAircraft=[ac.callsign],

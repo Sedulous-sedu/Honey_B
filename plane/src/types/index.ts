@@ -106,6 +106,11 @@ export interface GroundLandingSequence {
   delayMinutes: number;           // Calculated spacing delay
   previousTargetLandingTimeUtc?: string;
   delayReasonText?: string;
+  advisorySource?: 'AMAN_BASELINE' | 'CONTROLLER_APPROVED_ESTIMATE';
+  approvedByControllerId?: string;
+  approvedAtUtc?: string;
+  isClearance?: boolean;
+  disclaimerText?: string;
   source: 'GROUND_CONTROL';
   lastUpdatedUtc: string;
 }

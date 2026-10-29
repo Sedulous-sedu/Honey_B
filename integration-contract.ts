@@ -39,6 +39,12 @@ export type FlightPhase =
 
 export type SequenceStatus = 'CONFIRMED' | 'ESTIMATED';
 
+export type EmergencyDeclarationType = 'NONE' | 'MAYDAY' | 'PAN_PAN';
+
+export type DeclarationStatus = 'NONE' | 'UNCONFIRMED' | 'CONFIRMED';
+
+export type EpistemicStatus = 'AUTHORITATIVE' | 'PILOT_REPORTED' | 'SIMULATED' | 'DEMO_ASSUMPTION';
+
 export type RerouteStatus =
   | 'PROPOSED'
   | 'AWAITING_RESPONSE'
@@ -130,6 +136,13 @@ export interface ArrivalSequencePayload {
   status: SequenceStatus;
   targetLandingTimeUtc: string;
   delayMinutes: number;
+  previousTargetLandingTimeUtc?: string;
+  delayReasonText?: string;
+  advisorySource?: 'AMAN_BASELINE' | 'CONTROLLER_APPROVED_ESTIMATE';
+  approvedByControllerId?: string;
+  approvedAtUtc?: string;
+  isClearance?: boolean;
+  disclaimerText?: string;
   source: 'GROUND_CONTROL';
   lastUpdatedUtc: string;
 }

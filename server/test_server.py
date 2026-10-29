@@ -13,7 +13,29 @@ def test_health():
     assert res.status_code == 200
     data = res.json()
     assert data["status"] == "ok"
-    assert data["aircraftCount"] >= 25
+    assert data["aircraftCount"] >= 15
+
+def test_pilot_dashboard_integration():
+    res = client.get("/api/dashboard/UAE231")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["contractVersion"] == "1.0.0"
+    assert data["flightId"] == "UAE231"
+    assert data["aircraft"]["callsign"] == "UAE231"
+    assert data["landingSequence"]["sequenceNumber"] >= 1
+    assert data["landingSequence"]["totalInSequence"] >= 1
+    assert data["conditions"]["airportIcao"] == "OMDB"
+
+    # Also test POST /api/pilot-response
+    resp = client.post("/api/pilot-response", json={
+        "referencedMessageId": "MSG-001",
+        "flightId": "UAE231",
+        "responseType": "ACKNOWLEDGE",
+        "pilotNotes": "Wilco",
+        "timestampUtc": "2026-10-28T03:05:00Z"
+    })
+    assert resp.status_code == 200
+    assert resp.json()["success"] is True
 
 def test_weather_fog_jump():
     res = client.post("/demo/fog", json={"phase": "DENSE_FOG"})

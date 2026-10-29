@@ -3,10 +3,34 @@ from typing import List, Optional, Dict, Any, Union
 from pydantic import BaseModel, Field
 
 class Provenance(str, Enum):
+    AUTHORITATIVE = "AUTHORITATIVE"
     SIMULATED = "SIMULATED"
     PILOT_REPORTED = "PILOT_REPORTED"
     RULE_BASED = "RULE_BASED"
     AI_DERIVED = "AI_DERIVED"
+    DEMO_ASSUMPTION = "DEMO_ASSUMPTION"
+
+class EmergencyDeclarationType(str, Enum):
+    NONE = "NONE"
+    MAYDAY = "MAYDAY"
+    PAN_PAN = "PAN_PAN"
+
+class DeclarationStatus(str, Enum):
+    NONE = "NONE"
+    UNCONFIRMED = "UNCONFIRMED"
+    CONFIRMED = "CONFIRMED"
+
+class RunwayOperationalStatus(str, Enum):
+    OPEN = "OPEN"
+    CLOSED = "CLOSED"
+    LVO_DEDICATED_DEPARTURE = "LVO_DEDICATED_DEPARTURE"
+    RESTRICTED = "RESTRICTED"
+
+class RunwayMode(str, Enum):
+    ARRIVAL = "ARRIVAL"
+    DEPARTURE = "DEPARTURE"
+    MIXED = "MIXED"
+    CLOSED = "CLOSED"
 
 class FlightPhase(str, Enum):
     PARKED = "PARKED"
@@ -92,19 +116,44 @@ class Speed(BaseModel):
     airspeedType: str = "IAS_APPROX"
 
 class Fuel(BaseModel):
-    totalKg: float
-    enduranceMin: float
-    holdingFuelFlowKgH: float
-    finalReserveKg: float
+    totalKg: Optional[float] = None
+    enduranceMin: Optional[float] = None
+    holdingFuelFlowKgH: Optional[float] = None
+    approachFuelFlowKgH: Optional[float] = None
+    descentFuelFlowKgH: Optional[float] = None
+    finalReserveKg: Optional[float] = None
+    alternatesFuelKg: Optional[float] = None
+    missingDataReasons: List[str] = Field(default_factory=list)
     provenance: Provenance = Provenance.SIMULATED
 
 class Capability(BaseModel):
     lvpApproach: LvpApproach = LvpApproach.CAT_IIIB
+    minApprovedRvrM: Optional[float] = None
+    operatorLvoApproved: bool = True
+    eligibleRunways: List[str] = Field(default_factory=lambda: ["30L", "30R", "12L", "12R"])
+    maxCrosswindKt: Optional[float] = 30.0
+    missingDataReasons: List[str] = Field(default_factory=list)
 
 class Priority(BaseModel):
     level: PriorityLevel = PriorityLevel.NORMAL
     reasonCodes: List[str] = Field(default_factory=list)
     provenance: Provenance = Provenance.RULE_BASED
+    declarationType: EmergencyDeclarationType = EmergencyDeclarationType.NONE
+    declarationStatus: DeclarationStatus = DeclarationStatus.NONE
+    declaredAtUtc: Optional[str] = None
+    confirmedByControllerId: Optional[str] = None
+    emergencyNature: Optional[str] = None
+
+class RunwayOperationalState(BaseModel):
+    runway: str
+    serviceable: bool = True
+    status: RunwayOperationalStatus = RunwayOperationalStatus.OPEN
+    mode: RunwayMode = RunwayMode.MIXED
+    ilsCategory: LvpApproach = LvpApproach.CAT_IIIB
+    smrServiceable: bool = True
+    reason: Optional[str] = None
+    observedAtUtc: Optional[str] = None
+    provenance: Provenance = Provenance.AUTHORITATIVE
 
 class AircraftStatePayload(BaseModel):
     callsign: str
@@ -133,6 +182,11 @@ class AircraftStatePayload(BaseModel):
     assignedStand: Optional[str] = None
     squawk: Optional[str] = None
     icao24: Optional[str] = None
+    observedAtUtc: Optional[str] = None
+    dataFreshnessSec: Optional[float] = 0.0
+    isStale: bool = False
+    slotFrozen: bool = False
+    missingDataReasons: List[str] = Field(default_factory=list)
     provenance: Provenance = Provenance.SIMULATED
 
 class RvrItem(BaseModel):
@@ -160,6 +214,10 @@ class WeatherPayload(BaseModel):
     qnhHpa: float
     flightCategory: FlightCategory
     lvp: LvpInfo
+    smrServiceable: bool = True
+    runwayStates: Dict[str, RunwayOperationalState] = Field(default_factory=dict)
+    dataFreshnessSec: Optional[float] = 0.0
+    missingDataReasons: List[str] = Field(default_factory=list)
     alerts: List[str] = Field(default_factory=list)
     provenance: Provenance = Provenance.SIMULATED
 

@@ -14,7 +14,10 @@ export interface Fuel {
   totalKg: number;
   enduranceMin: number;
   holdingFuelFlowKgH: number;
+  approachFuelFlowKgH?: number | null;
+  descentFuelFlowKgH?: number | null;
   finalReserveKg: number;
+  missingDataReasons?: string[];
   provenance: string;
 }
 
@@ -22,6 +25,11 @@ export interface Priority {
   level: 'NORMAL' | 'ELEVATED' | 'MINIMUM_FUEL' | 'MEDICAL' | 'EMERGENCY';
   reasonCodes: string[];
   provenance: string;
+  declarationType?: 'NONE' | 'MAYDAY' | 'PAN_PAN';
+  declarationStatus?: 'NONE' | 'UNCONFIRMED' | 'CONFIRMED';
+  declaredAtUtc?: string | null;
+  confirmedByControllerId?: string | null;
+  emergencyNature?: string | null;
 }
 
 export interface Aircraft {
@@ -42,12 +50,22 @@ export interface Aircraft {
   landingSequence: number | null;
   etaUtc: string | null;
   fuel: Fuel;
-  capability: { lvpApproach: string };
+  capability: {
+    lvpApproach: string;
+    minApprovedRvrM?: number | null;
+    operatorLvoApproved?: boolean;
+    eligibleRunways?: string[];
+  };
   assignedControllerId: string | null;
   priority: Priority;
   assignedStand: string | null;
   squawk?: string;
   icao24?: string;
+  observedAtUtc?: string | null;
+  dataFreshnessSec?: number | null;
+  isStale?: boolean;
+  slotFrozen?: boolean;
+  missingDataReasons?: string[];
 }
 
 export interface RvrItem {

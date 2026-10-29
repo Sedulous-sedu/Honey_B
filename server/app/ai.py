@@ -14,12 +14,13 @@ def ask_ai(prompt: str, context: Optional[Dict[str, Any]] = None) -> str:
 
     at_risk = []
     for ac in state.aircraft.values():
-        if ac.fuel.enduranceMin < 45 or (ac.fuel.totalKg - ac.fuel.finalReserveKg) < 400:
-            at_risk.append(f"{ac.callsign} (Fuel: {round(ac.fuel.enduranceMin)}m remaining)")
+        if ac.fuel.totalKg is not None and ac.fuel.finalReserveKg is not None and ac.fuel.enduranceMin is not None:
+            if ac.fuel.enduranceMin < 45 or (ac.fuel.totalKg - ac.fuel.finalReserveKg) < 400:
+                at_risk.append(f"{ac.callsign} (Fuel: {round(ac.fuel.enduranceMin)}m remaining)")
         if lvp_active and ac.capability.lvpApproach == "CAT_I":
             at_risk.append(f"{ac.callsign} (CAT I only, below LVP minima)")
         if ac.priority.level == "MEDICAL":
-            at_risk.append(f"{ac.callsign} (Medical emergency onboard)")
+            at_risk.append(f"{ac.callsign} (Medical report onboard, status={ac.priority.declarationStatus.value})")
 
     grounded_summary = (
         f"OMDB Operations Status: Visibility {vis_m}m, 30L RVR {rvr_30l}m, LVP {'ACTIVE' if lvp_active else 'INACTIVE'}. "

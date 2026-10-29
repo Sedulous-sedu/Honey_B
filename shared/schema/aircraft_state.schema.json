@@ -5,10 +5,71 @@
         "lvpApproach": {
           "$ref": "#/$defs/LvpApproach",
           "default": "CAT_IIIB"
+        },
+        "minApprovedRvrM": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Minapprovedrvrm"
+        },
+        "operatorLvoApproved": {
+          "default": true,
+          "title": "Operatorlvoapproved",
+          "type": "boolean"
+        },
+        "eligibleRunways": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Eligiblerunways",
+          "type": "array"
+        },
+        "maxCrosswindKt": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 30.0,
+          "title": "Maxcrosswindkt"
+        },
+        "missingDataReasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Missingdatareasons",
+          "type": "array"
         }
       },
       "title": "Capability",
       "type": "object"
+    },
+    "DeclarationStatus": {
+      "enum": [
+        "NONE",
+        "UNCONFIRMED",
+        "CONFIRMED"
+      ],
+      "title": "DeclarationStatus",
+      "type": "string"
+    },
+    "EmergencyDeclarationType": {
+      "enum": [
+        "NONE",
+        "MAYDAY",
+        "PAN_PAN"
+      ],
+      "title": "EmergencyDeclarationType",
+      "type": "string"
     },
     "FlightPhase": {
       "enum": [
@@ -42,32 +103,101 @@
     "Fuel": {
       "properties": {
         "totalKg": {
-          "title": "Totalkg",
-          "type": "number"
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Totalkg"
         },
         "enduranceMin": {
-          "title": "Endurancemin",
-          "type": "number"
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Endurancemin"
         },
         "holdingFuelFlowKgH": {
-          "title": "Holdingfuelflowkgh",
-          "type": "number"
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Holdingfuelflowkgh"
+        },
+        "approachFuelFlowKgH": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Approachfuelflowkgh"
+        },
+        "descentFuelFlowKgH": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Descentfuelflowkgh"
         },
         "finalReserveKg": {
-          "title": "Finalreservekg",
-          "type": "number"
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Finalreservekg"
+        },
+        "alternatesFuelKg": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Alternatesfuelkg"
+        },
+        "missingDataReasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Missingdatareasons",
+          "type": "array"
         },
         "provenance": {
           "$ref": "#/$defs/Provenance",
           "default": "SIMULATED"
         }
       },
-      "required": [
-        "totalKg",
-        "enduranceMin",
-        "holdingFuelFlowKgH",
-        "finalReserveKg"
-      ],
       "title": "Fuel",
       "type": "object"
     },
@@ -120,6 +250,50 @@
         "provenance": {
           "$ref": "#/$defs/Provenance",
           "default": "RULE_BASED"
+        },
+        "declarationType": {
+          "$ref": "#/$defs/EmergencyDeclarationType",
+          "default": "NONE"
+        },
+        "declarationStatus": {
+          "$ref": "#/$defs/DeclarationStatus",
+          "default": "NONE"
+        },
+        "declaredAtUtc": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Declaredatutc"
+        },
+        "confirmedByControllerId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confirmedbycontrollerid"
+        },
+        "emergencyNature": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Emergencynature"
         }
       },
       "title": "Priority",
@@ -138,10 +312,12 @@
     },
     "Provenance": {
       "enum": [
+        "AUTHORITATIVE",
         "SIMULATED",
         "PILOT_REPORTED",
         "RULE_BASED",
-        "AI_DERIVED"
+        "AI_DERIVED",
+        "DEMO_ASSUMPTION"
       ],
       "title": "Provenance",
       "type": "string"
@@ -204,9 +380,33 @@
       "title": "Altitudeft",
       "type": "number"
     },
+    "targetAltitudeFt": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Targetaltitudeft"
+    },
     "headingDeg": {
       "title": "Headingdeg",
       "type": "number"
+    },
+    "targetHeadingDeg": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Targetheadingdeg"
     },
     "verticalRateFpm": {
       "title": "Verticalratefpm",
@@ -214,6 +414,18 @@
     },
     "speed": {
       "$ref": "#/$defs/Speed"
+    },
+    "targetSpeedKt": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Targetspeedkt"
     },
     "assignedRunway": {
       "anyOf": [
@@ -319,6 +531,47 @@
       ],
       "default": null,
       "title": "Icao24"
+    },
+    "observedAtUtc": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Observedatutc"
+    },
+    "dataFreshnessSec": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0.0,
+      "title": "Datafreshnesssec"
+    },
+    "isStale": {
+      "default": false,
+      "title": "Isstale",
+      "type": "boolean"
+    },
+    "slotFrozen": {
+      "default": false,
+      "title": "Slotfrozen",
+      "type": "boolean"
+    },
+    "missingDataReasons": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Missingdatareasons",
+      "type": "array"
     },
     "provenance": {
       "$ref": "#/$defs/Provenance",
