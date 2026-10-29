@@ -437,3 +437,132 @@ class ChatRequest(BaseModel):
 def api_chat(req: ChatRequest):
     reply = ask_ai(req.prompt)
     return {"reply": reply}
+
+# ── Pilot Dashboard Endpoint ────────────────────────────────────────────────
+# Called by the pilot-system HttpDataLinkAdapter every 5 seconds.
+# Returns a ConsolidatedDashboardState shaped to match the integration contract.
+
+from datetime import datetime
+
+@app.get("/api/dashboard/{aircraft_id}")
+def pilot_dashboard(aircraft_id: str):
+    ac = state.aircraft.get(aircraft_id)
+    if not ac:
+        raise HTTPException(status_code=404, detail=f"Aircraft '{aircraft_id}' not found")
+
+    wx = state.weather
+    now = datetime.utcnow().isoformat() + "Z"
+
+    # Fuel endurance in minutes above final reserve
+    fuel_above_reserve = max(0, ac.fuelKg - ac.finalReserveKg)
+    hold_endurance_min = int(fuel_above_reserve / ac.fuelFlowKgH * 60) if ac.fuelFlowKgH > 0 else 0
+
+    # Holding active?
+    holding_active = ac.status in ("HOLDING", "HOLD")
+
+    # Notices: build from active suggestions for this aircraft
+    notices = []
+    for sg in state.suggestions:
+        if sg.aircraftId == aircraft_id:
+            notices.append({
+                "id": sg.suggestionId,
+                "flightId": aircraft_id,
+                "source": "GROUND_CONTROL",
+                "timestampUtc": now,
+                "status": "UNREAD",
+                "subject": sg.instruction.get("displayText", "Advisory"),
+                "body": sg.reason,
+                "requiresAck": sg.urgency in ("CRITICAL", "HIGH"),
+                "pilotResponse": None,
+            })
+
+    # Last command for this aircraft
+    messages = []
+    for cmd in reversed(state.commands):
+        if cmd.aircraftId == aircraft_id:
+            messages.append({
+                "id": cmd.commandId,
+                "flightId": aircraft_id,
+                "source": "GROUND_CONTROL",
+                "timestampUtc": cmd.issuedAt,
+                "status": cmd.status,
+                "subject": cmd.instruction.get("displayText", "ATC Instruction"),
+                "body": cmd.instruction.get("displayText", ""),
+                "requiresAck": True,
+                "pilotResponse": cmd.pilotResponse,
+            })
+            break  # only latest command
+
+    # LVP phase → flight category string
+    lvp = wx.lvpPhase if wx else "NONE"
+    flight_cat = {"LVP_ACTIVE": "LIFR", "LVP_PREPARATION": "IFR", "NONE": "VFR"}.get(lvp, "IFR")
+
+    return {
+        "contractVersion": "1.0.0",
+        "flightId": aircraft_id,
+        "connectionStatus": "LIVE",
+        "connectionLastSeenUtc": now,
+        "revision": state.revision,
+        "generatedAtUtc": now,
+        "aircraft": {
+            "flightId": aircraft_id,
+            "callsign": ac.callsign,
+            "aircraftType": ac.aircraftType,
+            "originIcao": ac.origin,
+            "destinationIcao": ac.destination,
+            "flightPhase": ac.status,
+            "altitudeFt": ac.altitudeFt,
+            "verticalSpeedFpm": ac.verticalRateFpm,
+            "indicatedAirspeedKts": ac.groundSpeedKt,
+            "groundspeedKts": ac.groundSpeedKt,
+            "position": {
+                "latitude": ac.lat,
+                "longitude": ac.lon,
+                "headingDegTrue": ac.headingDeg,
+                "remainingDistanceNm": round(ac.distanceToRunwayNm, 1),
+                "formattedCoordinates": f"{abs(ac.lat):.4f}{'N' if ac.lat>=0 else 'S'} {abs(ac.lon):.4f}{'E' if ac.lon>=0 else 'W'}",
+            },
+            "currentClearedRoute": f"{ac.origin} -> OMDB RWY {ac.assignedRunway}",
+            "fmsEtaUtc": ac.eta,
+            "fuel": {
+                "fuelOnBoardKg": int(ac.fuelKg),
+                "fuelFlowKgPerHr": int(ac.fuelFlowKgH),
+                "finalReserveFuelKg": int(ac.finalReserveKg),
+                "holdingEnduranceMinutes": hold_endurance_min,
+                "fuelTrendAssumptions": "Based on current fuel flow. Hold endurance is above final reserve.",
+            },
+            "source": "AIRCRAFT",
+            "lastUpdatedUtc": now,
+        },
+        "landingSequence": {
+            "assignedRunway": ac.assignedRunway,
+            "status": "CONFIRMED",
+            "targetLandingTimeUtc": ac.eta,
+            "delayMinutes": 0,
+            "delayReasonText": f"LVP phase: {lvp}" if lvp != "NONE" else "Normal arrival sequence.",
+            "source": "GROUND_CONTROL",
+            "lastUpdatedUtc": now,
+        },
+        "holding": {
+            "active": holding_active,
+            "holdingFix": "DXB VOR" if holding_active else None,
+            "predictedDelayDisclaimer": "DECISION SUPPORT ONLY — NOT AN ATC CLEARANCE",
+            "source": "GROUND_CONTROL",
+            "lastUpdatedUtc": now,
+        },
+        "conditions": {
+            "airportIcao": "OMDB",
+            "activeRunway": ac.assignedRunway,
+            "approachType": f"ILS CAT {'IIIB' if lvp == 'LVP_ACTIVE' else 'I'} RWY {ac.assignedRunway}",
+            "windDirectionDeg": wx.windDir if wx else 0,
+            "windSpeedKts": wx.windSpeedKt if wx else 0,
+            "visibilityMeters": wx.visibilityM if wx else 9999,
+            "qnhHpa": wx.qnh if wx else 1013,
+            "flightCategory": flight_cat,
+            "rawMetar": wx.metar if wx else "",
+            "source": "OMDB METAR",
+            "lastUpdatedUtc": now,
+        },
+        "notices": notices,
+        "messages": messages,
+    }
