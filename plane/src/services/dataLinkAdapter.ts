@@ -861,5 +861,21 @@ export class HttpDataLinkAdapter implements DataLinkAdapter {
   }
 }
 
-// Global active adapter instance for the app
-export const activeDataLinkAdapter: DataLinkAdapter = new MockDataLinkAdapter();
+// ── Active Adapter Configuration ────────────────────────────────────────────
+// Switch between mock and live ground-control server here.
+//
+// FOR DEMO (connected to Ground Control server):
+//   Change to: new HttpDataLinkAdapter('http://<GROUND_CONTROL_IP>:8000', 'UAE231')
+//   Replace <GROUND_CONTROL_IP> with the IP of the machine running the server.
+//   Aircraft IDs available: UAE231, FDB512, SIA317, BAW107, THY762, IGO1433
+//
+// FOR STANDALONE (no server needed):
+//   Keep as: new MockDataLinkAdapter()
+
+const GROUND_CONTROL_URL = import.meta.env.VITE_GROUND_URL ?? '';
+const DEMO_FLIGHT_ID = import.meta.env.VITE_FLIGHT_ID ?? 'UAE231';
+
+export const activeDataLinkAdapter: DataLinkAdapter =
+  GROUND_CONTROL_URL
+    ? new HttpDataLinkAdapter(GROUND_CONTROL_URL, DEMO_FLIGHT_ID)
+    : new MockDataLinkAdapter();
