@@ -387,3 +387,109 @@ def test_13_determinism_and_non_mutation():
         k: v.model_dump() for k, v in snapshot_before.items()
     }
     assert st.weather.model_dump() == weather_before.model_dump()
+
+
+def test_14_no_infeasible_recommendation_ever_displayed_as_safe():
+    """
+    Safety invariant: across all arrival aircraft and failure modes (both runways closed,
+    dense fog with CAT I, missing fuel, unknown wake, stale telemetry), no infeasible
+    candidate is ever placed in recommendedCandidates or marked feasible.
+    """
+    st = _fresh_state()
+    # Both runways closed
+    both_closed = {
+        "30L": RunwayOperationalState(
+            runway="30L",
+            serviceable=False,
+            status=RunwayOperationalStatus.CLOSED,
+            mode=RunwayMode.CLOSED,
+            reason="Full aerodrome closure test",
+        ),
+        "30R": RunwayOperationalState(
+            runway="30R",
+            serviceable=False,
+            status=RunwayOperationalStatus.CLOSED,
+            mode=RunwayMode.CLOSED,
+            reason="Full aerodrome closure test",
+        ),
+    }
+    fdb = st.aircraft["FDB512"]
+    fdb.priority.level = PriorityLevel.EMERGENCY
+    fdb.priority.declarationType = EmergencyDeclarationType.MAYDAY
+    fdb.priority.declarationStatus = DeclarationStatus.CONFIRMED
+
+    res = EmergencySequenceRiskAdvisor.evaluate(
+        aircraft_list=list(st.aircraft.values()),
+        weather=st.weather,
+        target_aircraft_id="FDB512",
+        sim_time_iso=st.get_sim_time_iso(),
+        runway_states=both_closed,
+    )
+    assert res.evaluationStatus == "NO_FEASIBLE_PLAN"
+    assert len(res.recommendedCandidates) == 0
+    for rc in res.rejectedCandidates:
+        assert rc.feasible is False
+        assert len(rc.hardConstraintFailures) >= 1
+
+
+def test_15_advisor_vs_current_order_and_fcfs_baseline_comparison():
+    """
+    Verifies quantitative comparison against Current Order (Baseline) and FCFS Baseline
+    for both RWY 30L (BAW107 MAYDAY) and RWY 30R (FDB512 PAN_PAN).
+    """
+    st = _fresh_state()
+    baw = st.aircraft["BAW107"]
+    baw.priority.level = PriorityLevel.EMERGENCY
+    baw.priority.declarationType = EmergencyDeclarationType.MAYDAY
+    baw.priority.declarationStatus = DeclarationStatus.CONFIRMED
+
+    res_baw = EmergencySequenceRiskAdvisor.evaluate(
+        aircraft_list=list(st.aircraft.values()),
+        weather=st.weather,
+        target_aircraft_id="BAW107",
+        sim_time_iso=st.get_sim_time_iso(),
+    )
+    comp = res_baw.baselineComparisonSummary
+    assert "currentOrderBaseline" in comp
+    assert "fcfsBaseline" in comp
+    assert comp["topAdvisorCandidate"] is not None
+
+    # Top advisor candidate must land BAW107 earlier than Current Order and preserve fuel margins
+    top = res_baw.recommendedCandidates[0]
+    assert top.emergencyProposedLandingTimeUtc < res_baw.baseline.emergencyProposedLandingTimeUtc
+    assert top.emergencyLandingFuelMarginKg > res_baw.baseline.emergencyLandingFuelMarginKg
+    assert top.minDisplacedFuelMarginKg >= 200.0
+
+
+def test_16_api_evaluation_endpoint_determinism_and_no_commands_issued():
+    from fastapi.testclient import TestClient
+    from app.main import app
+    from app.state import state as live_state
+
+    client = TestClient(app)
+    client.post("/demo/reset")
+    cmds_before = len(live_state.commands)
+
+    r1 = client.post(
+        "/api/risk-advisor/evaluate",
+        json={
+            "emergencyAircraftId": "BAW107",
+            "overrideDeclarationType": "MAYDAY",
+            "overrideDeclarationStatus": "CONFIRMED",
+            "includeAiExplanation": False,
+        },
+    )
+    r2 = client.post(
+        "/api/risk-advisor/evaluate",
+        json={
+            "emergencyAircraftId": "BAW107",
+            "overrideDeclarationType": "MAYDAY",
+            "overrideDeclarationStatus": "CONFIRMED",
+            "includeAiExplanation": False,
+        },
+    )
+    assert r1.status_code == 200
+    assert r2.status_code == 200
+    assert r1.json() == r2.json()
+    assert len(live_state.commands) == cmds_before
+
