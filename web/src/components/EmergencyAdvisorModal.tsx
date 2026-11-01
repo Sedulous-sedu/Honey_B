@@ -33,6 +33,7 @@ export const EmergencyAdvisorModal: React.FC<EmergencyAdvisorModalProps> = ({
   const activeControllerId = useAtcStore((s) => s.activeControllerId);
   const approvedSequenceAdvisory = useAtcStore((s) => s.approvedSequenceAdvisory);
   const updateAircraft = useAtcStore((s) => s.updateAircraft);
+  const setComposerDraft = useAtcStore((s) => s.setComposerDraft);
 
   const arrivalAircraft = Object.values(aircraftMap).filter((a) =>
     ['ARRIVAL', 'APPROACH', 'FINAL', 'HOLDING'].includes(a.flightPhase)
@@ -226,6 +227,32 @@ export const EmergencyAdvisorModal: React.FC<EmergencyAdvisorModalProps> = ({
     }
   };
 
+  // Load candidate into the ATC Command & Pilot Options Composer for custom editing / options
+  const handleLoadIntoComposer = (cand: any) => {
+    if (!cand) return;
+    const isRwyChange =
+      targetAc && cand.emergencyRunway && cand.emergencyRunway !== targetAc.assignedRunway;
+    const instructionType = isRwyChange ? 'RUNWAY_CHANGE' : 'APPROACH_CLEARANCE';
+    const seqNum =
+      cand.perAircraftImpacts?.find((i: any) => i.callsign === targetId)
+        ?.proposedRunwaySequenceNumber || 1;
+    const optA = isRwyChange
+      ? `Sidestep to RWY ${cand.emergencyRunway}, cleared ILS RWY ${cand.emergencyRunway} (Sequence #${seqNum})`
+      : `Priority direct approach RWY ${cand.emergencyRunway} (Sequence #${seqNum}, saves ${cand.emergencyTimeGainedMin}m)`;
+    const optB = `Maintain current approach or request alternate OMSJ`;
+
+    setComposerDraft({
+      aircraftId: targetId,
+      instructionType,
+      mode: 'OPTIONS',
+      optionA: optA,
+      optionB: optB,
+      newRunway: isRwyChange ? cand.emergencyRunway : undefined,
+      displayText: `${targetId} ATC OPTIONS — OPTION 1: ${optA} | OPTION 2: ${optB} — Advise crew preference.`,
+    });
+    onClose();
+  };
+
   // Find currently selected plan to inspect in the per-aircraft impact table
   const allPlans: any[] = [];
   if (evaluation) {
@@ -252,33 +279,36 @@ export const EmergencyAdvisorModal: React.FC<EmergencyAdvisorModalProps> = ({
       aria-modal="true"
       aria-labelledby="emergency-advisor-title"
     >
-      <div className="bg-[#0B1220] border border-[#223554] rounded-2xl w-full max-w-6xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden text-slate-100">
+      <div className="bg-[#0B1F3A] border-2 border-[#F5A623]/60 rounded-2xl w-full max-w-6xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden text-[#FFFFFF]">
         {/* Top Header */}
-        <div className="px-5 py-3.5 bg-gradient-to-r from-[#111D33] via-[#172642] to-[#1D1B38] border-b border-[#243757] flex items-center justify-between">
+        <div className="px-5 py-3.5 bg-gradient-to-r from-[#0B1F3A] via-[#102A4C] to-[#163763] border-b border-[#F5A623]/50 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-300">
-              <ShieldAlert className="w-5 h-5" />
-            </div>
+            <img
+              src="/honey-b-logo.jpg"
+              alt="Honey B logo"
+              className="w-10 h-10 rounded-xl bg-[#FFFFFF] p-0.5 object-contain border-2 border-[#F5A623] shadow-md"
+              draggable={false}
+            />
             <div>
               <div className="flex items-center space-x-2">
-                <h2 id="emergency-advisor-title" className="text-base font-bold tracking-tight text-white">
+                <h2 id="emergency-advisor-title" className="text-base font-bold tracking-tight text-[#FFFFFF]">
                   Emergency Sequence Change Risk Advisor
                 </h2>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#0B1F3A] text-[#F5A623] border border-[#F5A623]/50">
                   {evaluation?.policyVersion || 'OMDB-KC-2026.10-v1.0.0'}
                 </span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#F5A623] text-[#0B1F3A] font-bold">
                   DECISION SUPPORT ONLY — NON-AUTONOMOUS
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400 font-mono">
+              <p className="text-[11px] text-[#FFFFFF]/80 font-mono">
                 Deterministic Kinematic, Wake/LVO Separation & Fuel-Reserve Impact Evaluator (Never Mutates State or Issues Clearances)
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg bg-[#16233A] hover:bg-[#1F3150] text-slate-300 transition-colors"
+            className="p-1.5 rounded-lg bg-[#102A4C] hover:bg-[#163763] text-[#FFFFFF] border border-[#F5A623]/40 transition-colors"
             title="Close Advisor"
           >
             <X className="w-5 h-5" />
@@ -286,16 +316,16 @@ export const EmergencyAdvisorModal: React.FC<EmergencyAdvisorModalProps> = ({
         </div>
 
         {/* Control & Declaration Verification Bar */}
-        <div className="px-5 py-3 bg-[#0F1829] border-b border-[#1D2E4A] flex flex-wrap items-center justify-between gap-3">
+        <div className="px-5 py-3 bg-[#08172C] border-b border-[#1E4478] flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-3">
             <div>
-              <label className="block text-[10px] font-mono text-slate-400 uppercase mb-0.5">
+              <label className="block text-[10px] font-mono text-[#F5A623] uppercase mb-0.5">
                 Target Arrival Aircraft
               </label>
               <select
                 value={targetId}
                 onChange={(e) => setTargetId(e.target.value)}
-                className="bg-[#080E1A] border border-[#263B5E] rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold text-white focus:outline-none focus:border-cyan-400"
+                className="bg-[#0B1F3A] border border-[#F5A623]/50 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold text-[#FFFFFF] focus:outline-none focus:border-[#F5A623]"
               >
                 {arrivalAircraft.map((a) => (
                   <option key={a.callsign} value={a.callsign}>
@@ -581,31 +611,43 @@ export const EmergencyAdvisorModal: React.FC<EmergencyAdvisorModalProps> = ({
                           </div>
                         </div>
 
-                        {/* Separate Action Buttons: Approve Advisory vs Issue ATC Command */}
-                        <div className="mt-3 pt-2 border-t border-[#223959] flex flex-col gap-1.5">
+                        {/* Separate Action Buttons: Approve Advisory vs Edit/Compose Options vs Issue ATC Command */}
+                        <div className="mt-3 pt-2 border-t border-[#1E4478] flex flex-col gap-1.5">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               handleApproveAdvisorySequence(cand.candidateId);
                             }}
                             disabled={approving}
-                            className="w-full py-1.5 px-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-mono font-bold flex items-center justify-center space-x-1"
+                            className="w-full py-1.5 px-2 rounded-lg bg-[#F5A623] hover:bg-[#F7B84B] text-[#0B1F3A] text-[10px] font-mono font-bold flex items-center justify-center space-x-1"
                             title="Approve Estimated Sequence Advisory (Does NOT issue an ATC clearance)"
                           >
                             <FileCheck className="w-3.5 h-3.5" />
                             <span>1. Approve Estimated Sequence (Advisory Only)</span>
                           </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleIssueFormalCommand(cand);
-                            }}
-                            className="w-full py-1.5 px-2 rounded-lg bg-purple-600/80 hover:bg-purple-500 text-white text-[10px] font-mono font-bold flex items-center justify-center space-x-1"
-                            title="Send Formal Operational ATC Clearance via Data Link Command Workflow"
-                          >
-                            <Send className="w-3 h-3" />
-                            <span>2. Issue Formal ATC Clearance Command</span>
-                          </button>
+                          <div className="grid grid-cols-2 gap-1.5">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleLoadIntoComposer(cand);
+                              }}
+                              className="py-1.5 px-2 rounded-lg bg-[#0B1F3A] hover:bg-[#163763] text-[#F5A623] border border-[#F5A623] text-[10px] font-mono font-bold flex items-center justify-center space-x-1"
+                              title="Load into ATC Command & Pilot Options Composer to edit or send as options"
+                            >
+                              <span>2a. Edit / Options</span>
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleIssueFormalCommand(cand);
+                              }}
+                              className="py-1.5 px-2 rounded-lg bg-[#102A4C] hover:bg-[#163763] text-[#FFFFFF] border border-[#FFFFFF]/40 text-[10px] font-mono font-bold flex items-center justify-center space-x-1"
+                              title="Send Formal Operational ATC Clearance via Data Link Command Workflow"
+                            >
+                              <Send className="w-3 h-3 text-[#F5A623]" />
+                              <span>2b. Send Direct</span>
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -933,3 +975,4 @@ export const EmergencyAdvisorModal: React.FC<EmergencyAdvisorModalProps> = ({
     </div>
   );
 };
+

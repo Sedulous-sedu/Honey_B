@@ -6,8 +6,11 @@
   "scripts": {
     "dev": "npm --prefix plane run dev",
     "dev:plane": "npm --prefix plane run dev",
+    "dev:web": "npm --prefix web run dev",
+    "dev:server": "cd server && .venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000",
     "build": "npm --prefix plane run build",
     "build:plane": "npm --prefix plane run build",
+    "build:web": "npm --prefix web run build",
     "lint": "oxlint",
     "preview": "npm --prefix plane run preview"
   },

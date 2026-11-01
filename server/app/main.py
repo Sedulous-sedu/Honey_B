@@ -1,11 +1,18 @@
 import asyncio
 import json
 import logging
+import os
+import sys
 from contextlib import asynccontextmanager
 from typing import Dict, Any, Optional, Set
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+
+# Ensure `server/` is on sys.path whether uvicorn is launched from repo root or `server/`
+_SERVER_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _SERVER_DIR not in sys.path:
+    sys.path.insert(0, _SERVER_DIR)
 
 from app.state import state
 from app.models import (
@@ -314,8 +321,36 @@ async def demo_fog(req: FogRequest):
     wx = WeatherManager.set_phase(req.phase)
     if not wx:
         raise HTTPException(status_code=400, detail=f"Unknown weather phase: {req.phase}")
+
+    # Recompute suggestions immediately so UAE231 & IGO1433 fog actions appear right away
+    SuggestionEngine.compute_all_suggestions()
+
     wx_env = state.create_envelope("weather.updated", wx, aircraft_id=None)
     await manager.broadcast_event(wx_env)
+
+    for ac_id, ac in state.aircraft.items():
+        ac_env = state.create_envelope("aircraft.state", ac, aircraft_id=ac_id)
+        await manager.broadcast_event(ac_env)
+
+    controller_update = {
+        "suggestions": [s.model_dump() for s in state.suggestions.values()],
+        "claims": state.claims,
+        "eventLog": state.event_log[:20],
+        "commands": [c.model_dump() for c in list(state.commands.values())[-15:]],
+        "stands": list(state.stands.values()),
+        "runwayStates": {k: v.model_dump() for k, v in state.runway_states.items()},
+        "approvedSequenceAdvisory": state.approved_sequence_advisory,
+        "metrics": {
+            "totalFlights": len(state.aircraft),
+            "atRiskCount": sum(1 for a in state.aircraft.values() if a.priority.level in ["MINIMUM_FUEL", "EMERGENCY", "MEDICAL"]),
+            "delayedMinutes": round(max(0, (state.sim_time_sec / 60.0) * 1.5), 1),
+            "fcfsBaselineDelayMin": round(max(0, (state.sim_time_sec / 60.0) * 2.8), 1),
+            "conflictsAvoided": 4 if state.weather and state.weather.lvp.active else 1
+        }
+    }
+    ctrl_env = state.create_envelope("ground.metrics", controller_update, aircraft_id=None)
+    await manager.broadcast_event(ctrl_env)
+
     return {"status": "ok", "phase": req.phase, "visibilityM": wx.visibilityM, "lvp": wx.lvp.model_dump()}
 
 class CommandRequest(BaseModel):
@@ -708,8 +743,17 @@ async def api_pilot_response(req: PilotHttpResponseRequest):
         "FUEL_CONCERN": PilotResponse.UNABLE,
     }
     resp_enum = mapped_map.get(req.responseType.upper(), PilotResponse.WILCO)
+    raw_ref_id = req.referencedMessageId or ""
+    target_cmd_id = raw_ref_id.split("::")[0]
+    if target_cmd_id not in state.commands:
+        # Fallback to the most recent active command for this aircraft
+        for cmd in reversed(list(state.commands.values())):
+            if cmd.aircraftId == req.flightId and cmd.status.value in ("SENT", "STANDBY", "ACKNOWLEDGED"):
+                target_cmd_id = cmd.commandId
+                break
+
     status_payload, err = CommandManager.handle_pilot_response(
-        req.referencedMessageId,
+        target_cmd_id,
         req.flightId,
         resp_enum,
         req.pilotNotes,
@@ -803,20 +847,25 @@ def pilot_dashboard(aircraft_id: str):
                 f"approved by {approved_by or 'ATC'} at {approved_at or now}. Formal ATC clearance still required."
             )
 
-    # Operational notices from active suggestions for this aircraft
+    # Operational notices reflect Airport ATIS / LVP weather state (NOT unsent ATC suggestions)
     notices = []
-    for sg in state.suggestions.values():
-        if sg.aircraftId == aircraft_id and sg.status == "ACTIVE":
-            notices.append({
-                "id": sg.suggestionId,
-                "urgency": sg.urgency if sg.urgency in ("CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO") else "MEDIUM",
-                "category": "WEATHER" if "VIS" in " ".join(sg.reasonCodes) else ("DELAY" if "HOLD" in " ".join(sg.reasonCodes) else "OTHER"),
-                "title": sg.displayText,
-                "body": sg.reasonText,
-                "source": "OMDB GROUND CONTROL",
-                "issuedAtUtc": now,
-                "isStale": ac.isStale,
-            })
+    if wx and wx.lvp.active:
+        rvr_str = ", ".join(f"RWY {r.runway} {r.valueM}m" for r in (wx.rvr or [])) or f"{wx.visibilityM}m"
+        wx_name = getattr(wx, "name", None) or "LVP_ACTIVE"
+        notices.append({
+            "id": f"NOT-WX-{wx_name}",
+            "urgency": "HIGH" if wx.visibilityM <= 400 else "MEDIUM",
+            "category": "WEATHER",
+            "title": f"OMDB {wx_name.replace('_', ' ')} — LVP {wx.lvp.phase.value} Active",
+            "body": (
+                f"Visibility {wx.visibilityM}m ({rvr_str}). "
+                f"Low Visibility Procedures in force; CAT II/IIIB Autoland required. "
+                f"Longitudinal wake spacing increased to 6 NM."
+            ),
+            "source": "OMDB ATIS / METAR",
+            "issuedAtUtc": wx.observedAt or now,
+            "isStale": ac.isStale,
+        })
 
     # Commands mapped to pilot messages
     messages = []
@@ -842,6 +891,8 @@ def pilot_dashboard(aircraft_id: str):
                 "subject": f"ATC {cmd.instructionType.value} Clearance",
                 "body": cmd.displayText,
                 "requiresAck": cmd.status.value in ("SENT", "STANDBY"),
+                "pilotResponse": "ACKNOWLEDGE" if cmd.status.value in ("ACKNOWLEDGED", "EXECUTING", "DONE") else ("UNABLE" if cmd.status.value == "UNABLE" else None),
+                "pilotResponseNote": cmd.pilotNotes,
             })
 
     lvp_phase = wx.lvp.phase.value if wx else "NONE"

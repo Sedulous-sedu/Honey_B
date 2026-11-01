@@ -203,6 +203,11 @@ class AppState:
         self.advisories["UAE231"] = [adv]
 
         self.log_event("SYSTEM", "Initialized scenario and loaded synthetic operations data for OMDB.")
+        try:
+            from app.traffic_generator import TrafficGenerator
+            TrafficGenerator.reset()
+        except Exception:
+            pass
 
     def log_event(self, source: str, message: str, details: Optional[Dict[str, Any]] = None):
         entry = {

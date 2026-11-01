@@ -83,3 +83,4 @@ All five integration issues have been repaired while preserving both `plane/` an
    https://ntrs.nasa.gov/citations/20120004194  
    - Demonstrates how arrival-time (ETA) uncertainty, runway occupancy time (ROT) variability, and fuel burn variations impact deterministic runway schedules.
    - Motivates our four configurable, deterministic stress scenarios (`NOMINAL`, `LATE_ETA_HIGH_BURN`, `EXTENDED_ROT_LVP`, `COMBINED_ADVERSE`), explicitly labeled as scenario evaluations rather than calibrated probabilities.
+

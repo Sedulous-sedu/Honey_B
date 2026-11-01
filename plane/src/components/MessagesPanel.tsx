@@ -3,6 +3,7 @@ import type { GroundMessage, PilotResponseType } from '../types';
 import { formatUtcTime } from '../utils/format';
 import { activeDataLinkAdapter } from '../services/dataLinkAdapter';
 import { TouchSafeButton } from './TouchSafeButton';
+import { PressAndHoldButton } from './PressAndHoldButton';
 
 interface Props {
   messages: GroundMessage[];
@@ -110,16 +111,15 @@ export function MessagesPanel({ messages, flightId }: Props) {
             {msg.status !== 'ACKNOWLEDGED' && msg.requiresAck && msg.source !== 'PILOT' && (
               <div className="message-ack-row touch-safe-ack-zone">
                 <div className="response-btn-group touch-safe-btn-group">
-                  <TouchSafeButton
+                  <PressAndHoldButton
                     actionId={`msg-ack-${msg.id}`}
-                    variant="ack"
-                    className="response-btn ack"
+                    variant="accept"
+                    holdDurationMs={1000}
                     disabled={!!sending}
-                    onDeliberateClick={() => handleSendResponse(msg, 'ACKNOWLEDGE')}
-                    title="Acknowledge message receipt and instructions"
-                  >
-                    {sending === msg.id + 'ACKNOWLEDGE' ? '…' : '✓ Acknowledge'}
-                  </TouchSafeButton>
+                    label={sending === msg.id + 'ACKNOWLEDGE' ? 'Sending…' : '✓ Hold 1.0s to Accept'}
+                    messageIntegrityKey={`${msg.id}-${msg.body}`}
+                    onConfirmed={() => handleSendResponse(msg, 'ACKNOWLEDGE')}
+                  />
 
                   <div className="touch-safety-small-buffer" aria-hidden="true" />
 

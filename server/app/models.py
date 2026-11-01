@@ -204,6 +204,7 @@ class LvpInfo(BaseModel):
 
 class WeatherPayload(BaseModel):
     airport: str = "OMDB"
+    name: Optional[str] = "CLEAR"
     observedAt: str
     rawMetar: str
     visibilityM: float
@@ -247,6 +248,8 @@ class CommandIssuedPayload(BaseModel):
     displayText: str
     allowedResponses: List[str] = Field(default_factory=lambda: ["WILCO", "UNABLE", "STANDBY"])
     status: CommandStatus = CommandStatus.SENT
+    response: Optional[PilotResponse] = None
+    pilotNotes: Optional[str] = None
     issuedAt: str
     expiresAt: str
     supersedes: Optional[str] = None

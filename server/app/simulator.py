@@ -15,6 +15,7 @@ from app.models import (
 from app.command_manager import CommandManager
 from app.weather import WeatherManager
 from app.suggestion import SuggestionEngine
+from app.traffic_generator import TrafficGenerator
 
 class Simulator:
     @staticmethod
@@ -37,6 +38,9 @@ class Simulator:
 
         # 4. Advance kinematics and fuel burn
         Simulator._advance_aircraft(dt)
+
+        # 4b. Synthetic traffic generator & lifecycle
+        TrafficGenerator.tick(dt)
 
         # 5. Check command expirations
         CommandManager.check_expirations()
@@ -244,28 +248,44 @@ class Simulator:
                 turn_step = math.copysign(min(abs(hdg_diff), 3.0 * dt), hdg_diff) # 3 deg/sec standard rate turn
                 ac.headingDeg = round((ac.headingDeg + turn_step) % 360)
 
-            # 5. Position along approach path / holding
+            # 5. Position along approach path / holding / ground
             if ac.flightPhase == FlightPhase.HOLDING:
                 # Orbit pattern around holding fix: turn continuously
                 ac.headingDeg = (ac.headingDeg + 2.0 * dt) % 360
             elif ac.flightPhase in [FlightPhase.ARRIVAL, FlightPhase.APPROACH, FlightPhase.FINAL]:
+                # Glideslope descent guidance inside 14 NM
+                if ac.position.distanceToThresholdNm <= 14.0:
+                    gs_alt = 62.0 + (ac.position.distanceToThresholdNm * 318.0)
+                    if ac.targetAltitudeFt is None or ac.targetAltitudeFt >= 3000.0:
+                        ac.targetAltitudeFt = round(max(62.0, min(ac.altitudeFt, gs_alt)))
+
+                # Approach speed guidance
+                if ac.targetSpeedKt is None or ac.targetSpeedKt >= 200.0:
+                    if ac.position.distanceToThresholdNm <= 4.0:
+                        ac.targetSpeedKt = 145.0
+                    elif ac.position.distanceToThresholdNm <= 10.0:
+                        ac.targetSpeedKt = 160.0
+                    elif ac.position.distanceToThresholdNm <= 18.0:
+                        ac.targetSpeedKt = 210.0
+
                 # Advance toward OMDB threshold (heading 300 deg, moving northwest)
                 nm_moved = (ac.speed.groundSpeedKt / 3600.0) * dt
                 ac.position.distanceToThresholdNm = max(0.0, ac.position.distanceToThresholdNm - nm_moved)
 
-                # Move lat/lon towards OMDB (25.2532, 55.3657)
-                # 1 NM ~ 0.0166 degrees
                 rad = math.radians(ac.headingDeg)
                 d_lat = (nm_moved * math.cos(rad)) / 60.0
                 d_lon = (nm_moved * math.sin(rad)) / (60.0 * math.cos(math.radians(ac.position.lat)))
                 ac.position.lat = round(ac.position.lat + d_lat, 5)
                 ac.position.lon = round(ac.position.lon + d_lon, 5)
 
-                # Flight phase updates based on distance
-                if ac.position.distanceToThresholdNm <= 0.05 and ac.altitudeFt <= 100:
+                # Touchdown & phase updates
+                if ac.position.distanceToThresholdNm <= 0.08:
                     ac.flightPhase = FlightPhase.LANDED
                     ac.altitudeFt = 62.0
-                    ac.targetSpeedKt = 20.0
+                    ac.targetAltitudeFt = 62.0
+                    ac.targetSpeedKt = 15.0
+                    ac.speed.indicatedAirspeedKt = 50.0
+                    ac.speed.groundSpeedKt = 50.0
                     state.log_event("SIM", f"{ac.callsign} touched down on runway {ac.assignedRunway}.")
                 elif ac.position.distanceToThresholdNm <= 3.5:
                     ac.flightPhase = FlightPhase.FINAL
@@ -273,14 +293,29 @@ class Simulator:
                     ac.flightPhase = FlightPhase.APPROACH
 
             elif ac.flightPhase == FlightPhase.LANDED:
-                # Decelerate to taxi speed
-                if ac.speed.groundSpeedKt <= 25:
+                ac.targetSpeedKt = 15.0
+                if ac.speed.groundSpeedKt <= 25.0:
                     ac.flightPhase = FlightPhase.TAXI_IN
                     ac.speed.indicatedAirspeedKt = 12.0
                     ac.speed.groundSpeedKt = 12.0
+                    state.log_event("SIM", f"{ac.callsign} vacated runway {ac.assignedRunway}, taxiing to stand.")
 
-            elif ac.flightPhase == FlightPhase.DEPARTURE:
-                # Climbing out
+            elif ac.flightPhase == FlightPhase.TAXI_IN:
+                # Slowly move toward airport center / ramp
+                d_lat = (25.2532 - ac.position.lat) * 0.01 * dt
+                d_lon = (55.3657 - ac.position.lon) * 0.01 * dt
+                ac.position.lat = round(ac.position.lat + d_lat, 5)
+                ac.position.lon = round(ac.position.lon + d_lon, 5)
+
+            elif ac.flightPhase == FlightPhase.TAXI_OUT:
+                # Slowly move toward departure threshold
+                d_lat = (25.2443 - ac.position.lat) * 0.01 * dt
+                d_lon = (55.3852 - ac.position.lon) * 0.01 * dt
+                ac.position.lat = round(ac.position.lat + d_lat, 5)
+                ac.position.lon = round(ac.position.lon + d_lon, 5)
+
+            elif ac.flightPhase in [FlightPhase.DEPARTURE, FlightPhase.DIVERTING]:
+                # Outbound climb or diversion
                 nm_moved = (ac.speed.groundSpeedKt / 3600.0) * dt
                 ac.position.distanceToThresholdNm += nm_moved
                 rad = math.radians(ac.headingDeg)

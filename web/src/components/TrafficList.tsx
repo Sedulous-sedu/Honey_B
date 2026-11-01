@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useAtcStore } from '../store/useAtcStore';
-import { Aircraft } from '../types';
 import { UserCheck, Shield } from 'lucide-react';
 
 export const TrafficList: React.FC = () => {
@@ -40,8 +39,10 @@ export const TrafficList: React.FC = () => {
     displayedFlights = otherFlights;
   }
 
-  // When viewing a specific controller in ALL/ARR/DEP, sort their flights to the top
+  // Always pin primary demo flight UAE231 to the top, then sort active controller's flights
   const sortedFlights = [...displayedFlights].sort((a, b) => {
+    if (a.callsign === 'UAE231') return -1;
+    if (b.callsign === 'UAE231') return 1;
     if (activeControllerId === 'ALL') return 0;
     const aMine = a.assignedControllerId === activeControllerId ? 1 : 0;
     const bMine = b.assignedControllerId === activeControllerId ? 1 : 0;
@@ -49,19 +50,19 @@ export const TrafficList: React.FC = () => {
   });
 
   return (
-    <div className="w-80 h-full bg-[#0B0F19] border-r border-[#162338] flex flex-col select-none overflow-hidden">
+    <div className="w-80 h-full bg-[#0B1F3A] border-r border-[#1E4478] flex flex-col select-none overflow-hidden text-[#FFFFFF]">
       {/* Header */}
-      <div className="p-3 border-b border-[#162338] bg-[#0E1524]">
+      <div className="p-3 border-b border-[#1E4478] bg-[#102A4C]">
         {/* Sector Info Banner */}
         {activeControllerId !== 'ALL' ? (
-          <div className="mb-2 p-2 rounded-lg bg-blue-950/40 border border-blue-500/40 flex items-center justify-between">
+          <div className="mb-2 p-2 rounded-lg bg-[#0B1F3A] border border-[#F5A623]/60 flex items-center justify-between">
             <div className="flex items-center space-x-1.5">
-              <UserCheck className="w-4 h-4 text-cyan-400" />
+              <UserCheck className="w-4 h-4 text-[#F5A623]" />
               <div>
-                <span className="text-[10px] font-mono text-cyan-300 font-bold block">
+                <span className="text-[10px] font-mono text-[#F5A623] font-bold block">
                   SECTOR: {activeCtrl?.name.toUpperCase() || activeControllerId}
                 </span>
-                <span className="text-[9px] font-mono text-slate-400">
+                <span className="text-[9px] font-mono text-[#FFFFFF]/80">
                   {activeCtrl?.role} · {myFlights.length} Assigned
                 </span>
               </div>
@@ -69,34 +70,34 @@ export const TrafficList: React.FC = () => {
             <button
               onClick={() => setTab('MINE')}
               className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
-                tab === 'MINE' ? 'bg-cyan-500 text-black' : 'bg-[#121E36] text-cyan-300 border border-cyan-500/30'
+                tab === 'MINE' ? 'bg-[#F5A623] text-[#0B1F3A]' : 'bg-[#102A4C] text-[#F5A623] border border-[#F5A623]/40'
               }`}
             >
               MY SECTOR
             </button>
           </div>
         ) : (
-          <div className="mb-2 p-1.5 rounded-lg bg-[#070B12] border border-[#162338] flex items-center justify-between">
+          <div className="mb-2 p-1.5 rounded-lg bg-[#0B1F3A] border border-[#1E4478] flex items-center justify-between">
             <div className="flex items-center space-x-1.5">
-              <Shield className="w-3.5 h-3.5 text-blue-400" />
-              <span className="text-[10px] font-mono text-slate-300 font-bold">
+              <Shield className="w-3.5 h-3.5 text-[#F5A623]" />
+              <span className="text-[10px] font-mono text-[#FFFFFF] font-bold">
                 WALL SCREEN: ALL SECTORS
               </span>
             </div>
-            <span className="text-[10px] font-mono text-cyan-400 font-bold">
+            <span className="text-[10px] font-mono text-[#F5A623] font-bold">
               {allFlights.length} TOTAL
             </span>
           </div>
         )}
 
-        {/* Filter Tabs matching image */}
-        <div className="grid grid-cols-4 gap-1 p-0.5 bg-[#070B12] rounded border border-[#162338]">
+        {/* Filter Tabs */}
+        <div className="grid grid-cols-4 gap-1 p-0.5 bg-[#08172C] rounded border border-[#1E4478]">
           <button
             onClick={() => setTab('ALL')}
             className={`py-1 text-[11px] font-mono font-bold rounded transition-colors ${
               tab === 'ALL'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-[#F5A623] text-[#0B1F3A] shadow-sm'
+                : 'text-[#FFFFFF]/70 hover:text-[#FFFFFF]'
             }`}
           >
             ALL ({allFlights.length})
@@ -105,8 +106,8 @@ export const TrafficList: React.FC = () => {
             onClick={() => setTab(activeControllerId === 'ALL' ? 'ARR' : 'MINE')}
             className={`py-1 text-[11px] font-mono font-bold rounded transition-colors ${
               tab === (activeControllerId === 'ALL' ? 'ARR' : 'MINE')
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-[#F5A623] text-[#0B1F3A] shadow-sm'
+                : 'text-[#FFFFFF]/70 hover:text-[#FFFFFF]'
             }`}
           >
             {activeControllerId === 'ALL' ? `ARR (${arrFlights.length})` : `MINE (${myFlights.length})`}
@@ -115,8 +116,8 @@ export const TrafficList: React.FC = () => {
             onClick={() => setTab('DEP')}
             className={`py-1 text-[11px] font-mono font-bold rounded transition-colors ${
               tab === 'DEP'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-[#F5A623] text-[#0B1F3A] shadow-sm'
+                : 'text-[#FFFFFF]/70 hover:text-[#FFFFFF]'
             }`}
           >
             DEP ({depFlights.length})
@@ -125,8 +126,8 @@ export const TrafficList: React.FC = () => {
             onClick={() => setTab('OTHER')}
             className={`py-1 text-[11px] font-mono font-bold rounded transition-colors ${
               tab === 'OTHER'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-[#F5A623] text-[#0B1F3A] shadow-sm'
+                : 'text-[#FFFFFF]/70 hover:text-[#FFFFFF]'
             }`}
           >
             OTH ({otherFlights.length})
@@ -135,7 +136,7 @@ export const TrafficList: React.FC = () => {
       </div>
 
       {/* Flight Rows */}
-      <div className="flex-1 overflow-y-auto divide-y divide-[#131E30]">
+      <div className="flex-1 overflow-y-auto divide-y divide-[#1E4478]/60">
         {sortedFlights.map((ac) => {
           const isSelected = selectedId === ac.callsign;
           const isAssignedToMe = activeControllerId === 'ALL' || ac.assignedControllerId === activeControllerId;
@@ -146,40 +147,38 @@ export const TrafficList: React.FC = () => {
           // Priority indicator border
           let priorityBorder = 'border-transparent';
           if (ac.priority.level === 'MINIMUM_FUEL' || ac.priority.level === 'EMERGENCY') {
-            priorityBorder = 'border-l-4 border-l-rose-500 bg-rose-950/10';
+            priorityBorder = 'border-l-4 border-l-[#F5A623] bg-[#F5A623]/10';
           } else if (ac.priority.level === 'MEDICAL') {
-            priorityBorder = 'border-l-4 border-l-pink-500 bg-pink-950/10';
+            priorityBorder = 'border-l-4 border-l-rose-500 bg-rose-950/20';
           } else if (ac.status === 'UNABLE_TO_LAND' || ac.flightPhase === 'DIVERTING') {
-            priorityBorder = 'border-l-4 border-l-amber-500 bg-amber-950/10';
+            priorityBorder = 'border-l-4 border-l-[#F5A623] bg-[#F5A623]/5';
           } else if (isAssignedToMe && activeControllerId !== 'ALL') {
-            priorityBorder = 'border-l-4 border-l-cyan-400 bg-cyan-950/10';
+            priorityBorder = 'border-l-4 border-l-[#FFFFFF] bg-[#102A4C]/40';
           }
 
-          // Distance or ground status label matching photo
           let statusText = `${Math.round(ac.position.distanceToThresholdNm)} nm`;
-          let statusColor = 'text-slate-300';
+          let statusColor = 'text-[#FFFFFF]';
 
           if (ac.flightPhase === 'HOLDING') {
             statusText = 'HOLDING';
-            statusColor = 'text-amber-400 font-bold';
+            statusColor = 'text-[#F5A623] font-bold';
           } else if (ac.flightPhase === 'DIVERTING') {
             statusText = 'DIVERT';
-            statusColor = 'text-amber-400 font-bold';
+            statusColor = 'text-[#F5A623] font-bold';
           } else if (ac.flightPhase === 'TAXI_OUT') {
             statusText = 'TAXI';
-            statusColor = 'text-emerald-400';
+            statusColor = 'text-[#FFFFFF]';
           } else if (ac.flightPhase === 'PARKED') {
             statusText = 'PUSH 12m';
-            statusColor = 'text-amber-400';
+            statusColor = 'text-[#F5A623]';
           } else if (ac.flightPhase === 'DEPARTURE' && ac.altitudeFt < 200) {
             statusText = 'LINE UP';
-            statusColor = 'text-cyan-400';
+            statusColor = 'text-[#F5A623]';
           } else if (ac.flightPhase === 'LANDED') {
             statusText = 'LANDED';
-            statusColor = 'text-emerald-400 font-bold';
+            statusColor = 'text-[#F5A623] font-bold';
           }
 
-          // Controller name label
           const ctrl = controllers.find((c) => c.id === ac.assignedControllerId);
           const ctrlDisplayName = ctrl ? ctrl.name : (ac.assignedControllerId || 'UNASSIGNED');
 
@@ -189,11 +188,11 @@ export const TrafficList: React.FC = () => {
               onClick={() => setSelectedId(ac.callsign)}
               className={`p-2.5 flex items-center justify-between cursor-pointer transition-all ${
                 isSelected
-                  ? 'bg-[#152338] ring-1 ring-cyan-500/50'
-                  : 'hover:bg-[#10192A]'
+                  ? 'bg-[#102A4C] ring-1 ring-[#F5A623]'
+                  : 'hover:bg-[#102A4C]/60'
               } ${priorityBorder} ${
                 activeControllerId !== 'ALL' && !isAssignedToMe
-                  ? 'opacity-25 hover:opacity-75 grayscale-[50%]'
+                  ? 'opacity-30 hover:opacity-80'
                   : 'opacity-100'
               }`}
             >
@@ -201,10 +200,17 @@ export const TrafficList: React.FC = () => {
               <div className="flex items-center space-x-2">
                 <div>
                   <div className="flex items-center space-x-1.5">
-                    <span className="font-mono text-xs font-bold text-slate-100">{ac.callsign}</span>
-                    <span className="text-[10px] font-mono text-slate-400">{ac.aircraftType}</span>
+                    <span className="font-mono text-xs font-bold text-[#FFFFFF]">
+                      {ac.callsign === 'UAE231' ? `★ ${ac.callsign}` : ac.callsign}
+                    </span>
+                    <span className="text-[10px] font-mono text-[#FFFFFF]/70">{ac.aircraftType}</span>
+                    {ac.callsign === 'UAE231' && (
+                      <span className="text-[8px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#F5A623] text-[#0B1F3A]">
+                        PRIMARY
+                      </span>
+                    )}
                     {isAssignedToMe && activeControllerId !== 'ALL' && (
-                      <span className="text-[8px] font-mono font-bold px-1 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                      <span className="text-[8px] font-mono font-bold px-1 rounded bg-[#F5A623] text-[#0B1F3A]">
                         MINE
                       </span>
                     )}
@@ -213,16 +219,16 @@ export const TrafficList: React.FC = () => {
                     <span
                       className={`text-[9px] font-bold px-1 py-0.2 rounded font-mono ${
                         isArr
-                          ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                          ? 'bg-[#F5A623] text-[#0B1F3A]'
                           : isDep
-                          ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                          : 'bg-slate-700 text-slate-300'
+                          ? 'bg-[#102A4C] text-[#F5A623] border border-[#F5A623]/50'
+                          : 'bg-[#08172C] text-[#FFFFFF]/80 border border-[#1E4478]'
                       }`}
                     >
                       {isArr ? 'ARR' : isDep ? 'DEP' : 'GND'}
                     </span>
                     {ac.assignedRunway && (
-                      <span className="text-[10px] font-mono text-slate-400">
+                      <span className="text-[10px] font-mono text-[#FFFFFF]/80">
                         RWY {ac.assignedRunway}
                       </span>
                     )}
@@ -233,7 +239,7 @@ export const TrafficList: React.FC = () => {
               {/* Right: Distance / Status & Controller */}
               <div className="text-right">
                 <span className={`text-xs font-mono ${statusColor}`}>{statusText}</span>
-                <div className={`text-[9px] font-mono mt-0.5 ${isAssignedToMe ? 'text-cyan-400 font-bold' : 'text-slate-500'}`}>
+                <div className={`text-[9px] font-mono mt-0.5 ${isAssignedToMe ? 'text-[#F5A623] font-bold' : 'text-[#FFFFFF]/60'}`}>
                   {isAssignedToMe && activeControllerId !== 'ALL' ? '● YOU' : ctrlDisplayName}
                 </div>
               </div>

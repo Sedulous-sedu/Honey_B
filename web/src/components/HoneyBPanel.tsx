@@ -1,360 +1,688 @@
 import React, { useState, useEffect } from 'react';
 import { useAtcStore } from '../store/useAtcStore';
-import { Suggestion } from '../types';
-import { Send, AlertTriangle, ShieldCheck, Zap, MessageSquare, Lock, ShieldAlert } from 'lucide-react';
+import {
+  Send,
+  AlertTriangle,
+  Sparkles,
+  CheckCircle2,
+  ShieldAlert,
+  Edit3,
+  Sliders,
+  ListChecks,
+  Terminal,
+} from 'lucide-react';
 import { EmergencyAdvisorModal } from './EmergencyAdvisorModal';
+import { Suggestion } from '../types';
 
 export const HoneyBPanel: React.FC = () => {
   const suggestions = useAtcStore((s) => s.suggestions);
-  const sendCommand = useAtcStore((s) => s.sendCommand);
+  const aircraft = useAtcStore((s) => s.aircraft);
   const activeControllerId = useAtcStore((s) => s.activeControllerId);
-  const controllers = useAtcStore((s) => s.controllers);
-  const weather = useAtcStore((s) => s.weather);
   const selectedAircraftId = useAtcStore((s) => s.selectedAircraftId);
+  const sendCommand = useAtcStore((s) => s.sendCommand);
+  const sendCustomCommand = useAtcStore((s) => s.sendCustomCommand);
   const approvedSequenceAdvisory = useAtcStore((s) => s.approvedSequenceAdvisory);
-  const setSelectedId = useAtcStore((s) => s.setSelectedAircraftId);
+  const composerDraft = useAtcStore((s) => s.composerDraft);
+  const setComposerDraft = useAtcStore((s) => s.setComposerDraft);
 
-  const [aiQuestion, setAiQuestion] = useState('');
-  const [aiAnswer, setAiAnswer] = useState<string | null>(null);
-  const [aiLoading, setAiLoading] = useState(false);
-  const [showAllSuggestions, setShowAllSuggestions] = useState(false);
-  const [advisorModalOpen, setAdvisorModalOpen] = useState(false);
-  const [activeFilter, setActiveFilter] = useState<'ALL' | 'CRITICAL' | 'MINE'>(
-    activeControllerId === 'ALL' ? 'ALL' : 'MINE'
+  const weather = useAtcStore((s) => s.weather);
+  const triggerFog = useAtcStore((s) => s.triggerFog);
+  const [advisorOpen, setAdvisorOpen] = useState(false);
+
+  // Free-form ATC Command & Pilot Options Composer state
+  const [composerMode, setComposerMode] = useState<'OPTIONS' | 'COMMAND'>('OPTIONS');
+  const [targetFlightId, setTargetFlightId] = useState<string>(selectedAircraftId || 'UAE231');
+  const [instructionType, setInstructionType] = useState<string>('INFORMATION');
+  const [commandText, setCommandText] = useState<string>(
+    'UAE231 ATC OPTIONS — OPTION 1: Sidestep RWY 30R ILS CAT IIIB Autoland (RVR 450m, zero holding delay) | OPTION 2: Hold at DXB VOR 4000 ft for RWY 30L LVP sequence (EFC +8 min) — Advise crew preference.'
   );
+  const [optionA, setOptionA] = useState<string>('Sidestep RWY 30R ILS CAT IIIB Autoland (RVR 450m, zero holding delay)');
+  const [optionB, setOptionB] = useState<string>('Hold at DXB VOR 4000 ft for RWY 30L LVP sequence (EFC +8 min)');
+  const [newRunway, setNewRunway] = useState<string>('');
+  const [targetSpeedKt, setTargetSpeedKt] = useState<string>('');
+  const [targetAltitudeFt, setTargetAltitudeFt] = useState<string>('');
+  const [relatedSuggestionId, setRelatedSuggestionId] = useState<string | undefined>(undefined);
+  const [sending, setSending] = useState<boolean>(false);
+  const [transmitBanner, setTransmitBanner] = useState<string | null>(null);
 
-  // Sync filter when active controller changes
+  // Sync target aircraft when user clicks a flight on radar or traffic list
   useEffect(() => {
-    setActiveFilter(activeControllerId === 'ALL' ? 'ALL' : 'MINE');
-  }, [activeControllerId]);
+    if (selectedAircraftId && aircraft[selectedAircraftId]) {
+      setTargetFlightId(selectedAircraftId);
+    }
+  }, [selectedAircraftId, aircraft]);
 
-  const activeCtrl = controllers.find((c) => c.id === activeControllerId);
+  // Sync when a suggestion or modal loads a draft into the composer
+  useEffect(() => {
+    if (composerDraft) {
+      setTargetFlightId(composerDraft.aircraftId);
+      setInstructionType(composerDraft.instructionType || 'INFORMATION');
+      setCommandText(composerDraft.displayText || '');
+      if (composerDraft.mode) {
+        setComposerMode(composerDraft.mode);
+      } else {
+        setComposerMode('COMMAND');
+      }
+      if (composerDraft.optionA) setOptionA(composerDraft.optionA);
+      if (composerDraft.optionB) setOptionB(composerDraft.optionB);
+      setNewRunway(composerDraft.newRunway || '');
+      setTargetSpeedKt(composerDraft.targetSpeedKt ? String(composerDraft.targetSpeedKt) : '');
+      setTargetAltitudeFt(composerDraft.targetAltitudeFt ? String(composerDraft.targetAltitudeFt) : '');
+      setRelatedSuggestionId(composerDraft.relatedSuggestionId);
+      setComposerDraft(null);
+    }
+  }, [composerDraft, setComposerDraft]);
 
-  // Filter suggestions
-  const filteredSuggestions = suggestions.filter((s) => {
-    if (s.status === 'EXECUTED') return false;
-    if (activeFilter === 'CRITICAL' && s.urgency !== 'CRITICAL') return false;
-    if (activeFilter === 'MINE' && activeControllerId !== 'ALL' && s.targetControllerId !== activeControllerId) return false;
-    return true;
+  const allFlights = Object.values(aircraft);
+
+  // Filter suggestions and alerts to the active controller's sector (or show all if 'ALL'), pinning UAE231 first
+  const sectorSuggestions = suggestions
+    .filter((s) => {
+      if (s.status !== 'ACTIVE') return false;
+      if (activeControllerId === 'ALL') return true;
+      const ac = aircraft[s.aircraftId];
+      return ac && ac.assignedControllerId === activeControllerId;
+    })
+    .sort((a, b) => {
+      if (a.aircraftId === 'UAE231' && b.aircraftId !== 'UAE231') return -1;
+      if (b.aircraftId === 'UAE231' && a.aircraftId !== 'UAE231') return 1;
+      return 0;
+    });
+
+  // Identify critical alerts from aircraft state (pinning UAE231 first)
+  const alerts: Array<{ id: string; callsign: string; type: 'CRITICAL' | 'WARNING'; title: string; detail: string }> = [];
+
+  if (weather?.lvp.active && aircraft['UAE231']) {
+    const uae = aircraft['UAE231'];
+    const marginKg = Math.round(uae.fuel.totalKg - uae.fuel.finalReserveKg);
+    alerts.push({
+      id: 'alert-fog-uae231',
+      callsign: 'UAE231',
+      type: 'CRITICAL',
+      title: `🌫 LVP FOG PRIORITY: UAE231 (B77W)`,
+      detail: `Vis ${weather.visibilityM}m (RVR 400m) · RWY 30L spacing 6 NM · Endurance ${Math.round(uae.fuel.enduranceMin)}m (${marginKg}kg margin). Send 30R Sidestep / Hold Options to Pilot!`
+    });
+  }
+
+  allFlights.forEach((ac) => {
+    if (ac.callsign === 'UAE231' && weather?.lvp.active) return; // Already added at top
+    if (activeControllerId !== 'ALL' && ac.assignedControllerId !== activeControllerId) {
+      return;
+    }
+
+    if (ac.priority.level === 'MINIMUM_FUEL' || ac.priority.level === 'EMERGENCY') {
+      const marginKg = Math.round(ac.fuel.totalKg - ac.fuel.finalReserveKg);
+      alerts.push({
+        id: `alert-fuel-${ac.callsign}`,
+        callsign: ac.callsign,
+        type: 'CRITICAL',
+        title: `MINIMUM FUEL: ${ac.callsign}`,
+        detail: `${Math.round(ac.fuel.enduranceMin)} min endurance (${marginKg} kg reserve margin). Immediate priority required.`
+      });
+    } else if (ac.priority.level === 'MEDICAL') {
+      alerts.push({
+        id: `alert-med-${ac.callsign}`,
+        callsign: ac.callsign,
+        type: 'CRITICAL',
+        title: `MEDICAL PRIORITY: ${ac.callsign}`,
+        detail: `${ac.priority.emergencyNature || 'Passenger cardiac issue'}. Expedite arrival & ambulance.`
+      });
+    } else if (ac.status === 'UNABLE_TO_LAND') {
+      alerts.push({
+        id: `alert-cat-${ac.callsign}`,
+        callsign: ac.callsign,
+        type: 'WARNING',
+        title: `APPROACH LIMIT EXCEEDED: ${ac.callsign}`,
+        detail: `Max ${ac.capability.lvpApproach} vs active CAT IIIB fog. Hold or divert.`
+      });
+    }
   });
 
-  const handleSend = async (sug: Suggestion) => {
-    await sendCommand(sug.aircraftId, sug);
+  const handleLoadSuggestionIntoComposer = (sug: Suggestion, asOptions: boolean = false) => {
+    setTargetFlightId(sug.aircraftId);
+    setRelatedSuggestionId(sug.suggestionId);
+    if (asOptions) {
+      setComposerMode('OPTIONS');
+      setInstructionType('INFORMATION');
+      setOptionA(sug.displayText);
+      setOptionB(`Hold present position / advise alternative crew preference for ${sug.aircraftId}`);
+      setCommandText(
+        `${sug.aircraftId} ATC OPTIONS — OPTION 1: ${sug.displayText} | OPTION 2: Hold present position & advise crew preference`
+      );
+    } else {
+      setComposerMode('COMMAND');
+      setInstructionType(sug.instructionType);
+      setCommandText(sug.displayText);
+      setNewRunway(sug.params.newRunway || '');
+      setTargetSpeedKt(sug.params.targetSpeedKt ? String(sug.params.targetSpeedKt) : '');
+      setTargetAltitudeFt(sug.params.targetAltitudeFt ? String(sug.params.targetAltitudeFt) : '');
+    }
   };
 
-  const handleAskAi = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!aiQuestion.trim()) return;
+  const applyQuickOptionPreset = (preset: 'HOLD_OR_DIVERT' | 'SIDESTEP_OR_HOLD' | 'SPEED_OR_DELAY' | 'CONFIRM_DECL') => {
+    const cs = targetFlightId || 'UAE231';
+    setComposerMode('OPTIONS');
+    setInstructionType('INFORMATION');
+    if (preset === 'HOLD_OR_DIVERT') {
+      const a = `Hold at DXB VOR 4000 ft (EFC +10 min)`;
+      const b = `Divert to OMSJ (Sharjah) via immediate climb 5000 ft`;
+      setOptionA(a);
+      setOptionB(b);
+      setCommandText(`${cs} ATC OPTIONS — OPTION 1: ${a} | OPTION 2: ${b}. Advise captain decision.`);
+    } else if (preset === 'SIDESTEP_OR_HOLD') {
+      const a = `Sidestep to RWY 30R cleared ILS Approach`;
+      const b = `Maintain RWY 30L sequence with 6 min holding delay`;
+      setOptionA(a);
+      setOptionB(b);
+      setCommandText(`${cs} ATC OPTIONS — OPTION 1: ${a} | OPTION 2: ${b}. Advise able RWY 30R.`);
+    } else if (preset === 'SPEED_OR_DELAY') {
+      const a = `Reduce speed to 180 kt until 6 DME`;
+      const b = `Enter 1 orbit holding turn at present fix`;
+      setOptionA(a);
+      setOptionB(b);
+      setCommandText(`${cs} ATC OPTIONS — OPTION 1: ${a} | OPTION 2: ${b}. Advise preference.`);
+    } else if (preset === 'CONFIRM_DECL') {
+      const a = `Confirm formal PAN PAN (Urgency) declaration`;
+      const b = `Confirm formal MAYDAY (Distress) declaration or normal operations`;
+      setOptionA(a);
+      setOptionB(b);
+      setCommandText(`${cs} ATC QUERY — Please state formal declaration status: (1) ${a} OR (2) ${b}.`);
+    }
+  };
 
-    setAiLoading(true);
-    setAiAnswer(null);
-    try {
-      const res = await fetch(`http://${window.location.hostname || 'localhost'}:8000/api/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: aiQuestion })
-      });
-      const data = await res.json();
-      setAiAnswer(data.reply);
-    } catch {
-      setAiAnswer('Unable to connect to Honey B AI advisory engine.');
-    } finally {
-      setAiLoading(false);
+  // Sync combined text when Option A or Option B changes in OPTIONS mode
+  const handleOptionChange = (which: 'A' | 'B', val: string) => {
+    const cs = targetFlightId || 'UAE231';
+    const nextA = which === 'A' ? val : optionA;
+    const nextB = which === 'B' ? val : optionB;
+    if (which === 'A') setOptionA(val);
+    else setOptionB(val);
+    setCommandText(
+      `${cs} ATC OPTIONS — OPTION 1: ${nextA} | OPTION 2: ${nextB} — Advise crew preference.`
+    );
+  };
+
+  const handleTransmitToPilot = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const cs = targetFlightId || selectedAircraftId || 'UAE231';
+    if (sending) return;
+
+    setSending(true);
+    setTransmitBanner(null);
+
+    if (composerMode === 'OPTIONS') {
+      // Split options so each option is sent as its own separate selectable command card on the Pilot display
+      const rawOptions = [optionA.trim(), optionB.trim()].filter(Boolean);
+      const optionsToSend =
+        rawOptions.length > 0
+          ? rawOptions.map((opt, idx) =>
+              opt.match(/^(?:OPTION|OPT)\s*\d+/i) ? opt : `OPTION ${idx + 1}: ${opt}`
+            )
+          : [commandText.trim()].filter(Boolean);
+
+      let allOk = false;
+      for (const optText of optionsToSend) {
+        const ok = await sendCustomCommand({
+          aircraftId: cs,
+          instructionType: 'INFORMATION',
+          displayText: optText,
+          newRunway: newRunway.trim() || undefined,
+          targetSpeedKt: targetSpeedKt ? Number(targetSpeedKt) : undefined,
+          targetAltitudeFt: targetAltitudeFt ? Number(targetAltitudeFt) : undefined,
+          relatedSuggestionId,
+        });
+        if (ok) allOk = true;
+      }
+      setSending(false);
+      if (allOk) {
+        setTransmitBanner(
+          `Sent ${optionsToSend.length} separated option cards to ${cs} — Each has its own Accept button on Pilot Display.`
+        );
+        setRelatedSuggestionId(undefined);
+      }
+      return;
+    }
+
+    const finalDisplayText = commandText.trim();
+    if (!finalDisplayText) {
+      setSending(false);
+      return;
+    }
+
+    const ok = await sendCustomCommand({
+      aircraftId: cs,
+      instructionType,
+      displayText: finalDisplayText,
+      newRunway: newRunway.trim() || undefined,
+      targetSpeedKt: targetSpeedKt ? Number(targetSpeedKt) : undefined,
+      targetAltitudeFt: targetAltitudeFt ? Number(targetAltitudeFt) : undefined,
+      relatedSuggestionId,
+    });
+    setSending(false);
+
+    if (ok) {
+      setTransmitBanner(`Transmitted to ${cs} (${instructionType}): "${finalDisplayText}"`);
+      setRelatedSuggestionId(undefined);
     }
   };
 
   return (
-    <div className="w-96 h-full bg-[#0E1524] border-l border-[#162338] flex flex-col select-none overflow-hidden shadow-2xl">
-      {/* Brand Header matching photo */}
-      <div className="p-4 bg-gradient-to-r from-[#111C30] via-[#162540] to-[#1C1E38] border-b border-[#20314F]">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/20 text-2xl">
-            🐝
-          </div>
+    <div className="w-96 h-full bg-[#0B1F3A] border-l border-[#1E4478] flex flex-col select-none overflow-hidden text-[#FFFFFF]">
+      {/* Top Gradient Header with Official Honey B Logo */}
+      <div className="p-3.5 bg-gradient-to-r from-[#0B1F3A] via-[#102A4C] to-[#163763] border-b border-[#F5A623]/40 flex items-center justify-between shadow-lg">
+        <div className="flex items-center space-x-2.5">
+          <img
+            src="/honey-b-logo.jpg"
+            alt="Honey B logo"
+            className="w-10 h-10 rounded-xl bg-[#FFFFFF] p-0.5 object-contain border-2 border-[#F5A623] shadow-lg"
+            draggable={false}
+          />
           <div>
-            <h1 className="text-xl font-bold font-sans tracking-tight text-white flex items-center space-x-2">
-              <span>Honey B</span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
-                DECISION SUPPORT
+            <div className="flex items-center space-x-1.5">
+              <span className="font-bold text-sm tracking-tight text-[#FFFFFF]">Honey B</span>
+              <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[#F5A623] text-[#0B1F3A] font-bold">
+                ATC CO-PILOT
               </span>
-            </h1>
-            <p className="text-xs text-slate-400 font-mono">
-              {activeControllerId === 'ALL'
-                ? 'Supervisor Operations Overview'
-                : `Sector Console: ${activeCtrl?.name || activeControllerId}`}
+            </div>
+            <p className="text-[10px] text-[#FFFFFF]/80 font-mono">
+              Divide & Conquer · Pilot Options & Risk Advisor
             </p>
           </div>
         </div>
+
+        <button
+          onClick={() => setAdvisorOpen(true)}
+          className="px-2.5 py-1.5 rounded-lg bg-[#F5A623] hover:bg-[#F7B84B] text-[#0B1F3A] text-[10px] font-mono font-bold flex items-center space-x-1 transition-all shadow-md"
+          title="Open Deterministic Emergency Sequence Change Risk Advisor"
+        >
+          <ShieldAlert className="w-3.5 h-3.5" />
+          <span>Emergency Risk Advisor</span>
+        </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-3 space-y-4">
-        {/* Section 1: Filtered & Prioritized Data (Matching Photo) */}
-        <div className="bg-[#121B2D] rounded-xl p-3 border border-[#1E2E4A] shadow-inner">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 rounded-md bg-cyan-500/20 text-cyan-400 flex items-center justify-center">
-                <Zap className="w-3.5 h-3.5" />
-              </div>
-              <h2 className="text-xs font-mono font-bold tracking-wider text-slate-200 uppercase">
-                Filtered & Prioritized Data
-              </h2>
-            </div>
-            <span className="text-[10px] font-mono text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800/60">
-              {weather?.lvp.active ? 'LVP RULES ACTIVE' : 'NOMINAL SEPARATION'}
+      {/* Active Approved Sequence Advisory Banner (if any) */}
+      {approvedSequenceAdvisory && (
+        <div className="px-3 py-2 bg-[#102A4C] border-b border-[#F5A623]/50 flex items-center justify-between text-[10px] font-mono text-[#FFFFFF]">
+          <div className="truncate">
+            <span className="font-bold text-[#F5A623]">EST. SEQ APPROVED:</span>{' '}
+            {approvedSequenceAdvisory.emergencyAircraftId} ({approvedSequenceAdvisory.candidateLabel})
+          </div>
+          <button
+            onClick={() => setAdvisorOpen(true)}
+            className="ml-2 px-1.5 py-0.5 rounded bg-[#F5A623] text-[#0B1F3A] hover:bg-[#F7B84B] font-bold shrink-0"
+          >
+            Inspect
+          </button>
+        </div>
+      )}
+
+      {/* Main Scrollable Content: Section 1 (Alerts) + Section 2 (Suggestions with Edit/Options) */}
+      <div className="flex-1 overflow-y-auto p-3 space-y-3">
+        {/* SECTION 1: ACTIVE ALERTS */}
+        <div>
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#F5A623]">
+              Active Alerts ({alerts.length})
             </span>
+            {!weather?.lvp.active && (
+              <button
+                onClick={() => triggerFog('DENSE_FOG')}
+                className="px-2 py-0.5 rounded bg-[#F5A623] hover:bg-[#F7B84B] text-[#0B1F3A] text-[9px] font-mono font-bold shadow-sm"
+              >
+                🌫 Trigger Fog for UAE231 Demo
+              </button>
+            )}
           </div>
 
-          <div className="space-y-1.5 text-xs text-slate-400">
-            <div className="flex items-center space-x-2 text-[11px] text-slate-300">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-              <span>Key traffic, conflicts and constraints ranked</span>
+          {alerts.length === 0 ? (
+            <div className="p-2.5 rounded-lg bg-[#08172C] border border-[#1E4478] text-xs text-[#FFFFFF]/70 flex items-center space-x-2">
+              <CheckCircle2 className="w-4 h-4 text-[#F5A623]" />
+              <span>All sector flights within nominal safety envelopes.</span>
             </div>
-            <div className="flex items-center space-x-2 text-[11px] text-slate-300">
-              <ShieldCheck className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-              <span>Reduced clutter — only actionable events surfaced</span>
-            </div>
-          </div>
-
-          {/* Situation Summary Alert */}
-          {weather?.lvp.active && (
-            <div className="mt-3 p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-200 flex items-start space-x-2">
-              <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-              <div>
-                <span className="font-bold">Low Visibility Procedures:</span> Dense fog (RVR 400m). GCAA OMDB LVO spacing active. CAT I aircraft must divert.
-              </div>
+          ) : (
+            <div className="space-y-1.5">
+              {alerts.map((al) => (
+                <div
+                  key={al.id}
+                  onClick={() => setTargetFlightId(al.callsign)}
+                  className={`p-2.5 rounded-lg border cursor-pointer transition-colors ${
+                    al.type === 'CRITICAL'
+                      ? 'bg-[#102A4C] border-[#F5A623]'
+                      : 'bg-[#08172C] border-[#F5A623]/60'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-1.5">
+                      <AlertTriangle className="w-3.5 h-3.5 text-[#F5A623]" />
+                      <span className="text-xs font-mono font-bold text-[#FFFFFF]">
+                        {al.title}
+                      </span>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setTargetFlightId(al.callsign);
+                        setAdvisorOpen(true);
+                      }}
+                      className="px-2 py-0.5 rounded bg-[#F5A623] hover:bg-[#F7B84B] text-[9px] font-mono font-bold text-[#0B1F3A]"
+                    >
+                      Evaluate Risk
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-[#FFFFFF]/85 mt-1 leading-snug">
+                    {al.detail}
+                  </p>
+                </div>
+              ))}
             </div>
           )}
         </div>
 
-        {/* Section 1B: Emergency Sequence Change Risk Advisor Launcher */}
-        <div className="bg-gradient-to-br from-[#161F36] to-[#121A2D] rounded-xl p-3 border border-amber-500/40 shadow-md">
+        {/* SECTION 2: SUGGESTED COMMANDS (Load to Edit / Offer as Options / Send) */}
+        <div>
           <div className="flex items-center justify-between mb-1.5">
-            <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 rounded-md bg-amber-500/20 text-amber-300 flex items-center justify-center">
-                <ShieldAlert className="w-3.5 h-3.5" />
-              </div>
-              <h2 className="text-xs font-mono font-bold tracking-wider text-amber-200 uppercase">
-                Emergency Sequence Risk Advisor
-              </h2>
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#F5A623] flex items-center space-x-1">
+              <Sparkles className="w-3 h-3 text-[#F5A623]" />
+              <span>AI Suggested Actions ({sectorSuggestions.length})</span>
+            </span>
+            <span className="text-[9px] font-mono text-[#FFFFFF]/70">CLICK EDIT TO CUSTOMIZE</span>
+          </div>
+
+          {sectorSuggestions.length === 0 ? (
+            <div className="p-3 rounded-lg bg-[#08172C] border border-[#1E4478] text-xs text-[#FFFFFF]/70 font-mono text-center">
+              No pending suggestions in this sector. Use the composer below to type any command or pilot options.
             </div>
-            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
-              OMDB KC v1.0
+          ) : (
+            <div className="space-y-2">
+              {sectorSuggestions.map((sug) => {
+                const isHigh = sug.urgency === 'HIGH' || sug.urgency === 'CRITICAL';
+                return (
+                  <div
+                    key={sug.suggestionId}
+                    className={`p-2.5 rounded-xl border transition-all ${
+                      isHigh
+                        ? 'bg-[#102A4C] border-[#F5A623]/80 shadow-md'
+                        : 'bg-[#08172C] border-[#1E4478]'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-1.5">
+                      <div>
+                        <div className="flex items-center space-x-1.5">
+                          <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#0B1F3A] text-[#F5A623] border border-[#F5A623]/40">
+                            {sug.aircraftId}
+                          </span>
+                          <span className="text-[11px] font-bold text-[#FFFFFF]">
+                            {sug.instructionType}
+                          </span>
+                        </div>
+                        <p className="text-xs font-mono text-[#FFFFFF] mt-1 bg-[#0B1F3A] px-2 py-1 rounded border border-[#1E4478]">
+                          "{sug.displayText}"
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-1.5 text-[10px] text-[#FFFFFF]/80">
+                      <span className="text-[#F5A623] font-semibold">Why: </span>
+                      {sug.reasonText}
+                    </div>
+
+                    {/* Action Bar: Edit Command, Offer as Options, or Send Direct */}
+                    <div className="mt-2 pt-2 border-t border-[#1E4478] flex items-center justify-between gap-1.5">
+                      <button
+                        onClick={() => handleLoadSuggestionIntoComposer(sug, false)}
+                        className="flex-1 py-1 px-2 rounded-lg bg-[#0B1F3A] hover:bg-[#163763] text-[#FFFFFF] border border-[#F5A623]/60 text-[10px] font-mono font-bold flex items-center justify-center space-x-1 transition-colors"
+                        title="Load into composer below to edit wording or parameters before sending"
+                      >
+                        <Edit3 className="w-3 h-3 text-[#F5A623]" />
+                        <span>Edit Command</span>
+                      </button>
+                      <button
+                        onClick={() => handleLoadSuggestionIntoComposer(sug, true)}
+                        className="flex-1 py-1 px-2 rounded-lg bg-[#0B1F3A] hover:bg-[#163763] text-[#F5A623] border border-[#F5A623]/60 text-[10px] font-mono font-bold flex items-center justify-center space-x-1 transition-colors"
+                        title="Turn this suggestion into multiple options for the pilot to review"
+                      >
+                        <ListChecks className="w-3 h-3 text-[#F5A623]" />
+                        <span>Make Options</span>
+                      </button>
+                      <button
+                        onClick={() => sendCommand(sug.aircraftId, sug)}
+                        className="py-1 px-2.5 rounded-lg bg-[#F5A623] hover:bg-[#F7B84B] text-[#0B1F3A] text-[10px] font-mono font-bold flex items-center space-x-1 shadow-sm transition-colors"
+                        title="Transmit directly to pilot"
+                      >
+                        <Send className="w-3 h-3" />
+                        <span>Send</span>
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* SECTION 3: FREE-FORM ATC COMMAND & PILOT OPTIONS COMPOSER (Replaces Chatbot) */}
+      <div className="border-t-2 border-[#F5A623] bg-[#08172C] p-3 flex flex-col space-y-2.5 shadow-2xl">
+        {/* Header & Mode Switcher */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-1.5">
+            <Sliders className="w-3.5 h-3.5 text-[#F5A623]" />
+            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#FFFFFF]">
+              ATC Command & Pilot Options
             </span>
           </div>
-          <p className="text-[11px] text-slate-300 leading-snug mb-2">
-            Compare baseline vs candidate arrival resequencing, displaced flight fuel margins, wake/LVO spacing, and deterministic stress scenarios.
-          </p>
 
-          {approvedSequenceAdvisory && (
-            <div className="mb-2 p-2 rounded-lg bg-emerald-950/40 border border-emerald-500/40 text-[10px] font-mono text-emerald-200">
-              <div className="font-bold text-emerald-300">
-                ACTIVE APPROVED ESTIMATE ({approvedSequenceAdvisory.emergencyAircraftId})
-              </div>
-              <div>{approvedSequenceAdvisory.candidateLabel}</div>
-              <div className="text-emerald-400/80">
-                Source: {approvedSequenceAdvisory.source} @ {approvedSequenceAdvisory.approvedAtUtc.slice(11, 19)}Z
-              </div>
+          <div className="flex bg-[#0B1F3A] p-0.5 rounded-lg border border-[#1E4478]">
+            <button
+              type="button"
+              onClick={() => {
+                setComposerMode('OPTIONS');
+                setInstructionType('INFORMATION');
+                const cs = targetFlightId || 'UAE231';
+                setCommandText(
+                  `${cs} ATC OPTIONS — OPTION 1: ${optionA} | OPTION 2: ${optionB} — Advise crew preference.`
+                );
+              }}
+              className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold flex items-center space-x-1 transition-colors ${
+                composerMode === 'OPTIONS'
+                  ? 'bg-[#F5A623] text-[#0B1F3A]'
+                  : 'text-[#FFFFFF]/70 hover:text-[#FFFFFF]'
+              }`}
+            >
+              <ListChecks className="w-3 h-3" />
+              <span>Pilot Options</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setComposerMode('COMMAND');
+                if (instructionType === 'INFORMATION') setInstructionType('APPROACH_CLEARANCE');
+              }}
+              className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold flex items-center space-x-1 transition-colors ${
+                composerMode === 'COMMAND'
+                  ? 'bg-[#F5A623] text-[#0B1F3A]'
+                  : 'text-[#FFFFFF]/70 hover:text-[#FFFFFF]'
+              }`}
+            >
+              <Terminal className="w-3 h-3" />
+              <span>Type Command</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Target Aircraft + Instruction Type Row */}
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label className="block text-[9px] font-mono text-[#F5A623] uppercase mb-0.5">
+              Target Flight
+            </label>
+            <select
+              value={targetFlightId}
+              onChange={(e) => {
+                const nextCs = e.target.value;
+                setTargetFlightId(nextCs);
+                if (composerMode === 'OPTIONS') {
+                  setCommandText(
+                    `${nextCs} ATC OPTIONS — OPTION 1: ${optionA} | OPTION 2: ${optionB} — Advise crew preference.`
+                  );
+                }
+              }}
+              className="w-full bg-[#0B1F3A] border border-[#1E4478] focus:border-[#F5A623] rounded-lg px-2 py-1 text-xs font-mono font-bold text-[#FFFFFF] focus:outline-none"
+            >
+              {allFlights.map((f) => (
+                <option key={f.callsign} value={f.callsign}>
+                  {f.callsign} ({f.aircraftType} · {f.flightPhase})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-[9px] font-mono text-[#F5A623] uppercase mb-0.5">
+              {composerMode === 'OPTIONS' ? 'Quick Option Templates' : 'Instruction Type'}
+            </label>
+            {composerMode === 'OPTIONS' ? (
+              <select
+                defaultValue=""
+                onChange={(e) => {
+                  if (e.target.value) {
+                    applyQuickOptionPreset(e.target.value as any);
+                    e.target.value = '';
+                  }
+                }}
+                className="w-full bg-[#0B1F3A] border border-[#F5A623]/60 rounded-lg px-2 py-1 text-xs font-mono text-[#FFFFFF] focus:outline-none"
+              >
+                <option value="" disabled>
+                  Load Option Preset...
+                </option>
+                <option value="HOLD_OR_DIVERT">Hold DXB VOR vs Divert OMSJ</option>
+                <option value="SIDESTEP_OR_HOLD">Sidestep RWY 30R vs Hold 30L</option>
+                <option value="SPEED_OR_DELAY">Speed 180kt vs Delay Orbit</option>
+                <option value="CONFIRM_DECL">Query PAN PAN vs MAYDAY</option>
+              </select>
+            ) : (
+              <select
+                value={instructionType}
+                onChange={(e) => setInstructionType(e.target.value)}
+                className="w-full bg-[#0B1F3A] border border-[#1E4478] focus:border-[#F5A623] rounded-lg px-2 py-1 text-xs font-mono font-bold text-[#FFFFFF] focus:outline-none"
+              >
+                <option value="APPROACH_CLEARANCE">APPROACH CLEARANCE</option>
+                <option value="RUNWAY_CHANGE">RUNWAY CHANGE</option>
+                <option value="HOLD">HOLD INSTRUCTION</option>
+                <option value="SPEED">SPEED CONTROL</option>
+                <option value="ALTITUDE">ALTITUDE CLEARANCE</option>
+                <option value="HEADING">RADAR VECTOR / HDG</option>
+                <option value="DIVERT">DIVERT CLEARANCE</option>
+                <option value="INFORMATION">FREE-TEXT ADVISORY</option>
+              </select>
+            )}
+          </div>
+        </div>
+
+        {/* Mode-Specific Inputs */}
+        {composerMode === 'OPTIONS' ? (
+          <div className="space-y-1.5">
+            <div className="flex items-center space-x-1.5">
+              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#F5A623] text-[#0B1F3A] shrink-0">
+                OPT 1
+              </span>
+              <input
+                type="text"
+                value={optionA}
+                onChange={(e) => handleOptionChange('A', e.target.value)}
+                placeholder="Type Option 1 for pilot..."
+                className="flex-1 bg-[#0B1F3A] border border-[#1E4478] focus:border-[#F5A623] rounded-lg px-2 py-1 text-xs font-mono text-[#FFFFFF] focus:outline-none"
+              />
+            </div>
+            <div className="flex items-center space-x-1.5">
+              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#102A4C] text-[#F5A623] border border-[#F5A623]/60 shrink-0">
+                OPT 2
+              </span>
+              <input
+                type="text"
+                value={optionB}
+                onChange={(e) => handleOptionChange('B', e.target.value)}
+                placeholder="Type Option 2 for pilot..."
+                className="flex-1 bg-[#0B1F3A] border border-[#1E4478] focus:border-[#F5A623] rounded-lg px-2 py-1 text-xs font-mono text-[#FFFFFF] focus:outline-none"
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-1.5">
+            <input
+              type="text"
+              value={newRunway}
+              onChange={(e) => setNewRunway(e.target.value)}
+              placeholder="RWY (e.g. 30R)"
+              className="bg-[#0B1F3A] border border-[#1E4478] focus:border-[#F5A623] rounded-lg px-2 py-1 text-[11px] font-mono text-[#FFFFFF] focus:outline-none"
+            />
+            <input
+              type="number"
+              value={targetSpeedKt}
+              onChange={(e) => setTargetSpeedKt(e.target.value)}
+              placeholder="Speed (kt)"
+              className="bg-[#0B1F3A] border border-[#1E4478] focus:border-[#F5A623] rounded-lg px-2 py-1 text-[11px] font-mono text-[#FFFFFF] focus:outline-none"
+            />
+            <input
+              type="number"
+              value={targetAltitudeFt}
+              onChange={(e) => setTargetAltitudeFt(e.target.value)}
+              placeholder="Alt (ft)"
+              className="bg-[#0B1F3A] border border-[#1E4478] focus:border-[#F5A623] rounded-lg px-2 py-1 text-[11px] font-mono text-[#FFFFFF] focus:outline-none"
+            />
+          </div>
+        )}
+
+        {/* Free-Form Editable Message / Clearance Textarea */}
+        <form onSubmit={handleTransmitToPilot} className="space-y-2">
+          <div>
+            <label className="block text-[9px] font-mono text-[#FFFFFF]/80 uppercase mb-0.5">
+              {composerMode === 'OPTIONS'
+                ? 'Editable Options Message to Pilot (Data Link)'
+                : 'Editable ATC Command Text to Pilot'}
+            </label>
+            <textarea
+              rows={2}
+              value={commandText}
+              onChange={(e) => setCommandText(e.target.value)}
+              placeholder={
+                composerMode === 'OPTIONS'
+                  ? 'Type custom options for the pilot to review and select...'
+                  : 'Type any custom ATC clearance or instruction for the pilot...'
+              }
+              className="w-full bg-[#0B1F3A] border border-[#F5A623]/60 focus:border-[#F5A623] rounded-lg px-2.5 py-1.5 text-xs font-mono text-[#FFFFFF] placeholder-[#FFFFFF]/40 focus:outline-none resize-none"
+            />
+          </div>
+
+          {transmitBanner && (
+            <div className="p-2 rounded-lg bg-[#102A4C] border border-[#F5A623] text-[10px] font-mono text-[#FFFFFF] flex items-center space-x-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#F5A623] shrink-0" />
+              <span className="truncate">{transmitBanner}</span>
             </div>
           )}
 
           <button
-            onClick={() => setAdvisorModalOpen(true)}
-            className="w-full py-2 px-3 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-mono font-bold flex items-center justify-center space-x-1.5 shadow-md transition-colors"
+            type="submit"
+            disabled={sending}
+            className="w-full py-2 px-3 rounded-lg bg-[#F5A623] hover:bg-[#F7B84B] disabled:opacity-50 text-[#0B1F3A] text-xs font-mono font-bold flex items-center justify-center space-x-2 shadow-md transition-colors"
           >
-            <ShieldAlert className="w-3.5 h-3.5" />
-            <span>Evaluate Emergency Resequencing</span>
+            <Send className="w-3.5 h-3.5" />
+            <span>
+              {sending
+                ? 'Transmitting...'
+                : composerMode === 'OPTIONS'
+                ? `Send Options to ${targetFlightId || 'Pilot'}`
+                : `Transmit Command to ${targetFlightId || 'Pilot'}`}
+            </span>
           </button>
-        </div>
-
-        {/* Section 2: Suggested Commands (Matching Photo) */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 rounded-md bg-purple-500/20 text-purple-400 flex items-center justify-center">
-                <Send className="w-3.5 h-3.5" />
-              </div>
-              <h2 className="text-xs font-mono font-bold tracking-wider text-slate-200 uppercase">
-                Suggested Commands ({filteredSuggestions.length})
-              </h2>
-            </div>
-
-            {/* Filter buttons */}
-            <div className="flex space-x-1 text-[10px] font-mono">
-              <button
-                onClick={() => setActiveFilter('ALL')}
-                className={`px-1.5 py-0.5 rounded ${activeFilter === 'ALL' ? 'bg-purple-600 text-white font-bold' : 'text-slate-400'}`}
-              >
-                ALL
-              </button>
-              {activeControllerId !== 'ALL' && (
-                <button
-                  onClick={() => setActiveFilter('MINE')}
-                  className={`px-1.5 py-0.5 rounded ${activeFilter === 'MINE' ? 'bg-cyan-600 text-white font-bold' : 'text-slate-400'}`}
-                >
-                  MINE
-                </button>
-              )}
-              <button
-                onClick={() => setActiveFilter('CRITICAL')}
-                className={`px-1.5 py-0.5 rounded ${activeFilter === 'CRITICAL' ? 'bg-rose-600 text-white font-bold' : 'text-slate-400'}`}
-              >
-                URGENT
-              </button>
-            </div>
-          </div>
-
-          {/* List of Suggestions */}
-          <div className="space-y-2">
-            {filteredSuggestions.length === 0 ? (
-              <div className="p-4 rounded-xl bg-[#121B2D] border border-[#1E2E4A] text-center text-xs text-slate-400 font-mono">
-                No active conflicts in this sector.
-              </div>
-            ) : (
-              (showAllSuggestions ? filteredSuggestions : filteredSuggestions.slice(0, 3)).map((sug) => {
-                const isCritical = sug.urgency === 'CRITICAL';
-                const isMyFlight = activeControllerId === 'ALL' || sug.targetControllerId === activeControllerId;
-                const assignedCtrl = controllers.find((c) => c.id === sug.targetControllerId);
-                const assignedCtrlName = assignedCtrl ? assignedCtrl.name : (sug.targetControllerId || 'ATC');
-
-                return (
-                  <div
-                    key={sug.suggestionId}
-                    className={`p-3 rounded-xl border transition-all ${
-                      isCritical
-                        ? 'bg-rose-950/20 border-rose-500/50 hover:border-rose-400'
-                        : isMyFlight
-                        ? 'bg-[#121B2D] border-cyan-500/30 hover:border-cyan-400/60'
-                        : 'bg-[#0F1726]/60 border-[#1B2940] opacity-60'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div
-                        className="cursor-pointer flex-1 mr-2"
-                        onClick={() => setSelectedId(sug.aircraftId)}
-                      >
-                        <div className="flex items-center space-x-2">
-                          <span className="font-mono font-bold text-xs text-white">
-                            {sug.aircraftId}
-                          </span>
-                          <span
-                            className={`text-[9px] font-bold px-1.5 py-0.2 rounded font-mono ${
-                              isCritical
-                                ? 'bg-rose-500/30 text-rose-300'
-                                : 'bg-purple-500/30 text-purple-300'
-                            }`}
-                          >
-                            {sug.instructionType}
-                          </span>
-                          {/* Controller Ownership Badge */}
-                          <span className="text-[9px] font-mono text-slate-400">
-                            {isMyFlight && activeControllerId !== 'ALL'
-                              ? '● YOUR SECTOR'
-                              : `[${assignedCtrlName}]`}
-                          </span>
-                        </div>
-                        <p className="text-xs font-semibold text-slate-200 mt-1">
-                          {sug.displayText}
-                        </p>
-                      </div>
-
-                      {/* Send Clearance Button or Handled Badge */}
-                      {isMyFlight ? (
-                        <button
-                          onClick={() => handleSend(sug)}
-                          className={`px-2.5 py-1.5 rounded-lg text-xs font-mono font-bold flex items-center space-x-1.5 transition-all shadow-md shrink-0 ${
-                            isCritical
-                              ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-600/30'
-                              : 'bg-purple-600 hover:bg-purple-500 text-white shadow-purple-600/30'
-                          }`}
-                          title="Issue clearance to aircraft"
-                        >
-                          <span>Send</span>
-                          <Send className="w-3 h-3" />
-                        </button>
-                      ) : (
-                        <div className="flex items-center space-x-1 px-2 py-1 rounded bg-[#10192A] border border-[#1F2E47] text-[10px] font-mono text-slate-400 shrink-0">
-                          <Lock className="w-3 h-3 text-slate-500" />
-                          <span>Handled by {assignedCtrlName}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Rationale */}
-                    <p className="text-[11px] text-slate-400 mt-2 font-sans leading-relaxed border-t border-[#1C2C47] pt-1.5">
-                      {sug.reasonText}
-                    </p>
-                  </div>
-                );
-              })
-            )}
-
-            {filteredSuggestions.length > 3 && (
-              <button
-                onClick={() => setShowAllSuggestions((v) => !v)}
-                className="w-full py-1.5 text-center rounded-lg bg-[#111A2C] hover:bg-[#16233B] border border-[#1E2E4A] text-xs font-mono text-cyan-300 font-bold transition-colors"
-              >
-                {showAllSuggestions
-                  ? '▲ Show Top 3 Critical Only'
-                  : `▼ View All ${filteredSuggestions.length} Suggestions`}
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Section 3: Natural Language ATC Explanation / AI Assistant */}
-        <div className="bg-[#121B2D] rounded-xl p-3 border border-[#1E2E4A]">
-          <div className="flex items-center space-x-2 mb-2">
-            <MessageSquare className="w-4 h-4 text-cyan-400" />
-            <h3 className="text-xs font-mono font-bold text-slate-200 uppercase">
-              Explain Rationale / Chat
-            </h3>
-          </div>
-
-          <form onSubmit={handleAskAi} className="flex space-x-1.5">
-            <input
-              type="text"
-              value={aiQuestion}
-              onChange={(e) => setAiQuestion(e.target.value)}
-              placeholder="e.g. Why is FDB512 prioritized?"
-              className="flex-1 bg-[#090F1C] border border-[#1E2E4A] rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 font-sans"
-            />
-            <button
-              type="submit"
-              disabled={aiLoading}
-              className="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-white rounded-lg text-xs font-bold transition-colors"
-            >
-              {aiLoading ? '...' : 'Ask'}
-            </button>
-          </form>
-
-          {/* Quick preset questions */}
-          <div className="flex flex-wrap gap-1 mt-2">
-            {['Who is most at risk?', 'Why is FDB512 ranked first?', 'What if I divert FDB512?'].map((q) => (
-              <button
-                key={q}
-                onClick={() => setAiQuestion(q)}
-                className="text-[10px] font-mono text-cyan-300/80 bg-cyan-950/40 hover:bg-cyan-900/60 px-1.5 py-0.5 rounded border border-cyan-800/40"
-              >
-                {q}
-              </button>
-            ))}
-          </div>
-
-          {aiAnswer && (
-            <div className="mt-2.5 p-2 rounded-lg bg-[#090F1C] border border-cyan-500/30 text-xs text-cyan-100 font-sans leading-relaxed">
-              <span className="font-mono text-[10px] font-bold text-cyan-400 block mb-1">
-                HONEY B ADVISORY RATIONALE:
-              </span>
-              {aiAnswer}
-            </div>
-          )}
-        </div>
+        </form>
       </div>
 
+      {/* Deterministic Emergency Sequence Change Risk Advisor Modal */}
       <EmergencyAdvisorModal
-        isOpen={advisorModalOpen}
-        onClose={() => setAdvisorModalOpen(false)}
-        initialAircraftId={selectedAircraftId}
+        isOpen={advisorOpen}
+        onClose={() => setAdvisorOpen(false)}
+        initialAircraftId={targetFlightId || selectedAircraftId}
       />
     </div>
   );

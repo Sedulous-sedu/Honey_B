@@ -81,3 +81,4 @@ Before any calibrated probability (e.g., "probability of reserve breach $< 10^{-
    - Lidar/radiometer boundary-layer wind profiles and multi-transmissometer RVR time-series at OMDB to calibrate joint ETA + RVR degradation transition probabilities during LVP onset/recovery.
 4. **Controller Action Logs & Voice/CPDLC Transcripts**:
    - Historical AMAN advisories paired with actual ATC clearances, pilot `WILCO`/`UNABLE` responses, and controller overrides to evaluate out-of-distribution generalization, calibration curves (Brier score / reliability diagrams), and human-in-the-loop workload impact (per ICAO APAC ATMAS TF/6 and NASA NTRS 20120004194).
+

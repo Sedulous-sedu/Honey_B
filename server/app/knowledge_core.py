@@ -199,3 +199,4 @@ class KnowledgeCore:
 
 
 default_knowledge_core = KnowledgeCore()
+

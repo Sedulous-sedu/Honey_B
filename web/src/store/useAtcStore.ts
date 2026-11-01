@@ -1,6 +1,23 @@
 import { create } from 'zustand';
 import { Aircraft, Weather, Suggestion, Command, Stand, Controller, EventLogEntry, Metrics } from '../types';
 
+export interface CustomCommandDraft {
+  aircraftId: string;
+  instructionType: string;
+  displayText: string;
+  optionA?: string;
+  optionB?: string;
+  mode?: 'COMMAND' | 'OPTIONS';
+  targetAltitudeFt?: number;
+  targetSpeedKt?: number;
+  targetHeadingDeg?: number;
+  fix?: string;
+  holdAltitudeFt?: number;
+  newRunway?: string;
+  alternateIcao?: string;
+  relatedSuggestionId?: string;
+}
+
 interface AtcState {
   connected: boolean;
   activePage: 'wall' | 'operations';
@@ -24,6 +41,7 @@ interface AtcState {
 
   trafficFilter: 'ALL' | 'ARR' | 'DEP' | 'OTHER';
   searchTerm: string;
+  composerDraft: CustomCommandDraft | null;
 
   // Actions
   setConnected: (c: boolean) => void;
@@ -32,6 +50,7 @@ interface AtcState {
   setSelectedAircraftId: (id: string | null) => void;
   setTrafficFilter: (f: 'ALL' | 'ARR' | 'DEP' | 'OTHER') => void;
   setSearchTerm: (s: string) => void;
+  setComposerDraft: (draft: CustomCommandDraft | null) => void;
 
   applySnapshot: (snapshot: any) => void;
   updateAircraft: (ac: Aircraft) => void;
@@ -43,8 +62,10 @@ interface AtcState {
 
   // Server HTTP Actions
   sendCommand: (aircraftId: string, suggestion: Suggestion) => Promise<boolean>;
+  sendCustomCommand: (payload: CustomCommandDraft) => Promise<boolean>;
   triggerFog: (phase: string) => Promise<boolean>;
-  resetSim: () => Promise<boolean>;
+  resetSim: (
+  ) => Promise<boolean>;
   setSpeed: (speed: number) => Promise<boolean>;
   reassignStand: (aircraftId: string, standId: string) => Promise<boolean>;
   reassignController: (aircraftId: string, controllerId: string) => Promise<boolean>;
@@ -81,6 +102,7 @@ export const useAtcStore = create<AtcState>((set, get) => ({
 
   trafficFilter: 'ALL',
   searchTerm: '',
+  composerDraft: null,
 
   setConnected: (connected) => set({ connected }),
   setActivePage: (activePage) => set({ activePage }),
@@ -88,6 +110,7 @@ export const useAtcStore = create<AtcState>((set, get) => ({
   setSelectedAircraftId: (selectedAircraftId) => set({ selectedAircraftId }),
   setTrafficFilter: (trafficFilter) => set({ trafficFilter }),
   setSearchTerm: (searchTerm) => set({ searchTerm }),
+  setComposerDraft: (composerDraft) => set({ composerDraft }),
 
   applySnapshot: (snap) => {
     const acMap: Record<string, Aircraft> = {};
@@ -205,6 +228,43 @@ export const useAtcStore = create<AtcState>((set, get) => ({
             s.suggestionId === suggestion.suggestionId ? { ...s, status: 'EXECUTED' } : s
           )
         }));
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  },
+
+  sendCustomCommand: async (payload) => {
+    try {
+      const controllerId = get().activeControllerId === 'ALL' ? 'CTRL-ARR-01' : get().activeControllerId;
+      const res = await fetch(`${API_BASE}/demo/command`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          aircraftId: payload.aircraftId,
+          controllerId,
+          instructionType: payload.instructionType || 'INFORMATION',
+          displayText: payload.displayText,
+          targetAltitudeFt: payload.targetAltitudeFt,
+          targetSpeedKt: payload.targetSpeedKt,
+          targetHeadingDeg: payload.targetHeadingDeg,
+          fix: payload.fix,
+          holdAltitudeFt: payload.holdAltitudeFt,
+          newRunway: payload.newRunway,
+          alternateIcao: payload.alternateIcao,
+          relatedSuggestionId: payload.relatedSuggestionId
+        })
+      });
+      if (res.ok) {
+        if (payload.relatedSuggestionId) {
+          set((state) => ({
+            suggestions: state.suggestions.map((s) =>
+              s.suggestionId === payload.relatedSuggestionId ? { ...s, status: 'EXECUTED' } : s
+            )
+          }));
+        }
         return true;
       }
       return false;

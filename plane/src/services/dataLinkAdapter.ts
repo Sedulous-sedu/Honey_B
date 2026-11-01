@@ -783,7 +783,7 @@ export class HttpDataLinkAdapter implements DataLinkAdapter {
   private listeners: Set<(state: ConsolidatedDashboardState) => void> = new Set();
   private latestState: ConsolidatedDashboardState | null = null;
 
-  constructor(baseUrl: string, flightId: string = 'EK201', pollIntervalMs: number = 5000) {
+  constructor(baseUrl: string, flightId: string = 'UAE231', pollIntervalMs: number = 1500) {
     this.baseUrl = baseUrl.replace(/\/$/, '');
     this.flightId = flightId;
     this.pollIntervalMs = pollIntervalMs;
@@ -825,11 +825,47 @@ export class HttpDataLinkAdapter implements DataLinkAdapter {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-    return res.json();
+    const out = await res.json();
+    // Immediately refresh dashboard state after pilot response
+    try {
+      const dashRes = await fetch(`${this.baseUrl}/api/dashboard/${this.flightId}`);
+      if (dashRes.ok) {
+        const data: ConsolidatedDashboardState = await dashRes.json();
+        this.latestState = data;
+        for (const l of this.listeners) l(data);
+      }
+    } catch {
+      // ignore poll error
+    }
+    return out;
   }
 
-  async setScenario(_name: ScenarioName): Promise<void> {
-    // In live mode, scenario is dictated by ground control server
+  async setScenario(name: ScenarioName): Promise<void> {
+    try {
+      if (name === 'RUNWAY_WEATHER_CHANGE') {
+        await fetch(`${this.baseUrl}/demo/fog`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phase: 'DENSE_FOG' }),
+        });
+      } else if (name === 'EXTENDED_HOLD') {
+        await fetch(`${this.baseUrl}/demo/fog`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phase: 'FOG' }),
+        });
+      } else if (name === 'NORMAL_ARRIVAL') {
+        await fetch(`${this.baseUrl}/demo/reset`, { method: 'POST' });
+      }
+      const res = await fetch(`${this.baseUrl}/api/dashboard/${this.flightId}`);
+      if (res.ok) {
+        const data: ConsolidatedDashboardState = await res.json();
+        this.latestState = data;
+        for (const l of this.listeners) l(data);
+      }
+    } catch (err) {
+      console.warn('Scenario switch error:', err);
+    }
   }
 
   getCurrentScenario(): ScenarioName {
@@ -872,10 +908,15 @@ export class HttpDataLinkAdapter implements DataLinkAdapter {
 // FOR STANDALONE (no server needed):
 //   Keep as: new MockDataLinkAdapter()
 
-const GROUND_CONTROL_URL = import.meta.env.VITE_GROUND_URL ?? '';
-const DEMO_FLIGHT_ID = import.meta.env.VITE_FLIGHT_ID ?? 'UAE231';
+const urlFlightParam =
+  typeof window !== 'undefined'
+    ? new URLSearchParams(window.location.search).get('flight')
+    : null;
+
+const GROUND_CONTROL_URL = import.meta.env.VITE_GROUND_URL ?? 'http://localhost:8000';
+const DEMO_FLIGHT_ID = urlFlightParam || import.meta.env.VITE_FLIGHT_ID || 'UAE231';
 
 export const activeDataLinkAdapter: DataLinkAdapter =
   GROUND_CONTROL_URL
-    ? new HttpDataLinkAdapter(GROUND_CONTROL_URL, DEMO_FLIGHT_ID)
+    ? new HttpDataLinkAdapter(GROUND_CONTROL_URL, DEMO_FLIGHT_ID, 1500)
     : new MockDataLinkAdapter();

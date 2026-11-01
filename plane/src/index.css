@@ -7,66 +7,67 @@
 
 /* ── CSS Custom Properties ────────────────────────────────── */
 :root {
-  /* ── Honey B Brand Palette ──────────────────────────────────
-     Deep charcoal surfaces  · Warm off-white text
-     Restrained blue controls · Gold ONLY on the brand mark
+  /* ── Honey B Unified Brand Palette ──────────────────────────
+     Primary 1: #0B1F3A (Deep Aviation Navy)
+     Primary 2: #F5A623 (Honey Gold)
+     Primary 3: #FFFFFF (Crisp White)
      ────────────────────────────────────────────────────────── */
 
-  /* Background layers — deep charcoal family */
-  --bg-base: #141416;
-  --bg-surface: #1C1C1E;
-  --bg-card: #242428;
-  --bg-card-hover: #2C2C32;
-  --bg-elevated: #303038;
-  --bg-overlay: rgba(20, 20, 22, 0.96);
+  /* Background layers — deep aviation navy family (#0B1F3A base) */
+  --bg-base: #0B1F3A;
+  --bg-surface: #0E2647;
+  --bg-card: #122E54;
+  --bg-card-hover: #173866;
+  --bg-elevated: #1B4175;
+  --bg-overlay: rgba(11, 31, 58, 0.96);
 
-  /* Brand mark accent — honey-gold, used ONLY on the logo/mark */
+  /* Brand mark & primary accent — Honey Gold (#F5A623) */
   --brand-gold: #F5A623;
   --brand-gold-dim: #C8841A;
-  --brand-gold-subtle: rgba(245, 166, 35, 0.12);
+  --brand-gold-subtle: rgba(245, 166, 35, 0.14);
 
-  /* Interactive controls — restrained aviation blue */
-  --color-primary: #4B9EFF;
-  --color-primary-dim: #2D7FE8;
-  --color-primary-glow: rgba(75, 158, 255, 0.15);
-  --color-accent: #7BB8FF;
+  /* Interactive controls — Honey Gold & crisp white-blue accents */
+  --color-primary: #F5A623;
+  --color-primary-dim: #C8841A;
+  --color-primary-glow: rgba(245, 166, 35, 0.16);
+  --color-accent: #F7B84B;
 
-  /* Urgency spectrum — must not use gold/amber to avoid brand confusion */
+  /* Urgency spectrum */
   --color-critical: #FF453A;
   --color-critical-bg: rgba(255, 69, 58, 0.12);
   --color-critical-border: rgba(255, 69, 58, 0.4);
   --color-high: #FF6B35;
   --color-high-bg: rgba(255, 107, 53, 0.10);
   --color-high-border: rgba(255, 107, 53, 0.35);
-  --color-medium: #FFB84D;
-  --color-medium-bg: rgba(255, 184, 77, 0.08);
-  --color-medium-border: rgba(255, 184, 77, 0.30);
-  --color-low: #5AC8FA;
-  --color-low-bg: rgba(90, 200, 250, 0.07);
-  --color-low-border: rgba(90, 200, 250, 0.25);
-  --color-info: #8E8E93;
-  --color-info-bg: rgba(142, 142, 147, 0.08);
-  --color-info-border: rgba(142, 142, 147, 0.20);
+  --color-medium: #F5A623;
+  --color-medium-bg: rgba(245, 166, 35, 0.10);
+  --color-medium-border: rgba(245, 166, 35, 0.35);
+  --color-low: #FFFFFF;
+  --color-low-bg: rgba(255, 255, 255, 0.08);
+  --color-low-border: rgba(255, 255, 255, 0.25);
+  --color-info: #B8CBE0;
+  --color-info-bg: rgba(184, 203, 224, 0.08);
+  --color-info-border: rgba(184, 203, 224, 0.20);
 
   /* Status colors */
   --color-live: #30D158;
   --color-live-glow: rgba(48, 209, 88, 0.20);
-  --color-stale: #FFB84D;
+  --color-stale: #F5A623;
   --color-disconnected: #FF453A;
 
-  /* Text hierarchy — warm off-white family */
-  --text-primary: #F5F0E8;
-  --text-secondary: #AEAEB2;
-  --text-muted: #636366;
-  --text-label: #8E8E93;
+  /* Text hierarchy — crisp white (#FFFFFF) family */
+  --text-primary: #FFFFFF;
+  --text-secondary: #D6E4F5;
+  --text-muted: #8FAAD0;
+  --text-label: #B8CBE0;
   --text-value: #FFFFFF;
-  --text-highlight: #4B9EFF;
+  --text-highlight: #F5A623;
 
   /* Borders */
-  --border-subtle: rgba(255, 255, 255, 0.06);
-  --border-card: rgba(255, 255, 255, 0.09);
-  --border-active: rgba(75, 158, 255, 0.35);
-  --border-glow: rgba(75, 158, 255, 0.60);
+  --border-subtle: rgba(255, 255, 255, 0.10);
+  --border-card: rgba(245, 166, 35, 0.28);
+  --border-active: rgba(245, 166, 35, 0.55);
+  --border-glow: rgba(245, 166, 35, 0.75);
 
   /* Typography */
   --font-ui: 'Inter', system-ui, sans-serif;
@@ -2120,8 +2121,8 @@ body {
 .tablet-overview-section {
   display: flex;
   flex-direction: column;
-  background: #090e18;
-  border-bottom: 2px solid rgba(0, 212, 255, 0.2);
+  background: #0B1F3A;
+  border-bottom: 2px solid rgba(245, 166, 35, 0.35);
   padding: var(--space-md) var(--space-xl);
   max-width: 1720px;
   margin: 0 auto;
@@ -2179,8 +2180,8 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(15, 23, 42, 0.8);
-  border: 1px solid rgba(0, 212, 255, 0.3);
+  background: #102A4C;
+  border: 1px solid rgba(245, 166, 35, 0.45);
   padding: 4px 10px;
   border-radius: var(--radius-sm);
 }
@@ -2189,22 +2190,22 @@ body {
   font-family: var(--font-display);
   font-size: 1.15rem;
   font-weight: 700;
-  color: var(--color-primary);
+  color: #F5A623;
 }
 
 .chip-flight-route {
   font-family: var(--font-data);
   font-size: 0.75rem;
-  color: var(--text-secondary);
+  color: #FFFFFF;
 }
 
 .tablet-header-tabs {
   display: flex;
   gap: 6px;
-  background: rgba(15, 23, 42, 0.6);
+  background: #08172C;
   padding: 3px;
   border-radius: var(--radius-md);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(245, 166, 35, 0.25);
 }
 
 .tab-pill-btn {
@@ -2212,7 +2213,7 @@ body {
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.05em;
-  color: #94a3b8;
+  color: rgba(255, 255, 255, 0.75);
   background: transparent;
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
@@ -2221,15 +2222,15 @@ body {
 }
 
 .tab-pill-btn:hover {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.04);
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .tab-pill-btn.active {
-  color: #fff;
-  background: rgba(0, 212, 255, 0.15);
-  border-color: rgba(0, 212, 255, 0.4);
-  box-shadow: 0 0 12px rgba(0, 212, 255, 0.2);
+  color: #0B1F3A;
+  background: #F5A623;
+  border-color: #F5A623;
+  box-shadow: 0 0 12px rgba(245, 166, 35, 0.35);
 }
 
 .tablet-header-right {
@@ -2286,12 +2287,11 @@ body {
 .tablet-update-card {
   display: flex;
   align-items: stretch;
-  background: #0d1524;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #102A4C;
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: var(--radius-md);
   padding: 10px 14px;
   gap: 14px;
-  cursor: pointer;
   transition: all var(--transition-fast);
   position: relative;
   overflow: hidden;
@@ -2299,8 +2299,8 @@ body {
 
 .tablet-update-card:hover,
 .tablet-update-card:focus-visible {
-  background: #111b2e;
-  border-color: rgba(0, 212, 255, 0.35);
+  background: #163763;
+  border-color: #F5A623;
   transform: translateY(-1px);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
@@ -2528,8 +2528,8 @@ body {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 10px;
-  background: #0b1220;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #08172C;
+  border: 1px solid rgba(245, 166, 35, 0.35);
   border-radius: var(--radius-lg);
   padding: 10px 14px;
 }
@@ -2539,16 +2539,16 @@ body {
   align-items: center;
   gap: 12px;
   padding: 8px 12px;
-  background: rgba(15, 23, 42, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: #102A4C;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 
 .bottom-strip-tile:hover {
-  background: rgba(15, 23, 42, 0.95);
-  border-color: rgba(0, 212, 255, 0.35);
+  background: #163763;
+  border-color: #F5A623;
   transform: translateY(-1px);
 }
 
@@ -3910,8 +3910,8 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background: rgba(15, 23, 42, 0.95);
-  border: 1.5px solid rgba(0, 212, 255, 0.35);
+  background: #102A4C;
+  border: 1.5px solid #F5A623;
   border-radius: var(--radius-lg);
   padding: 24px 32px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -4090,8 +4090,8 @@ body {
 }
 
 .summary-tile {
-  background: rgba(15, 23, 42, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #102A4C;
+  border: 1px solid rgba(245, 166, 35, 0.35);
   border-radius: var(--radius-md);
   padding: 16px 18px;
   display: flex;
@@ -4103,8 +4103,8 @@ body {
 }
 
 .summary-tile:hover {
-  border-color: rgba(0, 212, 255, 0.4);
-  background: rgba(15, 23, 42, 0.98);
+  border-color: #F5A623;
+  background: #163763;
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }

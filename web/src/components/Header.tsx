@@ -31,37 +31,43 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <header className="h-14 bg-[#090F1B] border-b border-[#162338] px-4 flex items-center justify-between select-none">
+    <header className="h-14 bg-[#0B1F3A] border-b border-[#1E4478] px-4 flex items-center justify-between select-none shadow-md">
       {/* Left: Brand & Navigation */}
       <div className="flex items-center space-x-6">
-        <div className="flex items-center space-x-2">
-          <span className="text-xl">🐝</span>
-          <span className="font-mono font-bold text-sm tracking-wider text-white">
-            HONEY B <span className="text-blue-400">GROUND CONTROL</span>
+        <div className="flex items-center space-x-2.5">
+          {/* Exact same Honey B logo image used in Pilot App */}
+          <img
+            src="/honey-b-logo.jpg"
+            alt="Honey B logo"
+            className="w-9 h-9 rounded-lg bg-[#FFFFFF] p-0.5 object-contain border border-[#F5A623] shadow-sm"
+            draggable={false}
+          />
+          <span className="font-mono font-bold text-sm tracking-wider text-[#FFFFFF]">
+            HONEY B <span className="text-[#F5A623]">GROUND CONTROL</span>
           </span>
-          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#102A4C] text-[#FFFFFF] border border-[#F5A623]/40">
             OMDB
           </span>
           {activeControllerId === 'ALL' ? (
-            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-blue-900/40 text-blue-300 border border-blue-600/40">
+            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#102A4C] text-[#F5A623] border border-[#F5A623]/50">
               OVERVIEW WALL (SUPERVISOR)
             </span>
           ) : (
-            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-900/40 text-emerald-300 border border-emerald-500/50 flex items-center space-x-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#102A4C] text-[#F5A623] border border-[#F5A623] flex items-center space-x-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#F5A623] animate-pulse"></span>
               <span>SECTOR: {activeController?.name.toUpperCase()} ({activeControllerId.replace('CTRL-', '')})</span>
             </span>
           )}
         </div>
 
         {/* Page Switcher */}
-        <div className="flex bg-[#0D1526] p-0.5 rounded-lg border border-[#1A2C4A]">
+        <div className="flex bg-[#08172C] p-0.5 rounded-lg border border-[#1E4478]">
           <button
             onClick={() => setActivePage('wall')}
             className={`px-3 py-1 rounded-md text-xs font-mono font-bold flex items-center space-x-1.5 transition-colors ${
               activePage === 'wall'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-[#F5A623] text-[#0B1F3A] shadow-sm'
+                : 'text-[#FFFFFF]/70 hover:text-[#FFFFFF]'
             }`}
           >
             <Radio className="w-3.5 h-3.5" />
@@ -71,8 +77,8 @@ export const Header: React.FC = () => {
             onClick={() => setActivePage('operations')}
             className={`px-3 py-1 rounded-md text-xs font-mono font-bold flex items-center space-x-1.5 transition-colors ${
               activePage === 'operations'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-[#F5A623] text-[#0B1F3A] shadow-sm'
+                : 'text-[#FFFFFF]/70 hover:text-[#FFFFFF]'
             }`}
           >
             <LayoutGrid className="w-3.5 h-3.5" />
@@ -83,28 +89,52 @@ export const Header: React.FC = () => {
 
       {/* Center: Live UTC Clock & Scenario Quick Controls */}
       <div className="flex items-center space-x-4">
-        <div className="flex items-center space-x-2 px-3 py-1 rounded bg-[#0D1526] border border-[#1A2C4A] text-xs font-mono">
-          <Clock className="w-3.5 h-3.5 text-cyan-400" />
-          <span className="font-bold text-cyan-300">{timeStr}</span>
+        <div className="flex items-center space-x-2 px-3 py-1 rounded bg-[#102A4C] border border-[#F5A623]/40 text-xs font-mono">
+          <Clock className="w-3.5 h-3.5 text-[#F5A623]" />
+          <span className="font-bold text-[#FFFFFF]">{timeStr}</span>
         </div>
 
-        {/* Quick Fog Trigger */}
-        <button
-          onClick={() => triggerFog('DENSE_FOG')}
-          className={`px-2.5 py-1 rounded text-xs font-mono font-bold flex items-center space-x-1.5 transition-all ${
-            weather?.lvp.active
-              ? 'bg-amber-600 text-white shadow-amber-600/30'
-              : 'bg-[#121E36] hover:bg-amber-900/40 text-amber-300 border border-amber-600/40'
-          }`}
-          title="Instantly jump simulation to Dense Fog LVP"
-        >
-          <CloudFog className="w-3.5 h-3.5" />
-          <span>{weather?.lvp.active ? 'FOG ACTIVE' : 'TRIGGER FOG'}</span>
-        </button>
+        {/* Quick Fog & Weather Phase Switcher */}
+        <div className="flex items-center bg-[#08172C] p-0.5 rounded-lg border border-[#F5A623]/50 space-x-1">
+          <button
+            onClick={() => triggerFog('CLEAR')}
+            className={`px-2 py-1 rounded text-[11px] font-mono font-bold transition-all ${
+              weather && !weather.lvp.active
+                ? 'bg-[#102A4C] text-[#FFFFFF] border border-[#F5A623]/40'
+                : 'text-[#FFFFFF]/60 hover:text-[#FFFFFF]'
+            }`}
+            title="Set Clear Weather (VFR 6000m)"
+          >
+            ☀ CLEAR
+          </button>
+          <button
+            onClick={() => triggerFog('FOG')}
+            className={`px-2 py-1 rounded text-[11px] font-mono font-bold transition-all ${
+              weather && weather.lvp.active && weather.visibilityM > 500
+                ? 'bg-[#F5A623] text-[#0B1F3A] shadow-md'
+                : 'text-[#F5A623] hover:bg-[#102A4C]'
+            }`}
+            title="Set Moderate Fog (800m · LVP Preparation)"
+          >
+            ☁ FOG 800m
+          </button>
+          <button
+            onClick={() => triggerFog('DENSE_FOG')}
+            className={`px-2.5 py-1 rounded text-[11px] font-mono font-bold flex items-center space-x-1 transition-all ${
+              weather && weather.lvp.active && weather.visibilityM <= 500
+                ? 'bg-[#F5A623] text-[#0B1F3A] shadow-md animate-pulse'
+                : 'bg-[#102A4C] hover:bg-[#F5A623] text-[#F5A623] hover:text-[#0B1F3A]'
+            }`}
+            title="Instantly jump simulation to Dense Fog LVP (350m · CAT IIIB · UAE231 Priority)"
+          >
+            <CloudFog className="w-3.5 h-3.5" />
+            <span>{weather && weather.visibilityM <= 500 ? 'DENSE FOG ACTIVE' : 'TRIGGER DENSE FOG'}</span>
+          </button>
+        </div>
 
         <button
           onClick={() => resetSim()}
-          className="p-1.5 rounded bg-[#121E36] hover:bg-[#1A2C4A] text-slate-300 border border-[#233552] transition-colors"
+          className="p-1.5 rounded bg-[#102A4C] hover:bg-[#163763] text-[#FFFFFF] border border-[#1E4478] transition-colors"
           title="Reset Simulation Scenario"
         >
           <RotateCcw className="w-3.5 h-3.5" />
@@ -115,12 +145,12 @@ export const Header: React.FC = () => {
       <div className="flex items-center space-x-4">
         {/* Active Controller Selector */}
         <div className="flex items-center space-x-2">
-          <Users className="w-3.5 h-3.5 text-slate-400" />
-          <span className="text-[11px] font-mono text-slate-400">CONSOLE:</span>
+          <Users className="w-3.5 h-3.5 text-[#F5A623]" />
+          <span className="text-[11px] font-mono text-[#FFFFFF]/80">CONSOLE:</span>
           <select
             value={activeControllerId}
             onChange={(e) => handleControllerChange(e.target.value)}
-            className="bg-[#0D1526] border border-[#233552] text-xs font-mono font-bold text-cyan-300 rounded px-2.5 py-1 focus:outline-none focus:border-cyan-400"
+            className="bg-[#102A4C] border border-[#F5A623]/50 text-xs font-mono font-bold text-[#FFFFFF] rounded px-2.5 py-1 focus:outline-none focus:border-[#F5A623]"
           >
             <option value="ALL">ALL (Overview Wall)</option>
             {controllers.map((c) => (
@@ -132,13 +162,13 @@ export const Header: React.FC = () => {
         </div>
 
         {/* WebSocket Live Status */}
-        <div className="flex items-center space-x-1.5 pl-3 border-l border-[#1A2C4A]">
+        <div className="flex items-center space-x-1.5 pl-3 border-l border-[#1E4478]">
           <span
             className={`w-2 h-2 rounded-full ${
-              connected ? 'bg-emerald-400 animate-pulse' : 'bg-rose-500'
+              connected ? 'bg-[#F5A623] animate-pulse' : 'bg-rose-500'
             }`}
           />
-          <span className="text-[10px] font-mono text-slate-400">
+          <span className="text-[10px] font-mono text-[#FFFFFF]/80">
             {connected ? 'LIVE WS 1Hz' : 'OFFLINE'}
           </span>
         </div>

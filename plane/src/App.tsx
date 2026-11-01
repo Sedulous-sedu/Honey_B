@@ -42,10 +42,18 @@ export default function App() {
     activeDataLinkAdapter.pilotUnableReroute(rerouteId);
   };
 
-  const handleSendPilotResponse = async (responseType: PilotResponseType, text: string) => {
+  const handleSendPilotResponse = async (
+    responseType: PilotResponseType,
+    text: string,
+    referencedMessageId?: string
+  ) => {
     if (!state) return;
+    const latestUnreadCmd =
+      state.messages.find((m) => m.source === 'ATC' && m.requiresAck) ||
+      state.messages.find((m) => m.source === 'ATC');
     await activeDataLinkAdapter.sendPilotResponse({
-      referencedMessageId: `OVR-${Date.now()}`,
+      referencedMessageId:
+        referencedMessageId || (latestUnreadCmd ? latestUnreadCmd.id : `OVR-${Date.now()}`),
       flightId: state.flightId,
       responseType,
       pilotNotes: text,

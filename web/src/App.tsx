@@ -24,7 +24,7 @@ export const App: React.FC = () => {
   }, [setActiveControllerId]);
 
   return (
-    <div className="w-screen h-screen flex flex-col bg-[#070B12] text-slate-100 overflow-hidden font-sans">
+    <div className="w-screen h-screen flex flex-col bg-[#0B1F3A] text-[#FFFFFF] overflow-hidden font-sans">
       <Header />
       {activePage === 'wall' ? <Page1MainWall /> : <Page2Operations />}
     </div>

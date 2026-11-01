@@ -28,6 +28,58 @@ class SuggestionEngine:
         ]
         arrivals.sort(key=lambda a: a.position.distanceToThresholdNm)
 
+        # 0. Primary Demo Flight UAE231 — Fog / LVP & Sequencing Decision Support
+        uae = state.aircraft.get("UAE231")
+        if uae and uae.flightPhase in [FlightPhase.ARRIVAL, FlightPhase.APPROACH, FlightPhase.HOLDING]:
+            if lvp_active:
+                new_suggestions["SUG-FOG-UAE231"] = SuggestionItem(
+                    suggestionId="SUG-FOG-UAE231",
+                    aircraftId="UAE231",
+                    instructionType=InstructionType.RUNWAY_CHANGE,
+                    displayText="UAE231 Sidestep RWY 30R CAT IIIB Autoland (RVR 400m Fog — Bypass 30L LVP Delay)",
+                    params={"newRunway": "30R", "newApproach": "ILS CAT IIIB 30R"},
+                    reasonCodes=["LVP_FOG_SPACING_CONFLICT", "LOW_FUEL_MARGIN", "CAT_IIIB_CAPABLE"],
+                    reasonText=(
+                        f"DENSE FOG LVP ACTIVE (RVR {rvr_30l}m): RWY 30L spacing doubled to 6 NM behind SIA317 & DLH788. "
+                        f"UAE231 endurance is {round(uae.fuel.enduranceMin or 36)} min (B77W CAT IIIB Autoland certified) — "
+                        "Sidestep to RWY 30R or send Pilot Options (Sidestep 30R vs Hold DXB VOR)."
+                    ),
+                    urgency="CRITICAL",
+                    timeToDecisionPointSec=45,
+                    affectedAircraft=["UAE231", "DLH788", "SIA317"],
+                    targetControllerId=uae.assignedControllerId,
+                )
+                new_suggestions["SUG-HOLD-UAE231"] = SuggestionItem(
+                    suggestionId="SUG-HOLD-UAE231",
+                    aircraftId="UAE231",
+                    instructionType=InstructionType.HOLD,
+                    displayText="UAE231 Hold at DXB VOR 4000 ft, expect further clearance in 8 min (LVP Spacing)",
+                    params={"fix": "DXB VOR", "holdAltitudeFt": 4000, "legTimeMin": 1.0},
+                    reasonCodes=["LVP_SPACING_EXPANSION", "HOLD_REQUIRED"],
+                    reasonText=(
+                        f"RVR {rvr_30l}m LVP requires 6.0 NM spacing on RWY 30L. Hold at DXB VOR 4000 ft "
+                        "or offer crew choice between DXB VOR hold and RWY 30R sidestep."
+                    ),
+                    urgency="HIGH",
+                    timeToDecisionPointSec=60,
+                    affectedAircraft=["UAE231"],
+                    targetControllerId=uae.assignedControllerId,
+                )
+            else:
+                new_suggestions["SUG-SEQ-UAE231"] = SuggestionItem(
+                    suggestionId="SUG-SEQ-UAE231",
+                    aircraftId="UAE231",
+                    instructionType=InstructionType.SPEED,
+                    displayText="UAE231 Maintain 210 knots until 8 DME, Sequence #3 for ILS RWY 30L",
+                    params={"targetSpeedKt": 210},
+                    reasonCodes=["ARRIVAL_SEQUENCING", "PRIMARY_DEMO_FLIGHT"],
+                    reasonText="Primary arrival stream sequencing behind DLH788 on RWY 30L. Trigger Fog to test LVP CAT IIIB conflict.",
+                    urgency="HIGH",
+                    timeToDecisionPointSec=90,
+                    affectedAircraft=["UAE231", "DLH788"],
+                    targetControllerId=uae.assignedControllerId,
+                )
+
         # 1. Check CAT I capability during low visibility (e.g. IGO1433)
         for ac in arrivals:
             if lvp_active and ac.capability.lvpApproach == "CAT_I":

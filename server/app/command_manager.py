@@ -51,12 +51,17 @@ class CommandManager:
                 )
             state.claims[claim_key] = {"aircraftId": aircraft_id, "controllerId": controller_id, "claimedAt": state.get_sim_time_iso()}
 
-        # Supersede any existing pending/executing command of the same instruction type
+        # Supersede any existing pending/executing command of the same instruction type (except INFORMATION options)
         superseded_cmd_id = None
-        for existing_id, cmd in list(state.commands.items()):
-            if cmd.aircraftId == aircraft_id and cmd.status in [CommandStatus.SENT, CommandStatus.STANDBY]:
-                superseded_cmd_id = existing_id
-                CommandManager.supersede_command(existing_id, reason="Replaced by new controller instruction")
+        if instruction_type != InstructionType.INFORMATION:
+            for existing_id, cmd in list(state.commands.items()):
+                if (
+                    cmd.aircraftId == aircraft_id
+                    and cmd.instructionType == instruction_type
+                    and cmd.status in [CommandStatus.SENT, CommandStatus.STANDBY]
+                ):
+                    superseded_cmd_id = existing_id
+                    CommandManager.supersede_command(existing_id, reason="Replaced by new controller instruction")
 
         cmd_id = state.next_command_id()
         issued_at = state.get_sim_time_iso()
@@ -88,7 +93,7 @@ class CommandManager:
             routeText=params.get("routeText"),
             text=params.get("text"),
             displayText=displayText,
-            allowedResponses=["WILCO", "UNABLE", "STANDBY"] if instruction_type != InstructionType.INFORMATION else [],
+            allowedResponses=["WILCO", "UNABLE", "STANDBY"],
             status=CommandStatus.SENT,
             issuedAt=issued_at,
             expiresAt=expires_at,
@@ -113,7 +118,7 @@ class CommandManager:
         if not cmd:
             return None, ErrorPayload(code="UNKNOWN_COMMAND", message=f"Command {command_id} not found.", commandId=command_id)
 
-        if cmd.status not in [CommandStatus.SENT, CommandStatus.STANDBY]:
+        if cmd.status not in [CommandStatus.SENT, CommandStatus.STANDBY, CommandStatus.ACKNOWLEDGED, CommandStatus.UNABLE]:
             return None, ErrorPayload(
                 code="COMMAND_NOT_AWAITING_RESPONSE",
                 message=f"Command {command_id} is in {cmd.status} status and not awaiting response.",
@@ -125,12 +130,18 @@ class CommandManager:
 
         if response == PilotResponse.WILCO:
             cmd.status = CommandStatus.ACKNOWLEDGED
-            state.log_event("PILOT", f"{aircraft_id} acknowledged {command_id} with WILCO.")
+            cmd.response = response
+            cmd.pilotNotes = reason_text
+            state.log_event("PILOT", f"{aircraft_id} acknowledged {command_id} with WILCO ({reason_text or 'Accepted'}).")
         elif response == PilotResponse.UNABLE:
             cmd.status = CommandStatus.UNABLE
+            cmd.response = response
+            cmd.pilotNotes = reason_text
             state.log_event("PILOT", f"{aircraft_id} responded UNABLE to {command_id}. Reason: {reason_text or 'No reason'}.")
         elif response == PilotResponse.STANDBY:
             cmd.status = CommandStatus.STANDBY
+            cmd.response = response
+            cmd.pilotNotes = reason_text
             state.log_event("PILOT", f"{aircraft_id} requested STANDBY for {command_id}.")
 
         status_payload = CommandStatusPayload(
