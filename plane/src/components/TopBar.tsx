@@ -13,7 +13,7 @@ export function TopBar({ aircraft, connectionStatus, lastSeenUtc }: Props) {
     <header className="topbar" role="banner">
       <div className="topbar-brand">
         <div>
-          <div className="topbar-brand-text">FlightDeck AMS</div>
+          <div className="topbar-brand-text">Honey B Pilot</div>
           <div className="topbar-brand-sub">Pilot display</div>
         </div>
       </div>
