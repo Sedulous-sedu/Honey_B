@@ -12,10 +12,9 @@ export function TopBar({ aircraft, connectionStatus, lastSeenUtc }: Props) {
   return (
     <header className="topbar" role="banner">
       <div className="topbar-brand">
-        <span className="topbar-brand-icon">✈</span>
         <div>
           <div className="topbar-brand-text">FlightDeck AMS</div>
-          <div className="topbar-brand-sub">Pilot In-Plane Decision Support</div>
+          <div className="topbar-brand-sub">Pilot display</div>
         </div>
       </div>
 

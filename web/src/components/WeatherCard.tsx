@@ -14,11 +14,11 @@ export const WeatherCard: React.FC = () => {
 
   return (
     <div
-      className={`bg-[#0B1F3A]/95 backdrop-blur-md border rounded-xl p-3 shadow-xl select-none text-[#FFFFFF] transition-all ${
+      className={`bg-[#0A1830]/95 backdrop-blur-md border rounded-xl p-3 shadow-xl select-none text-[#FFFFFF] transition-all ${
         isLvp ? 'border-2 border-[#F5A623]' : 'border-[#F5A623]/50'
       }`}
     >
-      <div className="flex items-center justify-between border-b border-[#1E4478] pb-2 mb-2">
+      <div className="flex items-center justify-between border-b border-[#1A3A66] pb-2 mb-2">
         <div className="flex items-center space-x-2">
           <CloudFog className="w-4 h-4 text-[#F5A623]" />
           <h3 className="font-mono text-xs font-bold text-[#FFFFFF]">
@@ -28,10 +28,10 @@ export const WeatherCard: React.FC = () => {
         <span
           className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded ${
             isDenseFog
-              ? 'bg-[#F5A623] text-[#0B1F3A] animate-pulse'
+              ? 'bg-[#F5A623] text-[#0A1830] animate-pulse'
               : isLvp
               ? 'bg-[#F5A623]/20 text-[#F5A623] border border-[#F5A623]'
-              : 'bg-[#102A4C] text-[#FFFFFF] border border-[#1E4478]'
+              : 'bg-[#0F2444] text-[#FFFFFF] border border-[#1A3A66]'
           }`}
         >
           {weather.flightCategory} · {weather.lvp.phase}
@@ -39,14 +39,14 @@ export const WeatherCard: React.FC = () => {
       </div>
 
       {/* Visual Fog Density & Visibility Bar */}
-      <div className="mb-2.5 bg-[#08172C] p-2 rounded-lg border border-[#1E4478]">
+      <div className="mb-2.5 bg-[#08172C] p-2 rounded-lg border border-[#1A3A66]">
         <div className="flex items-center justify-between text-[10px] font-mono mb-1">
           <span className="text-[#FFFFFF]/80">RUNWAY VISIBILITY / FOG DENSITY</span>
           <span className="font-bold text-[#F5A623]">
             {isDenseFog ? '🌫 DENSE FOG (CAT IIIB)' : isLvp ? '☁ FOG LVP PREP' : '☀ CLEAR VFR'}
           </span>
         </div>
-        <div className="w-full h-2 bg-[#102A4C] rounded-full overflow-hidden border border-[#1E4478]">
+        <div className="w-full h-2 bg-[#0F2444] rounded-full overflow-hidden border border-[#1A3A66]">
           <div
             className="h-full transition-all duration-500"
             style={{
@@ -112,13 +112,13 @@ export const WeatherCard: React.FC = () => {
       </div>
 
       {/* Quick Weather Phase Buttons */}
-      <div className="mt-2 pt-2 border-t border-[#1E4478] flex items-center justify-between gap-1">
+      <div className="mt-2 pt-2 border-t border-[#1A3A66] flex items-center justify-between gap-1">
         <button
           onClick={() => triggerFog('CLEAR')}
           className={`flex-1 py-1 rounded text-[10px] font-mono font-bold border transition-colors ${
             !isLvp
-              ? 'bg-[#F5A623] text-[#0B1F3A] border-[#F5A623]'
-              : 'bg-[#08172C] text-[#FFFFFF]/80 border-[#1E4478] hover:border-[#F5A623]'
+              ? 'bg-[#F5A623] text-[#0A1830] border-[#F5A623]'
+              : 'bg-[#08172C] text-[#FFFFFF]/80 border-[#1A3A66] hover:border-[#F5A623]'
           }`}
         >
           Clear (6km)
@@ -127,8 +127,8 @@ export const WeatherCard: React.FC = () => {
           onClick={() => triggerFog('FOG')}
           className={`flex-1 py-1 rounded text-[10px] font-mono font-bold border transition-colors ${
             isLvp && !isDenseFog
-              ? 'bg-[#F5A623] text-[#0B1F3A] border-[#F5A623]'
-              : 'bg-[#08172C] text-[#FFFFFF]/80 border-[#1E4478] hover:border-[#F5A623]'
+              ? 'bg-[#F5A623] text-[#0A1830] border-[#F5A623]'
+              : 'bg-[#08172C] text-[#FFFFFF]/80 border-[#1A3A66] hover:border-[#F5A623]'
           }`}
         >
           Fog (800m)
@@ -137,8 +137,8 @@ export const WeatherCard: React.FC = () => {
           onClick={() => triggerFog('DENSE_FOG')}
           className={`flex-1 py-1 rounded text-[10px] font-mono font-bold border transition-colors ${
             isDenseFog
-              ? 'bg-[#F5A623] text-[#0B1F3A] border-[#F5A623]'
-              : 'bg-[#08172C] text-[#F5A623] border-[#F5A623]/60 hover:bg-[#F5A623] hover:text-[#0B1F3A]'
+              ? 'bg-[#F5A623] text-[#0A1830] border-[#F5A623]'
+              : 'bg-[#08172C] text-[#F5A623] border-[#F5A623]/60 hover:bg-[#F5A623] hover:text-[#0A1830]'
           }`}
         >
           Dense Fog (350m)
@@ -146,7 +146,7 @@ export const WeatherCard: React.FC = () => {
       </div>
 
       {/* Raw METAR ticker at bottom */}
-      <div className="mt-2 pt-1.5 border-t border-[#1E4478]">
+      <div className="mt-2 pt-1.5 border-t border-[#1A3A66]">
         <div className="font-mono text-[10px] text-[#F5A623] truncate tracking-wide">
           {weather.rawMetar}
         </div>

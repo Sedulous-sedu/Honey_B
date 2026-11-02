@@ -29,9 +29,9 @@ export const Page2Operations: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-[#0B1F3A] text-[#FFFFFF] overflow-y-auto p-4 space-y-4 select-none">
+    <div className="flex-1 flex flex-col bg-[#0A1830] text-[#FFFFFF] overflow-y-auto p-4 space-y-4 select-none">
       {/* Top Scenario Control Bar */}
-      <div className="bg-[#102A4C] border border-[#F5A623]/40 rounded-xl p-3 flex items-center justify-between shadow-xl">
+      <div className="bg-[#0F2444] border border-[#F5A623]/40 rounded-xl p-3 flex items-center justify-between shadow-xl">
         <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-2 text-xs font-mono font-bold text-[#FFFFFF]">
             <Gauge className="w-4 h-4 text-[#F5A623]" />
@@ -46,8 +46,8 @@ export const Page2Operations: React.FC = () => {
                 onClick={() => triggerFog(p)}
                 className={`px-2.5 py-1 text-xs font-mono font-bold rounded transition-colors ${
                   weather?.lvp.phase === p || (p === 'DENSE_FOG' && weather?.lvp.phase === 'LVP_ACTIVE')
-                    ? 'bg-[#F5A623] text-[#0B1F3A] shadow-md'
-                    : 'bg-[#0B1F3A] hover:bg-[#163763] text-[#FFFFFF] border border-[#1E4478]'
+                    ? 'bg-[#F5A623] text-[#0A1830] shadow-md'
+                    : 'bg-[#0A1830] hover:bg-[#142E55] text-[#FFFFFF] border border-[#1A3A66]'
                 }`}
               >
                 {p}
@@ -58,14 +58,14 @@ export const Page2Operations: React.FC = () => {
 
         {/* Speed Controls & Reset */}
         <div className="flex items-center space-x-3">
-          <div className="flex items-center space-x-1 bg-[#0B1F3A] p-1 rounded-lg border border-[#1E4478]">
+          <div className="flex items-center space-x-1 bg-[#0A1830] p-1 rounded-lg border border-[#1A3A66]">
             <span className="text-[10px] font-mono text-[#F5A623] px-2">SIM SPEED:</span>
             {[1.0, 2.0, 4.0].map((spd) => (
               <button
                 key={spd}
                 onClick={() => setSpeed(spd)}
                 className={`px-2 py-0.5 text-xs font-mono font-bold rounded ${
-                  simSpeed === spd ? 'bg-[#F5A623] text-[#0B1F3A]' : 'text-[#FFFFFF]/70 hover:text-[#FFFFFF]'
+                  simSpeed === spd ? 'bg-[#F5A623] text-[#0A1830]' : 'text-[#FFFFFF]/70 hover:text-[#FFFFFF]'
                 }`}
               >
                 {spd}x
@@ -75,7 +75,7 @@ export const Page2Operations: React.FC = () => {
 
           <button
             onClick={() => resetSim()}
-            className="px-3 py-1.5 rounded-lg bg-[#F5A623] hover:bg-[#F7B84B] text-[#0B1F3A] text-xs font-mono font-bold flex items-center space-x-1.5 transition-colors shadow-sm"
+            className="px-3 py-1.5 rounded-lg bg-[#F5A623] hover:bg-[#F7B84B] text-[#0A1830] text-xs font-mono font-bold flex items-center space-x-1.5 transition-colors shadow-sm"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>RESET SCENARIO</span>
@@ -85,7 +85,7 @@ export const Page2Operations: React.FC = () => {
 
       {/* Operations Metrics Comparison Bar */}
       <div className="grid grid-cols-4 gap-4">
-        <div className="bg-[#102A4C] border border-[#1E4478] rounded-xl p-3 shadow-lg">
+        <div className="bg-[#0F2444] border border-[#1A3A66] rounded-xl p-3 shadow-lg">
           <div className="text-[11px] font-mono text-[#F5A623] flex items-center justify-between">
             <span>DELAY OPTIMIZATION</span>
             <Clock className="w-3.5 h-3.5 text-[#F5A623]" />
@@ -103,7 +103,7 @@ export const Page2Operations: React.FC = () => {
           </p>
         </div>
 
-        <div className="bg-[#102A4C] border border-[#1E4478] rounded-xl p-3 shadow-lg">
+        <div className="bg-[#0F2444] border border-[#1A3A66] rounded-xl p-3 shadow-lg">
           <div className="text-[11px] font-mono text-[#F5A623] flex items-center justify-between">
             <span>CONFLICTS MITIGATED</span>
             <ShieldAlert className="w-3.5 h-3.5 text-[#F5A623]" />
@@ -116,7 +116,7 @@ export const Page2Operations: React.FC = () => {
           </p>
         </div>
 
-        <div className="bg-[#102A4C] border border-[#F5A623]/60 rounded-xl p-3 shadow-lg">
+        <div className="bg-[#0F2444] border border-[#F5A623]/60 rounded-xl p-3 shadow-lg">
           <div className="text-[11px] font-mono text-[#F5A623] flex items-center justify-between">
             <span>CRITICAL FUEL / DIVERSIONS</span>
             <AlertTriangle className="w-3.5 h-3.5 text-[#F5A623]" />
@@ -129,7 +129,7 @@ export const Page2Operations: React.FC = () => {
           </p>
         </div>
 
-        <div className="bg-[#102A4C] border border-[#1E4478] rounded-xl p-3 shadow-lg">
+        <div className="bg-[#0F2444] border border-[#1A3A66] rounded-xl p-3 shadow-lg">
           <div className="text-[11px] font-mono text-[#F5A623] flex items-center justify-between">
             <span>COMMANDS LOGGED</span>
             <Radio className="w-3.5 h-3.5 text-[#F5A623]" />
@@ -146,8 +146,8 @@ export const Page2Operations: React.FC = () => {
       {/* Main Grid: Team Roster (Left) & Stand Allocation (Center) & Command Feed (Right) */}
       <div className="grid grid-cols-3 gap-4 flex-1">
         {/* Column 1: Controller Roster & Workload */}
-        <div className="bg-[#102A4C] border border-[#1E4478] rounded-xl p-3.5 flex flex-col shadow-xl">
-          <div className="flex items-center space-x-2 border-b border-[#1E4478] pb-2 mb-3">
+        <div className="bg-[#0F2444] border border-[#1A3A66] rounded-xl p-3.5 flex flex-col shadow-xl">
+          <div className="flex items-center space-x-2 border-b border-[#1A3A66] pb-2 mb-3">
             <Users className="w-4 h-4 text-[#F5A623]" />
             <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-[#FFFFFF]">
               Controller Roster & Workload
@@ -161,12 +161,12 @@ export const Page2Operations: React.FC = () => {
               const isHighWorkload = count >= 8;
 
               return (
-                <div key={ctrl.id} className="p-3 rounded-lg bg-[#0B1F3A] border border-[#1E4478]">
+                <div key={ctrl.id} className="p-3 rounded-lg bg-[#0A1830] border border-[#1A3A66]">
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="flex items-center space-x-2">
                         <span className="font-mono text-sm font-bold text-[#FFFFFF]">{ctrl.name}</span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#F5A623] text-[#0B1F3A] font-bold">
+                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#F5A623] text-[#0A1830] font-bold">
                           {ctrl.id}
                         </span>
                       </div>
@@ -189,11 +189,11 @@ export const Page2Operations: React.FC = () => {
                   </div>
 
                   {/* List of aircraft assigned */}
-                  <div className="flex flex-wrap gap-1 mt-2.5 pt-2 border-t border-[#1E4478]">
+                  <div className="flex flex-wrap gap-1 mt-2.5 pt-2 border-t border-[#1A3A66]">
                     {myFlights.map((f) => (
                       <span
                         key={f.callsign}
-                        className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#102A4C] text-[#FFFFFF] border border-[#F5A623]/40"
+                        className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#0F2444] text-[#FFFFFF] border border-[#F5A623]/40"
                       >
                         {f.callsign}
                       </span>
@@ -206,8 +206,8 @@ export const Page2Operations: React.FC = () => {
         </div>
 
         {/* Column 2: Stand Allocation Board */}
-        <div className="bg-[#102A4C] border border-[#1E4478] rounded-xl p-3.5 flex flex-col shadow-xl">
-          <div className="flex items-center justify-between border-b border-[#1E4478] pb-2 mb-3">
+        <div className="bg-[#0F2444] border border-[#1A3A66] rounded-xl p-3.5 flex flex-col shadow-xl">
+          <div className="flex items-center justify-between border-b border-[#1A3A66] pb-2 mb-3">
             <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-[#FFFFFF]">
               OMDB Stand Allocation ({stands.length})
             </h2>
@@ -226,17 +226,17 @@ export const Page2Operations: React.FC = () => {
           {/* Stand Grid */}
           <div className="grid grid-cols-4 gap-2 flex-1 overflow-y-auto">
             {stands.map((st) => {
-              let bg = 'bg-[#0B1F3A] border-[#1E4478] text-[#FFFFFF]';
+              let bg = 'bg-[#0A1830] border-[#1A3A66] text-[#FFFFFF]';
               let badgeColor = 'text-[#FFFFFF]';
 
               if (st.status === 'BLOCKED') {
                 bg = 'bg-rose-950/30 border-rose-500 text-[#FFFFFF]';
                 badgeColor = 'text-rose-400';
               } else if (st.status === 'OCCUPIED') {
-                bg = 'bg-[#0B1F3A] border-[#F5A623] text-[#FFFFFF]';
+                bg = 'bg-[#0A1830] border-[#F5A623] text-[#FFFFFF]';
                 badgeColor = 'text-[#F5A623]';
               } else if (st.status === 'RESERVED') {
-                bg = 'bg-[#0B1F3A] border-[#F5A623]/50 text-[#FFFFFF]';
+                bg = 'bg-[#0A1830] border-[#F5A623]/50 text-[#FFFFFF]';
                 badgeColor = 'text-[#F5A623]';
               }
 
@@ -266,7 +266,7 @@ export const Page2Operations: React.FC = () => {
 
           {/* Quick Reassignment Modal / Drawer */}
           {selectedStand && (
-            <form onSubmit={handleStandReassignSubmit} className="mt-3 p-2.5 rounded-lg bg-[#0B1F3A] border border-[#F5A623] text-xs">
+            <form onSubmit={handleStandReassignSubmit} className="mt-3 p-2.5 rounded-lg bg-[#0A1830] border border-[#F5A623] text-xs">
               <div className="font-mono font-bold text-[#F5A623] mb-1.5">
                 Reassign to Stand {selectedStand}
               </div>
@@ -274,7 +274,7 @@ export const Page2Operations: React.FC = () => {
                 <select
                   value={reassignFlight}
                   onChange={(e) => setReassignFlight(e.target.value)}
-                  className="flex-1 bg-[#102A4C] border border-[#1E4478] text-xs font-mono text-[#FFFFFF] rounded px-2 py-1"
+                  className="flex-1 bg-[#0F2444] border border-[#1A3A66] text-xs font-mono text-[#FFFFFF] rounded px-2 py-1"
                 >
                   <option value="">Select arriving flight...</option>
                   {allFlights.map((f) => (
@@ -286,14 +286,14 @@ export const Page2Operations: React.FC = () => {
                 <button
                   type="submit"
                   disabled={!reassignFlight}
-                  className="px-3 py-1 bg-[#F5A623] hover:bg-[#F7B84B] disabled:opacity-50 text-[#0B1F3A] font-mono font-bold rounded"
+                  className="px-3 py-1 bg-[#F5A623] hover:bg-[#F7B84B] disabled:opacity-50 text-[#0A1830] font-mono font-bold rounded"
                 >
                   Confirm
                 </button>
                 <button
                   type="button"
                   onClick={() => setSelectedStand(null)}
-                  className="px-2 py-1 bg-[#102A4C] hover:bg-[#163763] text-[#FFFFFF] font-mono rounded"
+                  className="px-2 py-1 bg-[#0F2444] hover:bg-[#142E55] text-[#FFFFFF] font-mono rounded"
                 >
                   ✕
                 </button>
@@ -303,8 +303,8 @@ export const Page2Operations: React.FC = () => {
         </div>
 
         {/* Column 3: Live Command Lifecycle Feed */}
-        <div className="bg-[#102A4C] border border-[#1E4478] rounded-xl p-3.5 flex flex-col shadow-xl">
-          <div className="flex items-center justify-between border-b border-[#1E4478] pb-2 mb-3">
+        <div className="bg-[#0F2444] border border-[#1A3A66] rounded-xl p-3.5 flex flex-col shadow-xl">
+          <div className="flex items-center justify-between border-b border-[#1A3A66] pb-2 mb-3">
             <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-[#FFFFFF]">
               Live Command Feed ({commands.length})
             </h2>
@@ -319,13 +319,13 @@ export const Page2Operations: React.FC = () => {
             ) : (
               commands.map((cmd) => {
                 return (
-                  <div key={cmd.commandId} className="p-2.5 rounded-lg bg-[#0B1F3A] border border-[#1E4478] text-xs">
+                  <div key={cmd.commandId} className="p-2.5 rounded-lg bg-[#0A1830] border border-[#1A3A66] text-xs">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
                         <span className="font-mono font-bold text-[#FFFFFF]">{cmd.commandId}</span>
                         <span className="font-mono font-bold text-[#F5A623]">{cmd.aircraftId}</span>
                       </div>
-                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#F5A623] text-[#0B1F3A]">
+                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#F5A623] text-[#0A1830]">
                         {cmd.status}
                       </span>
                     </div>
@@ -334,7 +334,7 @@ export const Page2Operations: React.FC = () => {
                       {cmd.displayText}
                     </p>
 
-                    <div className="flex items-center justify-between text-[10px] font-mono text-[#FFFFFF]/60 mt-1.5 pt-1 border-t border-[#1E4478]">
+                    <div className="flex items-center justify-between text-[10px] font-mono text-[#FFFFFF]/60 mt-1.5 pt-1 border-t border-[#1A3A66]">
                       <span>BY: {cmd.controllerName} ({cmd.controllerId.replace('CTRL-', '')})</span>
                       <span>{cmd.issuedAt.slice(11, 19)} UTC</span>
                     </div>

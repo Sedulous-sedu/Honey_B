@@ -31,7 +31,7 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <header className="h-14 bg-[#0B1F3A] border-b border-[#1E4478] px-4 flex items-center justify-between select-none shadow-md">
+    <header className="h-14 bg-[#0A1830] border-b border-[#1A3A66] px-4 flex items-center justify-between select-none">
       {/* Left: Brand & Navigation */}
       <div className="flex items-center space-x-6">
         <div className="flex items-center space-x-2.5">
@@ -39,57 +39,56 @@ export const Header: React.FC = () => {
           <img
             src="/honey-b-logo.jpg"
             alt="Honey B logo"
-            className="w-9 h-9 rounded-lg bg-[#FFFFFF] p-0.5 object-contain border border-[#F5A623] shadow-sm"
+            className="w-9 h-9 rounded-lg bg-[#FFFFFF] p-0.5 object-contain border border-[#F5A623] "
             draggable={false}
           />
-          <span className="font-mono font-bold text-sm tracking-wider text-[#FFFFFF]">
-            HONEY B <span className="text-[#F5A623]">GROUND CONTROL</span>
+          <span className="font-bold text-sm text-[#FFFFFF]">
+            Honey B <span className="text-[#F5A623]">Ground Control</span>
           </span>
-          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#102A4C] text-[#FFFFFF] border border-[#F5A623]/40">
+          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#0F2444] text-[#FFFFFF] border border-[#F5A623]/40">
             OMDB
           </span>
           {activeControllerId === 'ALL' ? (
-            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#102A4C] text-[#F5A623] border border-[#F5A623]/50">
-              OVERVIEW WALL (SUPERVISOR)
+            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#0F2444] text-[#F5A623] border border-[#F5A623]/50">
+              Overview
             </span>
           ) : (
-            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#102A4C] text-[#F5A623] border border-[#F5A623] flex items-center space-x-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#F5A623] animate-pulse"></span>
-              <span>SECTOR: {activeController?.name.toUpperCase()} ({activeControllerId.replace('CTRL-', '')})</span>
+            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#0F2444] text-[#F5A623] border border-[#F5A623] flex items-center space-x-1">
+              <span>{activeController?.name} ({activeControllerId.replace('CTRL-', '')})</span>
             </span>
           )}
         </div>
 
         {/* Page Switcher */}
-        <div className="flex bg-[#08172C] p-0.5 rounded-lg border border-[#1E4478]">
+        <div className="flex bg-[#08172C] p-0.5 rounded-lg border border-[#1A3A66]">
           <button
             onClick={() => setActivePage('wall')}
             className={`px-3 py-1 rounded-md text-xs font-mono font-bold flex items-center space-x-1.5 transition-colors ${
               activePage === 'wall'
-                ? 'bg-[#F5A623] text-[#0B1F3A] shadow-sm'
+                ? 'bg-[#F5A623] text-[#0A1830]'
                 : 'text-[#FFFFFF]/70 hover:text-[#FFFFFF]'
             }`}
           >
             <Radio className="w-3.5 h-3.5" />
-            <span>Radar Wall (P1)</span>
+            <span>Radar</span>
           </button>
           <button
             onClick={() => setActivePage('operations')}
             className={`px-3 py-1 rounded-md text-xs font-mono font-bold flex items-center space-x-1.5 transition-colors ${
               activePage === 'operations'
-                ? 'bg-[#F5A623] text-[#0B1F3A] shadow-sm'
+                ? 'bg-[#F5A623] text-[#0A1830]'
                 : 'text-[#FFFFFF]/70 hover:text-[#FFFFFF]'
             }`}
           >
             <LayoutGrid className="w-3.5 h-3.5" />
-            <span>Team & Ops (P2)</span>
+            <span>Team & Ops</span>
           </button>
         </div>
       </div>
 
       {/* Center: Live UTC Clock & Scenario Quick Controls */}
       <div className="flex items-center space-x-4">
-        <div className="flex items-center space-x-2 px-3 py-1 rounded bg-[#102A4C] border border-[#F5A623]/40 text-xs font-mono">
+        <div className="flex items-center space-x-2 px-3 py-1 rounded bg-[#0F2444] border border-[#F5A623]/40 text-xs font-mono">
           <Clock className="w-3.5 h-3.5 text-[#F5A623]" />
           <span className="font-bold text-[#FFFFFF]">{timeStr}</span>
         </div>
@@ -100,41 +99,41 @@ export const Header: React.FC = () => {
             onClick={() => triggerFog('CLEAR')}
             className={`px-2 py-1 rounded text-[11px] font-mono font-bold transition-all ${
               weather && !weather.lvp.active
-                ? 'bg-[#102A4C] text-[#FFFFFF] border border-[#F5A623]/40'
+                ? 'bg-[#0F2444] text-[#FFFFFF] border border-[#F5A623]/40'
                 : 'text-[#FFFFFF]/60 hover:text-[#FFFFFF]'
             }`}
             title="Set Clear Weather (VFR 6000m)"
           >
-            ☀ CLEAR
+            Clear
           </button>
           <button
             onClick={() => triggerFog('FOG')}
             className={`px-2 py-1 rounded text-[11px] font-mono font-bold transition-all ${
               weather && weather.lvp.active && weather.visibilityM > 500
-                ? 'bg-[#F5A623] text-[#0B1F3A] shadow-md'
-                : 'text-[#F5A623] hover:bg-[#102A4C]'
+                ? 'bg-[#F5A623] text-[#0A1830]'
+                : 'text-[#F5A623] hover:bg-[#0F2444]'
             }`}
             title="Set Moderate Fog (800m · LVP Preparation)"
           >
-            ☁ FOG 800m
+            Fog 800m
           </button>
           <button
             onClick={() => triggerFog('DENSE_FOG')}
             className={`px-2.5 py-1 rounded text-[11px] font-mono font-bold flex items-center space-x-1 transition-all ${
               weather && weather.lvp.active && weather.visibilityM <= 500
-                ? 'bg-[#F5A623] text-[#0B1F3A] shadow-md animate-pulse'
-                : 'bg-[#102A4C] hover:bg-[#F5A623] text-[#F5A623] hover:text-[#0B1F3A]'
+                ? 'bg-[#F5A623] text-[#0A1830] '
+                : 'bg-[#0F2444] hover:bg-[#F5A623] text-[#F5A623] hover:text-[#0A1830]'
             }`}
             title="Instantly jump simulation to Dense Fog LVP (350m · CAT IIIB · UAE231 Priority)"
           >
             <CloudFog className="w-3.5 h-3.5" />
-            <span>{weather && weather.visibilityM <= 500 ? 'DENSE FOG ACTIVE' : 'TRIGGER DENSE FOG'}</span>
+            <span>{weather && weather.visibilityM <= 500 ? 'Dense fog on' : 'Dense fog'}</span>
           </button>
         </div>
 
         <button
           onClick={() => resetSim()}
-          className="p-1.5 rounded bg-[#102A4C] hover:bg-[#163763] text-[#FFFFFF] border border-[#1E4478] transition-colors"
+          className="p-1.5 rounded bg-[#0F2444] hover:bg-[#142E55] text-[#FFFFFF] border border-[#1A3A66] transition-colors"
           title="Reset Simulation Scenario"
         >
           <RotateCcw className="w-3.5 h-3.5" />
@@ -146,13 +145,13 @@ export const Header: React.FC = () => {
         {/* Active Controller Selector */}
         <div className="flex items-center space-x-2">
           <Users className="w-3.5 h-3.5 text-[#F5A623]" />
-          <span className="text-[11px] font-mono text-[#FFFFFF]/80">CONSOLE:</span>
+          <span className="text-[11px] font-mono text-[#FFFFFF]/80">Console:</span>
           <select
             value={activeControllerId}
             onChange={(e) => handleControllerChange(e.target.value)}
-            className="bg-[#102A4C] border border-[#F5A623]/50 text-xs font-mono font-bold text-[#FFFFFF] rounded px-2.5 py-1 focus:outline-none focus:border-[#F5A623]"
+            className="bg-[#0F2444] border border-[#F5A623]/50 text-xs font-mono font-bold text-[#FFFFFF] rounded px-2.5 py-1 focus:outline-none focus:border-[#F5A623]"
           >
-            <option value="ALL">ALL (Overview Wall)</option>
+            <option value="ALL">All (overview)</option>
             {controllers.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name} ({c.id.replace('CTRL-', '')} - {c.role})
@@ -162,14 +161,14 @@ export const Header: React.FC = () => {
         </div>
 
         {/* WebSocket Live Status */}
-        <div className="flex items-center space-x-1.5 pl-3 border-l border-[#1E4478]">
+        <div className="flex items-center space-x-1.5 pl-3 border-l border-[#1A3A66]">
           <span
             className={`w-2 h-2 rounded-full ${
-              connected ? 'bg-[#F5A623] animate-pulse' : 'bg-rose-500'
+              connected ? 'bg-green-500' : 'bg-red-500'
             }`}
           />
           <span className="text-[10px] font-mono text-[#FFFFFF]/80">
-            {connected ? 'LIVE WS 1Hz' : 'OFFLINE'}
+            {connected ? 'Live' : 'Offline'}
           </span>
         </div>
       </div>

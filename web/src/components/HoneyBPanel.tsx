@@ -267,9 +267,9 @@ export const HoneyBPanel: React.FC = () => {
   };
 
   return (
-    <div className="w-96 h-full bg-[#0B1F3A] border-l border-[#1E4478] flex flex-col select-none overflow-hidden text-[#FFFFFF]">
+    <div className="w-96 h-full bg-[#0A1830] border-l border-[#1A3A66] flex flex-col select-none overflow-hidden text-[#FFFFFF]">
       {/* Top Gradient Header with Official Honey B Logo */}
-      <div className="p-3.5 bg-gradient-to-r from-[#0B1F3A] via-[#102A4C] to-[#163763] border-b border-[#F5A623]/40 flex items-center justify-between shadow-lg">
+      <div className="p-3.5 bg-gradient-to-r from-[#0A1830] via-[#0F2444] to-[#142E55] border-b border-[#F5A623]/40 flex items-center justify-between shadow-lg">
         <div className="flex items-center space-x-2.5">
           <img
             src="/honey-b-logo.jpg"
@@ -280,7 +280,7 @@ export const HoneyBPanel: React.FC = () => {
           <div>
             <div className="flex items-center space-x-1.5">
               <span className="font-bold text-sm tracking-tight text-[#FFFFFF]">Honey B</span>
-              <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[#F5A623] text-[#0B1F3A] font-bold">
+              <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[#F5A623] text-[#0A1830] font-bold">
                 ATC CO-PILOT
               </span>
             </div>
@@ -292,7 +292,7 @@ export const HoneyBPanel: React.FC = () => {
 
         <button
           onClick={() => setAdvisorOpen(true)}
-          className="px-2.5 py-1.5 rounded-lg bg-[#F5A623] hover:bg-[#F7B84B] text-[#0B1F3A] text-[10px] font-mono font-bold flex items-center space-x-1 transition-all shadow-md"
+          className="px-2.5 py-1.5 rounded-lg bg-[#F5A623] hover:bg-[#F7B84B] text-[#0A1830] text-[10px] font-mono font-bold flex items-center space-x-1 transition-all shadow-md"
           title="Open Deterministic Emergency Sequence Change Risk Advisor"
         >
           <ShieldAlert className="w-3.5 h-3.5" />
@@ -302,14 +302,14 @@ export const HoneyBPanel: React.FC = () => {
 
       {/* Active Approved Sequence Advisory Banner (if any) */}
       {approvedSequenceAdvisory && (
-        <div className="px-3 py-2 bg-[#102A4C] border-b border-[#F5A623]/50 flex items-center justify-between text-[10px] font-mono text-[#FFFFFF]">
+        <div className="px-3 py-2 bg-[#0F2444] border-b border-[#F5A623]/50 flex items-center justify-between text-[10px] font-mono text-[#FFFFFF]">
           <div className="truncate">
             <span className="font-bold text-[#F5A623]">EST. SEQ APPROVED:</span>{' '}
             {approvedSequenceAdvisory.emergencyAircraftId} ({approvedSequenceAdvisory.candidateLabel})
           </div>
           <button
             onClick={() => setAdvisorOpen(true)}
-            className="ml-2 px-1.5 py-0.5 rounded bg-[#F5A623] text-[#0B1F3A] hover:bg-[#F7B84B] font-bold shrink-0"
+            className="ml-2 px-1.5 py-0.5 rounded bg-[#F5A623] text-[#0A1830] hover:bg-[#F7B84B] font-bold shrink-0"
           >
             Inspect
           </button>
@@ -327,7 +327,7 @@ export const HoneyBPanel: React.FC = () => {
             {!weather?.lvp.active && (
               <button
                 onClick={() => triggerFog('DENSE_FOG')}
-                className="px-2 py-0.5 rounded bg-[#F5A623] hover:bg-[#F7B84B] text-[#0B1F3A] text-[9px] font-mono font-bold shadow-sm"
+                className="px-2 py-0.5 rounded bg-[#F5A623] hover:bg-[#F7B84B] text-[#0A1830] text-[9px] font-mono font-bold shadow-sm"
               >
                 🌫 Trigger Fog for UAE231 Demo
               </button>
@@ -335,7 +335,7 @@ export const HoneyBPanel: React.FC = () => {
           </div>
 
           {alerts.length === 0 ? (
-            <div className="p-2.5 rounded-lg bg-[#08172C] border border-[#1E4478] text-xs text-[#FFFFFF]/70 flex items-center space-x-2">
+            <div className="p-2.5 rounded-lg bg-[#08172C] border border-[#1A3A66] text-xs text-[#FFFFFF]/70 flex items-center space-x-2">
               <CheckCircle2 className="w-4 h-4 text-[#F5A623]" />
               <span>All sector flights within nominal safety envelopes.</span>
             </div>
@@ -347,7 +347,7 @@ export const HoneyBPanel: React.FC = () => {
                   onClick={() => setTargetFlightId(al.callsign)}
                   className={`p-2.5 rounded-lg border cursor-pointer transition-colors ${
                     al.type === 'CRITICAL'
-                      ? 'bg-[#102A4C] border-[#F5A623]'
+                      ? 'bg-red-950/30 border-red-500'
                       : 'bg-[#08172C] border-[#F5A623]/60'
                   }`}
                 >
@@ -364,7 +364,7 @@ export const HoneyBPanel: React.FC = () => {
                         setTargetFlightId(al.callsign);
                         setAdvisorOpen(true);
                       }}
-                      className="px-2 py-0.5 rounded bg-[#F5A623] hover:bg-[#F7B84B] text-[9px] font-mono font-bold text-[#0B1F3A]"
+                      className="px-2 py-0.5 rounded bg-[#F5A623] hover:bg-[#F7B84B] text-[9px] font-mono font-bold text-[#0A1830]"
                     >
                       Evaluate Risk
                     </button>
@@ -389,7 +389,7 @@ export const HoneyBPanel: React.FC = () => {
           </div>
 
           {sectorSuggestions.length === 0 ? (
-            <div className="p-3 rounded-lg bg-[#08172C] border border-[#1E4478] text-xs text-[#FFFFFF]/70 font-mono text-center">
+            <div className="p-3 rounded-lg bg-[#08172C] border border-[#1A3A66] text-xs text-[#FFFFFF]/70 font-mono text-center">
               No pending suggestions in this sector. Use the composer below to type any command or pilot options.
             </div>
           ) : (
@@ -401,21 +401,21 @@ export const HoneyBPanel: React.FC = () => {
                     key={sug.suggestionId}
                     className={`p-2.5 rounded-xl border transition-all ${
                       isHigh
-                        ? 'bg-[#102A4C] border-[#F5A623]/80 shadow-md'
-                        : 'bg-[#08172C] border-[#1E4478]'
+                        ? 'bg-red-950/30 border-red-500 shadow-md'
+                        : 'bg-[#08172C] border-[#1A3A66]'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-1.5">
                       <div>
                         <div className="flex items-center space-x-1.5">
-                          <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#0B1F3A] text-[#F5A623] border border-[#F5A623]/40">
+                          <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#0A1830] text-[#F5A623] border border-[#F5A623]/40">
                             {sug.aircraftId}
                           </span>
                           <span className="text-[11px] font-bold text-[#FFFFFF]">
                             {sug.instructionType}
                           </span>
                         </div>
-                        <p className="text-xs font-mono text-[#FFFFFF] mt-1 bg-[#0B1F3A] px-2 py-1 rounded border border-[#1E4478]">
+                        <p className="text-xs font-mono text-[#FFFFFF] mt-1 bg-[#0A1830] px-2 py-1 rounded border border-[#1A3A66]">
                           "{sug.displayText}"
                         </p>
                       </div>
@@ -427,10 +427,10 @@ export const HoneyBPanel: React.FC = () => {
                     </div>
 
                     {/* Action Bar: Edit Command, Offer as Options, or Send Direct */}
-                    <div className="mt-2 pt-2 border-t border-[#1E4478] flex items-center justify-between gap-1.5">
+                    <div className="mt-2 pt-2 border-t border-[#1A3A66] flex items-center justify-between gap-1.5">
                       <button
                         onClick={() => handleLoadSuggestionIntoComposer(sug, false)}
-                        className="flex-1 py-1 px-2 rounded-lg bg-[#0B1F3A] hover:bg-[#163763] text-[#FFFFFF] border border-[#F5A623]/60 text-[10px] font-mono font-bold flex items-center justify-center space-x-1 transition-colors"
+                        className="flex-1 py-1 px-2 rounded-lg bg-[#0A1830] hover:bg-[#142E55] text-[#FFFFFF] border border-[#F5A623]/60 text-[10px] font-mono font-bold flex items-center justify-center space-x-1 transition-colors"
                         title="Load into composer below to edit wording or parameters before sending"
                       >
                         <Edit3 className="w-3 h-3 text-[#F5A623]" />
@@ -438,7 +438,7 @@ export const HoneyBPanel: React.FC = () => {
                       </button>
                       <button
                         onClick={() => handleLoadSuggestionIntoComposer(sug, true)}
-                        className="flex-1 py-1 px-2 rounded-lg bg-[#0B1F3A] hover:bg-[#163763] text-[#F5A623] border border-[#F5A623]/60 text-[10px] font-mono font-bold flex items-center justify-center space-x-1 transition-colors"
+                        className="flex-1 py-1 px-2 rounded-lg bg-[#0A1830] hover:bg-[#142E55] text-[#F5A623] border border-[#F5A623]/60 text-[10px] font-mono font-bold flex items-center justify-center space-x-1 transition-colors"
                         title="Turn this suggestion into multiple options for the pilot to review"
                       >
                         <ListChecks className="w-3 h-3 text-[#F5A623]" />
@@ -446,7 +446,7 @@ export const HoneyBPanel: React.FC = () => {
                       </button>
                       <button
                         onClick={() => sendCommand(sug.aircraftId, sug)}
-                        className="py-1 px-2.5 rounded-lg bg-[#F5A623] hover:bg-[#F7B84B] text-[#0B1F3A] text-[10px] font-mono font-bold flex items-center space-x-1 shadow-sm transition-colors"
+                        className="py-1 px-2.5 rounded-lg bg-[#F5A623] hover:bg-[#F7B84B] text-[#0A1830] text-[10px] font-mono font-bold flex items-center space-x-1 shadow-sm transition-colors"
                         title="Transmit directly to pilot"
                       >
                         <Send className="w-3 h-3" />
@@ -472,7 +472,7 @@ export const HoneyBPanel: React.FC = () => {
             </span>
           </div>
 
-          <div className="flex bg-[#0B1F3A] p-0.5 rounded-lg border border-[#1E4478]">
+          <div className="flex bg-[#0A1830] p-0.5 rounded-lg border border-[#1A3A66]">
             <button
               type="button"
               onClick={() => {
@@ -485,7 +485,7 @@ export const HoneyBPanel: React.FC = () => {
               }}
               className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold flex items-center space-x-1 transition-colors ${
                 composerMode === 'OPTIONS'
-                  ? 'bg-[#F5A623] text-[#0B1F3A]'
+                  ? 'bg-[#F5A623] text-[#0A1830]'
                   : 'text-[#FFFFFF]/70 hover:text-[#FFFFFF]'
               }`}
             >
@@ -500,7 +500,7 @@ export const HoneyBPanel: React.FC = () => {
               }}
               className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold flex items-center space-x-1 transition-colors ${
                 composerMode === 'COMMAND'
-                  ? 'bg-[#F5A623] text-[#0B1F3A]'
+                  ? 'bg-[#F5A623] text-[#0A1830]'
                   : 'text-[#FFFFFF]/70 hover:text-[#FFFFFF]'
               }`}
             >
@@ -527,7 +527,7 @@ export const HoneyBPanel: React.FC = () => {
                   );
                 }
               }}
-              className="w-full bg-[#0B1F3A] border border-[#1E4478] focus:border-[#F5A623] rounded-lg px-2 py-1 text-xs font-mono font-bold text-[#FFFFFF] focus:outline-none"
+              className="w-full bg-[#0A1830] border border-[#1A3A66] focus:border-[#F5A623] rounded-lg px-2 py-1 text-xs font-mono font-bold text-[#FFFFFF] focus:outline-none"
             >
               {allFlights.map((f) => (
                 <option key={f.callsign} value={f.callsign}>
@@ -550,7 +550,7 @@ export const HoneyBPanel: React.FC = () => {
                     e.target.value = '';
                   }
                 }}
-                className="w-full bg-[#0B1F3A] border border-[#F5A623]/60 rounded-lg px-2 py-1 text-xs font-mono text-[#FFFFFF] focus:outline-none"
+                className="w-full bg-[#0A1830] border border-[#F5A623]/60 rounded-lg px-2 py-1 text-xs font-mono text-[#FFFFFF] focus:outline-none"
               >
                 <option value="" disabled>
                   Load Option Preset...
@@ -564,7 +564,7 @@ export const HoneyBPanel: React.FC = () => {
               <select
                 value={instructionType}
                 onChange={(e) => setInstructionType(e.target.value)}
-                className="w-full bg-[#0B1F3A] border border-[#1E4478] focus:border-[#F5A623] rounded-lg px-2 py-1 text-xs font-mono font-bold text-[#FFFFFF] focus:outline-none"
+                className="w-full bg-[#0A1830] border border-[#1A3A66] focus:border-[#F5A623] rounded-lg px-2 py-1 text-xs font-mono font-bold text-[#FFFFFF] focus:outline-none"
               >
                 <option value="APPROACH_CLEARANCE">APPROACH CLEARANCE</option>
                 <option value="RUNWAY_CHANGE">RUNWAY CHANGE</option>
@@ -583,7 +583,7 @@ export const HoneyBPanel: React.FC = () => {
         {composerMode === 'OPTIONS' ? (
           <div className="space-y-1.5">
             <div className="flex items-center space-x-1.5">
-              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#F5A623] text-[#0B1F3A] shrink-0">
+              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#F5A623] text-[#0A1830] shrink-0">
                 OPT 1
               </span>
               <input
@@ -591,11 +591,11 @@ export const HoneyBPanel: React.FC = () => {
                 value={optionA}
                 onChange={(e) => handleOptionChange('A', e.target.value)}
                 placeholder="Type Option 1 for pilot..."
-                className="flex-1 bg-[#0B1F3A] border border-[#1E4478] focus:border-[#F5A623] rounded-lg px-2 py-1 text-xs font-mono text-[#FFFFFF] focus:outline-none"
+                className="flex-1 bg-[#0A1830] border border-[#1A3A66] focus:border-[#F5A623] rounded-lg px-2 py-1 text-xs font-mono text-[#FFFFFF] focus:outline-none"
               />
             </div>
             <div className="flex items-center space-x-1.5">
-              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#102A4C] text-[#F5A623] border border-[#F5A623]/60 shrink-0">
+              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#0F2444] text-[#F5A623] border border-[#F5A623]/60 shrink-0">
                 OPT 2
               </span>
               <input
@@ -603,7 +603,7 @@ export const HoneyBPanel: React.FC = () => {
                 value={optionB}
                 onChange={(e) => handleOptionChange('B', e.target.value)}
                 placeholder="Type Option 2 for pilot..."
-                className="flex-1 bg-[#0B1F3A] border border-[#1E4478] focus:border-[#F5A623] rounded-lg px-2 py-1 text-xs font-mono text-[#FFFFFF] focus:outline-none"
+                className="flex-1 bg-[#0A1830] border border-[#1A3A66] focus:border-[#F5A623] rounded-lg px-2 py-1 text-xs font-mono text-[#FFFFFF] focus:outline-none"
               />
             </div>
           </div>
@@ -614,21 +614,21 @@ export const HoneyBPanel: React.FC = () => {
               value={newRunway}
               onChange={(e) => setNewRunway(e.target.value)}
               placeholder="RWY (e.g. 30R)"
-              className="bg-[#0B1F3A] border border-[#1E4478] focus:border-[#F5A623] rounded-lg px-2 py-1 text-[11px] font-mono text-[#FFFFFF] focus:outline-none"
+              className="bg-[#0A1830] border border-[#1A3A66] focus:border-[#F5A623] rounded-lg px-2 py-1 text-[11px] font-mono text-[#FFFFFF] focus:outline-none"
             />
             <input
               type="number"
               value={targetSpeedKt}
               onChange={(e) => setTargetSpeedKt(e.target.value)}
               placeholder="Speed (kt)"
-              className="bg-[#0B1F3A] border border-[#1E4478] focus:border-[#F5A623] rounded-lg px-2 py-1 text-[11px] font-mono text-[#FFFFFF] focus:outline-none"
+              className="bg-[#0A1830] border border-[#1A3A66] focus:border-[#F5A623] rounded-lg px-2 py-1 text-[11px] font-mono text-[#FFFFFF] focus:outline-none"
             />
             <input
               type="number"
               value={targetAltitudeFt}
               onChange={(e) => setTargetAltitudeFt(e.target.value)}
               placeholder="Alt (ft)"
-              className="bg-[#0B1F3A] border border-[#1E4478] focus:border-[#F5A623] rounded-lg px-2 py-1 text-[11px] font-mono text-[#FFFFFF] focus:outline-none"
+              className="bg-[#0A1830] border border-[#1A3A66] focus:border-[#F5A623] rounded-lg px-2 py-1 text-[11px] font-mono text-[#FFFFFF] focus:outline-none"
             />
           </div>
         )}
@@ -650,12 +650,12 @@ export const HoneyBPanel: React.FC = () => {
                   ? 'Type custom options for the pilot to review and select...'
                   : 'Type any custom ATC clearance or instruction for the pilot...'
               }
-              className="w-full bg-[#0B1F3A] border border-[#F5A623]/60 focus:border-[#F5A623] rounded-lg px-2.5 py-1.5 text-xs font-mono text-[#FFFFFF] placeholder-[#FFFFFF]/40 focus:outline-none resize-none"
+              className="w-full bg-[#0A1830] border border-[#F5A623]/60 focus:border-[#F5A623] rounded-lg px-2.5 py-1.5 text-xs font-mono text-[#FFFFFF] placeholder-[#FFFFFF]/40 focus:outline-none resize-none"
             />
           </div>
 
           {transmitBanner && (
-            <div className="p-2 rounded-lg bg-[#102A4C] border border-[#F5A623] text-[10px] font-mono text-[#FFFFFF] flex items-center space-x-1.5">
+            <div className="p-2 rounded-lg bg-[#0F2444] border border-[#F5A623] text-[10px] font-mono text-[#FFFFFF] flex items-center space-x-1.5">
               <CheckCircle2 className="w-3.5 h-3.5 text-[#F5A623] shrink-0" />
               <span className="truncate">{transmitBanner}</span>
             </div>
@@ -664,7 +664,7 @@ export const HoneyBPanel: React.FC = () => {
           <button
             type="submit"
             disabled={sending}
-            className="w-full py-2 px-3 rounded-lg bg-[#F5A623] hover:bg-[#F7B84B] disabled:opacity-50 text-[#0B1F3A] text-xs font-mono font-bold flex items-center justify-center space-x-2 shadow-md transition-colors"
+            className="w-full py-2 px-3 rounded-lg bg-[#F5A623] hover:bg-[#F7B84B] disabled:opacity-50 text-[#0A1830] text-xs font-mono font-bold flex items-center justify-center space-x-2 shadow-md transition-colors"
           >
             <Send className="w-3.5 h-3.5" />
             <span>

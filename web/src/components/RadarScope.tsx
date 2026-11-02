@@ -49,9 +49,9 @@ export const RadarScope: React.FC = () => {
   const [dxbVor_x, dxbVor_y] = project(25.2528, 55.4500);
 
   return (
-    <div className="relative w-full h-full bg-[#0B1F3A] rounded-lg border border-[#F5A623]/40 overflow-hidden flex flex-col shadow-2xl">
+    <div className="relative w-full h-full bg-[#0A1830] rounded-lg border border-[#F5A623]/40 overflow-hidden flex flex-col shadow-2xl">
       {/* Top Status Header */}
-      <div className="absolute top-3 left-4 z-10 flex items-center space-x-3 bg-[#0B1F3A]/95 px-3 py-1.5 rounded-lg border border-[#F5A623]/50 backdrop-blur-sm shadow-lg">
+      <div className="absolute top-3 left-4 z-10 flex items-center space-x-3 bg-[#0A1830]/95 px-3 py-1.5 rounded-lg border border-[#F5A623]/50 backdrop-blur-sm shadow-lg">
         <div className="flex items-center space-x-2">
           <span className="w-2.5 h-2.5 rounded-full bg-[#F5A623] animate-pulse"></span>
           <span className="text-xs font-mono font-bold tracking-wider text-[#FFFFFF]">SURVEILLANCE RADAR</span>
@@ -59,11 +59,11 @@ export const RadarScope: React.FC = () => {
         <span className="text-xs font-mono text-[#F5A623]">RANGE: {Math.round(30 / zoom)} NM</span>
 
         {activeControllerId === 'ALL' ? (
-          <span className="px-2 py-0.5 text-[10px] font-mono font-bold rounded bg-[#102A4C] text-[#FFFFFF] border border-[#F5A623]/40">
+          <span className="px-2 py-0.5 text-[10px] font-mono font-bold rounded bg-[#0F2444] text-[#FFFFFF] border border-[#F5A623]/40">
             ALL SECTORS (WALL OVERVIEW)
           </span>
         ) : (
-          <span className="px-2 py-0.5 text-[10px] font-mono font-bold rounded bg-[#F5A623] text-[#0B1F3A]">
+          <span className="px-2 py-0.5 text-[10px] font-mono font-bold rounded bg-[#F5A623] text-[#0A1830]">
             SECTOR: {activeCtrl?.name || activeControllerId}
           </span>
         )}
@@ -71,7 +71,7 @@ export const RadarScope: React.FC = () => {
         {isFogActive ? (
           <button
             onClick={() => triggerFog('CLEAR')}
-            className="px-2.5 py-0.5 text-[10px] font-mono font-bold tracking-wider rounded bg-[#F5A623] text-[#0B1F3A] flex items-center space-x-1 shadow-md animate-pulse"
+            className="px-2.5 py-0.5 text-[10px] font-mono font-bold tracking-wider rounded bg-[#F5A623] text-[#0A1830] flex items-center space-x-1 shadow-md animate-pulse"
             title="Click to clear fog and restore VFR conditions"
           >
             <CloudFog className="w-3.5 h-3.5" />
@@ -82,7 +82,7 @@ export const RadarScope: React.FC = () => {
         ) : (
           <button
             onClick={() => triggerFog('DENSE_FOG')}
-            className="px-2 py-0.5 text-[10px] font-mono font-bold tracking-wider rounded bg-[#102A4C] hover:bg-[#F5A623] text-[#F5A623] hover:text-[#0B1F3A] border border-[#F5A623]/50 flex items-center space-x-1 transition-colors"
+            className="px-2 py-0.5 text-[10px] font-mono font-bold tracking-wider rounded bg-[#0F2444] hover:bg-[#F5A623] text-[#F5A623] hover:text-[#0A1830] border border-[#F5A623]/50 flex items-center space-x-1 transition-colors"
             title="Simulate Dense Fog LVP on Radar"
           >
             <CloudFog className="w-3 h-3" />
@@ -93,7 +93,7 @@ export const RadarScope: React.FC = () => {
 
       {/* Atmospheric Fog Banner at Bottom Left when Fog is Active */}
       {isFogActive && (
-        <div className="absolute bottom-4 left-4 z-10 bg-[#0B1F3A]/95 border-2 border-[#F5A623] rounded-xl px-3.5 py-2.5 shadow-2xl max-w-md backdrop-blur-md">
+        <div className="absolute bottom-4 left-4 z-10 bg-[#0A1830]/95 border-2 border-[#F5A623] rounded-xl px-3.5 py-2.5 shadow-2xl max-w-md backdrop-blur-md">
           <div className="flex items-center space-x-2">
             <CloudFog className="w-4 h-4 text-[#F5A623] animate-pulse shrink-0" />
             <span className="text-xs font-mono font-bold text-[#F5A623]">
@@ -119,25 +119,24 @@ export const RadarScope: React.FC = () => {
       <div className="absolute bottom-4 right-4 z-10 flex flex-col space-y-1.5">
         <button
           onClick={() => setShowLabels((v) => !v)}
-          className={`p-2 rounded-lg border text-xs font-mono font-bold flex items-center justify-center transition-colors ${
-            showLabels
-              ? 'bg-[#F5A623] border-[#F5A623] text-[#0B1F3A]'
-              : 'bg-[#102A4C] border-[#1E4478] text-[#FFFFFF]'
-          }`}
+          className={`p-2 rounded-lg border text-xs font-mono font-bold flex items-center justify-center transition-colors ${showLabels
+            ? 'bg-[#F5A623] border-[#F5A623] text-[#0A1830]'
+            : 'bg-[#0F2444] border-[#1A3A66] text-[#FFFFFF]'
+            }`}
           title="Toggle data block declutter"
         >
           {showLabels ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
         </button>
         <button
           onClick={() => setZoom((z) => Math.min(2.2, z + 0.2))}
-          className="p-2 rounded-lg bg-[#102A4C] border border-[#F5A623]/40 text-[#FFFFFF] hover:bg-[#F5A623] hover:text-[#0B1F3A] transition-colors"
+          className="p-2 rounded-lg bg-[#0F2444] border border-[#F5A623]/40 text-[#FFFFFF] hover:bg-[#F5A623] hover:text-[#0A1830] transition-colors"
           title="Zoom In"
         >
           <ZoomIn className="w-4 h-4" />
         </button>
         <button
           onClick={() => setZoom((z) => Math.max(0.6, z - 0.2))}
-          className="p-2 rounded-lg bg-[#102A4C] border border-[#F5A623]/40 text-[#FFFFFF] hover:bg-[#F5A623] hover:text-[#0B1F3A] transition-colors"
+          className="p-2 rounded-lg bg-[#0F2444] border border-[#F5A623]/40 text-[#FFFFFF] hover:bg-[#F5A623] hover:text-[#0A1830] transition-colors"
           title="Zoom Out"
         >
           <ZoomOut className="w-4 h-4" />
@@ -147,13 +146,14 @@ export const RadarScope: React.FC = () => {
       {/* SVG Radar Scope */}
       <svg
         viewBox={`0 0 ${viewSize} ${viewSize}`}
-        className="w-full h-full cursor-crosshair select-none"
+        className="w-full h-full cursor-crosshair select-none overflow-visible"
+        style={{ background: '#050D1A' }}
       >
         <defs>
           <radialGradient id="radarSweep" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#102A4C" stopOpacity="0.85" />
-            <stop offset="75%" stopColor="#0B1F3A" stopOpacity="0.95" />
-            <stop offset="100%" stopColor="#071426" stopOpacity="1" />
+            <stop offset="0%" stopColor="#0F2444" stopOpacity="0.85" />
+            <stop offset="75%" stopColor="#0A1830" stopOpacity="0.95" />
+            <stop offset="100%" stopColor="#050D1A" stopOpacity="1" />
           </radialGradient>
 
           {/* Fog Plume Gradients & Blur Filter */}
@@ -161,13 +161,13 @@ export const RadarScope: React.FC = () => {
             <stop offset="0%" stopColor="#CBD5E1" stopOpacity={isDenseFog ? "0.42" : "0.26"} />
             <stop offset="45%" stopColor="#94A3B8" stopOpacity={isDenseFog ? "0.28" : "0.16"} />
             <stop offset="80%" stopColor="#F5A623" stopOpacity="0.10" />
-            <stop offset="100%" stopColor="#0B1F3A" stopOpacity="0" />
+            <stop offset="100%" stopColor="#0A1830" stopOpacity="0" />
           </radialGradient>
 
           <radialGradient id="omdbFogCorridor" cx="50%" cy="50%" r="50%">
             <stop offset="0%" stopColor="#E2E8F0" stopOpacity={isDenseFog ? "0.35" : "0.20"} />
             <stop offset="65%" stopColor="#94A3B8" stopOpacity={isDenseFog ? "0.18" : "0.10"} />
-            <stop offset="100%" stopColor="#0B1F3A" stopOpacity="0" />
+            <stop offset="100%" stopColor="#0A1830" stopOpacity="0" />
           </radialGradient>
 
           <filter id="fogSoftBlur" x="-30%" y="-30%" width="160%" height="160%">
@@ -176,11 +176,13 @@ export const RadarScope: React.FC = () => {
         </defs>
 
         {/* Background */}
+        {/* Background: solid fill extends past the square viewBox so it fills the whole pane */}
+        <rect x={-5000} y={-5000} width={viewSize + 10000} height={viewSize + 10000} fill="#050D1A" />
         <rect width={viewSize} height={viewSize} fill="url(#radarSweep)" />
 
         {/* Crosshair Center Lines */}
-        <line x1={0} y1={halfView} x2={viewSize} y2={halfView} stroke="#1E4478" strokeWidth="1" strokeDasharray="4 6" />
-        <line x1={halfView} y1={0} x2={halfView} y2={viewSize} stroke="#1E4478" strokeWidth="1" strokeDasharray="4 6" />
+        <line x1={-5000} y1={halfView} x2={viewSize + 5000} y2={halfView} stroke="#1A3A66" strokeWidth="1" strokeDasharray="4 6" />
+        <line x1={halfView} y1={-5000} x2={halfView} y2={viewSize + 5000} stroke="#1A3A66" strokeWidth="1" strokeDasharray="4 6" />
 
         {/* Range Rings: 5, 10, 15, 20, 30 NM */}
         {[5, 10, 15, 20, 30].map((nm) => {
@@ -192,7 +194,7 @@ export const RadarScope: React.FC = () => {
                 cy={halfView}
                 r={r}
                 fill="none"
-                stroke="#1E4478"
+                stroke="#1A3A66"
                 strokeWidth="1.2"
                 strokeDasharray={nm === 30 ? "6 6" : "none"}
               />
@@ -202,7 +204,7 @@ export const RadarScope: React.FC = () => {
                 fill="#F5A623"
                 opacity="0.7"
                 fontSize="10"
-                fontFamily="ui-monospace, monospace"
+                fontFamily="'B612 Mono', ui-monospace, monospace"
               >
                 {nm} NM
               </text>
@@ -260,7 +262,7 @@ export const RadarScope: React.FC = () => {
               width="250"
               height="16"
               rx="4"
-              fill="#0B1F3A"
+              fill="#0A1830"
               fillOpacity="0.9"
               stroke="#F5A623"
               strokeWidth="1"
@@ -271,7 +273,7 @@ export const RadarScope: React.FC = () => {
               textAnchor="middle"
               fill="#F5A623"
               fontSize="9"
-              fontFamily="monospace"
+              fontFamily="'B612 Mono', ui-monospace, monospace"
               fontWeight="bold"
             >
               🌫 OMDB FOG LVP ZONE · VIS {weather?.visibilityM}m · 6 NM SEP
@@ -301,7 +303,7 @@ export const RadarScope: React.FC = () => {
           strokeWidth="1.5"
           strokeDasharray="4 4"
         />
-        <text x={rwy30R_x + 6} y={rwy30R_y + 12} fill="#FFFFFF" fontSize="10" fontFamily="monospace" fontWeight="bold">30R</text>
+        <text x={rwy30R_x + 6} y={rwy30R_y + 12} fill="#FFFFFF" fontSize="10" fontFamily="'B612 Mono', ui-monospace, monospace" fontWeight="bold">30R</text>
 
         {/* RWY 12R/30L */}
         <line
@@ -324,7 +326,7 @@ export const RadarScope: React.FC = () => {
           strokeWidth="1.5"
           strokeDasharray="4 4"
         />
-        <text x={rwy30L_x + 6} y={rwy30L_y + 12} fill="#FFFFFF" fontSize="10" fontFamily="monospace" fontWeight="bold">30L</text>
+        <text x={rwy30L_x + 6} y={rwy30L_y + 12} fill="#FFFFFF" fontSize="10" fontFamily="'B612 Mono', ui-monospace, monospace" fontWeight="bold">30L</text>
 
         {/* DXB VOR Holding Fix */}
         <g>
@@ -333,7 +335,7 @@ export const RadarScope: React.FC = () => {
             fill="#F5A623"
             opacity="0.9"
           />
-          <text x={dxbVor_x + 10} y={dxbVor_y + 4} fill="#F5A623" fontSize="11" fontFamily="monospace" fontWeight="bold">
+          <text x={dxbVor_x + 10} y={dxbVor_y + 4} fill="#F5A623" fontSize="11" fontFamily="'B612 Mono', ui-monospace, monospace" fontWeight="bold">
             DXB VOR
           </text>
           <ellipse
@@ -377,7 +379,11 @@ export const RadarScope: React.FC = () => {
 
           // Heading vector
           const rad = (ac.headingDeg * Math.PI) / 180;
-          const vecLength = isPrimaryUae ? 28 : 22;
+          // Vector starts just past the nose so it doesn't read as a long nose
+          const vecStart = isPrimaryUae ? 10 : 8; // nose tip is ~10 * scale
+          const vecLength = isPrimaryUae ? 15 : 10;
+          const sx = px + Math.sin(rad) * vecStart;
+          const sy = py - Math.cos(rad) * vecStart;
           const vx = px + Math.sin(rad) * vecLength;
           const vy = py - Math.cos(rad) * vecLength;
 
@@ -421,6 +427,11 @@ export const RadarScope: React.FC = () => {
                 </>
               )}
 
+              {/* Emergency / priority red ring */}
+              {['EMERGENCY', 'MINIMUM_FUEL', 'MEDICAL'].includes(ac.priority.level) && (
+                <circle cx={px} cy={py} r={16} fill="rgba(239,68,68,0.12)" stroke="#EF4444" strokeWidth="1.8" />
+              )}
+
               {/* Selected Target Ring */}
               {isSelected && (
                 <circle cx={px} cy={py} r={18} fill="none" stroke="#F5A623" strokeWidth="2" className="radar-target-pulse" />
@@ -429,15 +440,19 @@ export const RadarScope: React.FC = () => {
               {/* Realistic Commercial Airplane Silhouette SVG */}
               <g transform={`translate(${px}, ${py}) rotate(${ac.headingDeg}) scale(${isPrimaryUae ? 1.15 : 0.9})`}>
                 <path
-                  d="M0,-12 L1.5,-7 L9,-1 L9,1.5 L1.5,0.5 L1.5,6.5 L4.5,9.5 L4.5,11 L0,9.8 L-4.5,11 L-4.5,9.5 L-1.5,6.5 L-1.5,0.5 L-9,1.5 L-9,-1 L-1.5,-7 Z"
+                  d="M0,-11.5 C0.6,-11.5 1.3,-9.5 2.3,-5.5 L2.3,-2 L12,4 L12,6 L2.3,3.2 L2,8 L5,10.3 L5,11.8 L0.7,10.8 L0,12 L-0.7,10.8 L-5,11.8 L-5,10.3 L-2,8 L-2.3,3.2 L-12,6 L-12,4 L-2.3,-2 L-2.3,-5.5 C-1.3,-9.5 -0.6,-11.5 0,-11.5 Z"
                   fill={color}
-                  stroke="#0B1F3A"
-                  strokeWidth="0.9"
+                  stroke="#0A1830"
+                  strokeWidth="0.8"
+                  strokeLinejoin="round"
                 />
+                {/* Engine nacelles */}
+                <rect x="-6.6" y="0.2" width="2" height="4.2" rx="1" fill={color} stroke="#0A1830" strokeWidth="0.6" />
+                <rect x="4.6" y="0.2" width="2" height="4.2" rx="1" fill={color} stroke="#0A1830" strokeWidth="0.6" />
               </g>
 
               {/* Heading / Velocity Vector */}
-              <line x1={px} y1={py} x2={vx} y2={vy} stroke={color} strokeWidth={isPrimaryUae ? "1.8" : "1.2"} strokeOpacity="0.85" />
+              <line x1={sx} y1={sy} x2={vx} y2={vy} stroke={color} strokeWidth={isPrimaryUae ? "1.8" : "1.2"} strokeOpacity="0.85" />
 
               {/* Data Block */}
               {(showLabels || isSelected || isPrimaryUae) && (
@@ -447,23 +462,23 @@ export const RadarScope: React.FC = () => {
                     y="0"
                     width={isPrimaryUae ? "88" : "64"}
                     height={isPrimaryUae ? "32" : "24"}
-                    fill="#0B1F3A"
+                    fill="#0A1830"
                     fillOpacity="0.95"
-                    stroke={isPrimaryUae || isSelected ? "#F5A623" : "#1E4478"}
+                    stroke={isPrimaryUae || isSelected ? "#F5A623" : "#1A3A66"}
                     strokeWidth={isPrimaryUae || isSelected ? "1.8" : "0.8"}
                     rx="3"
                   />
                   {/* Line 1: Callsign */}
-                  <text x="4" y="10" fill={isPrimaryUae || isSelected ? "#F5A623" : color} fontSize="9.5" fontFamily="monospace" fontWeight="bold">
+                  <text x="4" y="10" fill={isPrimaryUae || isSelected ? "#F5A623" : color} fontSize="9.5" fontFamily="'B612 Mono', ui-monospace, monospace" fontWeight="bold">
                     {isPrimaryUae ? `★ ${ac.callsign}` : ac.callsign}
                   </text>
                   {/* Line 2: Altitude & Speed */}
-                  <text x="4" y="19" fill="#FFFFFF" fontSize="8.5" fontFamily="monospace">
+                  <text x="4" y="19" fill="#FFFFFF" fontSize="8.5" fontFamily="'B612 Mono', ui-monospace, monospace">
                     {ac.altitudeFt > 6000 ? `FL${Math.round(ac.altitudeFt / 100)}` : `${ac.altitudeFt}${vTrend}`} {Math.round(ac.speed.groundSpeedKt)}K
                   </text>
                   {/* Line 3 for UAE231: Runway & LVP/Fuel tag */}
                   {isPrimaryUae && (
-                    <text x="4" y="28" fill={isFogActive ? "#F5A623" : "#4ADE80"} fontSize="8" fontFamily="monospace" fontWeight="bold">
+                    <text x="4" y="28" fill={isFogActive ? "#F5A623" : "#4ADE80"} fontSize="8" fontFamily="'B612 Mono', ui-monospace, monospace" fontWeight="bold">
                       {isFogActive ? `FOG · RWY ${ac.assignedRunway}` : `PRIMARY · ${ac.assignedRunway}`}
                     </text>
                   )}

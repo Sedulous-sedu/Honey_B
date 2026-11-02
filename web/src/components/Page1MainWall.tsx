@@ -7,7 +7,7 @@ import { FlightDetail } from './FlightDetail';
 
 export const Page1MainWall: React.FC = () => {
   return (
-    <div className="flex-1 flex flex-col overflow-hidden bg-[#0B1F3A]">
+    <div className="flex-1 flex flex-col overflow-hidden bg-[#0A1830]">
       {/* Upper Area: Traffic List | Center Radar Scope + Weather | Right Honey B */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left: Traffic List (28 tracks) */}

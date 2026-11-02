@@ -279,9 +279,9 @@ export const EmergencyAdvisorModal: React.FC<EmergencyAdvisorModalProps> = ({
       aria-modal="true"
       aria-labelledby="emergency-advisor-title"
     >
-      <div className="bg-[#0B1F3A] border-2 border-[#F5A623]/60 rounded-2xl w-full max-w-6xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden text-[#FFFFFF]">
+      <div className="bg-[#0A1830] border-2 border-[#F5A623]/60 rounded-2xl w-full max-w-6xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden text-[#FFFFFF]">
         {/* Top Header */}
-        <div className="px-5 py-3.5 bg-gradient-to-r from-[#0B1F3A] via-[#102A4C] to-[#163763] border-b border-[#F5A623]/50 flex items-center justify-between">
+        <div className="px-5 py-3.5 bg-gradient-to-r from-[#0A1830] via-[#0F2444] to-[#142E55] border-b border-[#F5A623]/50 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <img
               src="/honey-b-logo.jpg"
@@ -294,10 +294,10 @@ export const EmergencyAdvisorModal: React.FC<EmergencyAdvisorModalProps> = ({
                 <h2 id="emergency-advisor-title" className="text-base font-bold tracking-tight text-[#FFFFFF]">
                   Emergency Sequence Change Risk Advisor
                 </h2>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#0B1F3A] text-[#F5A623] border border-[#F5A623]/50">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#0A1830] text-[#F5A623] border border-[#F5A623]/50">
                   {evaluation?.policyVersion || 'OMDB-KC-2026.10-v1.0.0'}
                 </span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#F5A623] text-[#0B1F3A] font-bold">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#F5A623] text-[#0A1830] font-bold">
                   DECISION SUPPORT ONLY — NON-AUTONOMOUS
                 </span>
               </div>
@@ -308,7 +308,7 @@ export const EmergencyAdvisorModal: React.FC<EmergencyAdvisorModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg bg-[#102A4C] hover:bg-[#163763] text-[#FFFFFF] border border-[#F5A623]/40 transition-colors"
+            className="p-1.5 rounded-lg bg-[#0F2444] hover:bg-[#142E55] text-[#FFFFFF] border border-[#F5A623]/40 transition-colors"
             title="Close Advisor"
           >
             <X className="w-5 h-5" />
@@ -316,7 +316,7 @@ export const EmergencyAdvisorModal: React.FC<EmergencyAdvisorModalProps> = ({
         </div>
 
         {/* Control & Declaration Verification Bar */}
-        <div className="px-5 py-3 bg-[#08172C] border-b border-[#1E4478] flex flex-wrap items-center justify-between gap-3">
+        <div className="px-5 py-3 bg-[#08172C] border-b border-[#1A3A66] flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-3">
             <div>
               <label className="block text-[10px] font-mono text-[#F5A623] uppercase mb-0.5">
@@ -325,7 +325,7 @@ export const EmergencyAdvisorModal: React.FC<EmergencyAdvisorModalProps> = ({
               <select
                 value={targetId}
                 onChange={(e) => setTargetId(e.target.value)}
-                className="bg-[#0B1F3A] border border-[#F5A623]/50 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold text-[#FFFFFF] focus:outline-none focus:border-[#F5A623]"
+                className="bg-[#0A1830] border border-[#F5A623]/50 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold text-[#FFFFFF] focus:outline-none focus:border-[#F5A623]"
               >
                 {arrivalAircraft.map((a) => (
                   <option key={a.callsign} value={a.callsign}>
@@ -612,14 +612,14 @@ export const EmergencyAdvisorModal: React.FC<EmergencyAdvisorModalProps> = ({
                         </div>
 
                         {/* Separate Action Buttons: Approve Advisory vs Edit/Compose Options vs Issue ATC Command */}
-                        <div className="mt-3 pt-2 border-t border-[#1E4478] flex flex-col gap-1.5">
+                        <div className="mt-3 pt-2 border-t border-[#1A3A66] flex flex-col gap-1.5">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               handleApproveAdvisorySequence(cand.candidateId);
                             }}
                             disabled={approving}
-                            className="w-full py-1.5 px-2 rounded-lg bg-[#F5A623] hover:bg-[#F7B84B] text-[#0B1F3A] text-[10px] font-mono font-bold flex items-center justify-center space-x-1"
+                            className="w-full py-1.5 px-2 rounded-lg bg-[#F5A623] hover:bg-[#F7B84B] text-[#0A1830] text-[10px] font-mono font-bold flex items-center justify-center space-x-1"
                             title="Approve Estimated Sequence Advisory (Does NOT issue an ATC clearance)"
                           >
                             <FileCheck className="w-3.5 h-3.5" />
@@ -631,7 +631,7 @@ export const EmergencyAdvisorModal: React.FC<EmergencyAdvisorModalProps> = ({
                                 e.stopPropagation();
                                 handleLoadIntoComposer(cand);
                               }}
-                              className="py-1.5 px-2 rounded-lg bg-[#0B1F3A] hover:bg-[#163763] text-[#F5A623] border border-[#F5A623] text-[10px] font-mono font-bold flex items-center justify-center space-x-1"
+                              className="py-1.5 px-2 rounded-lg bg-[#0A1830] hover:bg-[#142E55] text-[#F5A623] border border-[#F5A623] text-[10px] font-mono font-bold flex items-center justify-center space-x-1"
                               title="Load into ATC Command & Pilot Options Composer to edit or send as options"
                             >
                               <span>2a. Edit / Options</span>
@@ -641,7 +641,7 @@ export const EmergencyAdvisorModal: React.FC<EmergencyAdvisorModalProps> = ({
                                 e.stopPropagation();
                                 handleIssueFormalCommand(cand);
                               }}
-                              className="py-1.5 px-2 rounded-lg bg-[#102A4C] hover:bg-[#163763] text-[#FFFFFF] border border-[#FFFFFF]/40 text-[10px] font-mono font-bold flex items-center justify-center space-x-1"
+                              className="py-1.5 px-2 rounded-lg bg-[#0F2444] hover:bg-[#142E55] text-[#FFFFFF] border border-[#FFFFFF]/40 text-[10px] font-mono font-bold flex items-center justify-center space-x-1"
                               title="Send Formal Operational ATC Clearance via Data Link Command Workflow"
                             >
                               <Send className="w-3 h-3 text-[#F5A623]" />

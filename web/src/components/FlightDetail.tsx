@@ -15,17 +15,17 @@ export const FlightDetail: React.FC = () => {
   const acCommands = commands.filter((c) => c.aircraftId === ac.callsign);
 
   return (
-    <div className="bg-[#0B1F3A] border border-[#F5A623]/40 rounded-xl p-3 flex items-center justify-between select-none shadow-2xl text-[#FFFFFF]">
+    <div className={`bg-[#0A1830] border ${ac.priority.level !== 'NORMAL' ? 'border-red-500 border-2' : 'border-[#F5A623]/40'} rounded-xl p-3 flex items-center justify-between select-none shadow-2xl text-[#FFFFFF]`}>
       {/* Flight Main Header */}
-      <div className="flex items-center space-x-4 border-r border-[#1E4478] pr-6">
-        <div className="w-10 h-10 rounded-lg bg-[#102A4C] border border-[#F5A623] flex items-center justify-center text-[#F5A623]">
+      <div className="flex items-center space-x-4 border-r border-[#1A3A66] pr-6">
+        <div className="w-10 h-10 rounded-lg bg-[#0F2444] border border-[#F5A623] flex items-center justify-center text-[#F5A623]">
           <Plane className="w-5 h-5 transform -rotate-45" />
         </div>
         <div>
           <div className="flex items-center space-x-2">
             <span className="font-mono text-base font-bold text-[#FFFFFF]">{ac.callsign}</span>
             <span className="font-mono text-xs text-[#FFFFFF]/80">{ac.aircraftType} ({ac.wakeCategory})</span>
-            <span className="px-1.5 py-0.2 text-[10px] font-mono font-bold rounded bg-[#F5A623] text-[#0B1F3A]">
+            <span className="px-1.5 py-0.2 text-[10px] font-mono font-bold rounded bg-[#F5A623] text-[#0A1830]">
               {ac.flightPhase}
             </span>
             {ac.priority.level !== 'NORMAL' && (
@@ -41,7 +41,7 @@ export const FlightDetail: React.FC = () => {
       </div>
 
       {/* Telemetry Grid */}
-      <div className="grid grid-cols-5 gap-6 text-xs font-mono border-r border-[#1E4478] pr-6">
+      <div className="grid grid-cols-5 gap-6 text-xs font-mono border-r border-[#1A3A66] pr-6">
         <div>
           <div className="text-[10px] text-[#F5A623] uppercase flex items-center space-x-1">
             <Compass className="w-3 h-3 text-[#F5A623]" />
@@ -94,7 +94,7 @@ export const FlightDetail: React.FC = () => {
           <select
             value={ac.assignedControllerId || ''}
             onChange={(e) => reassignController(ac.callsign, e.target.value)}
-            className="mt-0.5 bg-[#102A4C] border border-[#F5A623]/50 text-xs font-mono font-bold text-[#FFFFFF] rounded px-2 py-1 focus:outline-none focus:border-[#F5A623]"
+            className="mt-0.5 bg-[#0F2444] border border-[#F5A623]/50 text-xs font-mono font-bold text-[#FFFFFF] rounded px-2 py-1 focus:outline-none focus:border-[#F5A623]"
           >
             {controllers.map((c) => (
               <option key={c.id} value={c.id}>
@@ -106,11 +106,11 @@ export const FlightDetail: React.FC = () => {
 
         {/* Latest Command Status Chip */}
         {acCommands.length > 0 && (
-          <div className="pl-3 border-l border-[#1E4478] text-right">
+          <div className="pl-3 border-l border-[#1A3A66] text-right">
             <div className="text-[10px] font-mono text-[#F5A623]">LAST CLEARANCE</div>
             <div className="flex items-center space-x-1.5 mt-0.5">
               <span className="text-xs font-mono font-bold text-[#FFFFFF]">{acCommands[0].commandId}:</span>
-              <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-[#F5A623] text-[#0B1F3A]">
+              <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-[#F5A623] text-[#0A1830]">
                 {acCommands[0].status}
               </span>
             </div>

@@ -5,14 +5,14 @@
 :root {
   color-scheme: dark;
   /* Honey B Unified Primary Palette:
-     #0B1F3A (Deep Aviation Navy)
+     #0A1830 (Deep Aviation Navy)
      #F5A623 (Honey Gold)
      #FFFFFF (Crisp White) */
-  --hb-navy-deepest: #071426;
-  --hb-navy-base: #0B1F3A;
-  --hb-navy-surface: #102A4C;
-  --hb-navy-elevated: #163763;
-  --hb-navy-border: #1E4478;
+  --hb-navy-deepest: #050D1A;
+  --hb-navy-base: #0A1830;
+  --hb-navy-surface: #0F2444;
+  --hb-navy-elevated: #142E55;
+  --hb-navy-border: #1A3A66;
   --hb-gold: #F5A623;
   --hb-gold-bright: #F7B84B;
   --hb-gold-dim: #C8841A;
@@ -23,14 +23,14 @@
 
 body {
   margin: 0;
-  background-color: #0B1F3A;
+  background-color: #0A1830;
   color: #FFFFFF;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   overflow: hidden;
   user-select: none;
 }
 
-/* Custom subtle scrollbars in #0B1F3A / #F5A623 palette */
+/* Custom subtle scrollbars in #0A1830 / #F5A623 palette */
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
@@ -41,7 +41,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1E4478;
+  background: #1A3A66;
   border-radius: 3px;
 }
 

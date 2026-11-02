@@ -14,12 +14,12 @@
      ────────────────────────────────────────────────────────── */
 
   /* Background layers — deep aviation navy family (#0B1F3A base) */
-  --bg-base: #0B1F3A;
-  --bg-surface: #0E2647;
-  --bg-card: #122E54;
-  --bg-card-hover: #173866;
-  --bg-elevated: #1B4175;
-  --bg-overlay: rgba(11, 31, 58, 0.96);
+  --bg-base: #050D1A;
+  --bg-surface: #0A1830;
+  --bg-card: #0F2444;
+  --bg-card-hover: #142E55;
+  --bg-elevated: #1A3A66;
+  --bg-overlay: rgba(5, 13, 26, 0.96);
 
   /* Brand mark & primary accent — Honey Gold (#F5A623) */
   --brand-gold: #F5A623;
@@ -70,9 +70,9 @@
   --border-glow: rgba(245, 166, 35, 0.75);
 
   /* Typography */
-  --font-ui: 'Inter', system-ui, sans-serif;
-  --font-data: 'JetBrains Mono', 'Courier New', monospace;
-  --font-display: 'Rajdhani', sans-serif;
+  --font-ui: 'B612', 'Inter', system-ui, sans-serif;
+  --font-data: 'B612 Mono', 'JetBrains Mono', 'Courier New', monospace;
+  --font-display: 'B612', 'Rajdhani', sans-serif;
 
   /* Spacing */
   --space-xs: 4px;
@@ -141,12 +141,10 @@ body {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(8, 12, 20, 0.92);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border-card);
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-subtle);
   padding: 0 var(--space-xl);
-  height: 60px;
+  height: 52px;
   display: flex;
   align-items: center;
   gap: var(--space-xl);
@@ -165,27 +163,21 @@ body {
 
 .topbar-brand-text {
   font-family: var(--font-display);
-  font-size: 1.2rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: var(--text-value);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
 }
 
 .topbar-brand-sub {
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   color: var(--text-muted);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .topbar-flight-id {
   font-family: var(--font-display);
-  font-size: 1.6rem;
+  font-size: 1.3rem;
   font-weight: 700;
   color: var(--color-primary);
-  letter-spacing: 0.08em;
-  text-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
 }
 
 .topbar-route {
@@ -1372,10 +1364,7 @@ body {
   display: flex;
   align-items: baseline;
   gap: 6px;
-  background: var(--bg-elevated);
-  padding: 4px 10px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border-card);
+  padding: 0;
 }
 
 .topbar-flight-id {
@@ -1428,12 +1417,10 @@ body {
 
 .source-legend-dot.dot-aircraft {
   background: var(--color-primary);
-  box-shadow: 0 0 8px var(--color-primary);
 }
 
 .source-legend-dot.dot-ground {
   background: #10b981;
-  box-shadow: 0 0 8px #10b981;
 }
 
 /* ── Card Source Header Tags ──────────────────────────────── */

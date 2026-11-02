@@ -799,7 +799,7 @@ export function TabletPilotOverview({
               )}
             </span>
           </div>
-          <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#F5A623', fontWeight: 700 }}>
+          <span style={{ fontFamily: 'var(--font-data)', fontSize: '0.75rem', color: '#F5A623', fontWeight: 700 }}>
             QNH {conditions.qnhHpa} · RWY {activeRwy}
           </span>
         </div>
@@ -922,7 +922,7 @@ export function TabletPilotOverview({
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <strong style={{ color: '#F5A623', fontSize: '0.85rem' }}>{card.title}</strong>
-                      <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontFamily: 'monospace' }}>
+                      <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontFamily: 'var(--font-data)' }}>
                         {formatUtcTime(card.timestampUtc)}
                       </span>
                     </div>

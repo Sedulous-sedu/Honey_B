@@ -50,12 +50,12 @@ export const TrafficList: React.FC = () => {
   });
 
   return (
-    <div className="w-80 h-full bg-[#0B1F3A] border-r border-[#1E4478] flex flex-col select-none overflow-hidden text-[#FFFFFF]">
+    <div className="w-80 h-full bg-[#0A1830] border-r border-[#1A3A66] flex flex-col select-none overflow-hidden text-[#FFFFFF]">
       {/* Header */}
-      <div className="p-3 border-b border-[#1E4478] bg-[#102A4C]">
+      <div className="p-3 border-b border-[#1A3A66] bg-[#0F2444]">
         {/* Sector Info Banner */}
         {activeControllerId !== 'ALL' ? (
-          <div className="mb-2 p-2 rounded-lg bg-[#0B1F3A] border border-[#F5A623]/60 flex items-center justify-between">
+          <div className="mb-2 p-2 rounded-lg bg-[#0A1830] border border-[#F5A623]/60 flex items-center justify-between">
             <div className="flex items-center space-x-1.5">
               <UserCheck className="w-4 h-4 text-[#F5A623]" />
               <div>
@@ -70,14 +70,14 @@ export const TrafficList: React.FC = () => {
             <button
               onClick={() => setTab('MINE')}
               className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
-                tab === 'MINE' ? 'bg-[#F5A623] text-[#0B1F3A]' : 'bg-[#102A4C] text-[#F5A623] border border-[#F5A623]/40'
+                tab === 'MINE' ? 'bg-[#F5A623] text-[#0A1830]' : 'bg-[#0F2444] text-[#F5A623] border border-[#F5A623]/40'
               }`}
             >
               MY SECTOR
             </button>
           </div>
         ) : (
-          <div className="mb-2 p-1.5 rounded-lg bg-[#0B1F3A] border border-[#1E4478] flex items-center justify-between">
+          <div className="mb-2 p-1.5 rounded-lg bg-[#0A1830] border border-[#1A3A66] flex items-center justify-between">
             <div className="flex items-center space-x-1.5">
               <Shield className="w-3.5 h-3.5 text-[#F5A623]" />
               <span className="text-[10px] font-mono text-[#FFFFFF] font-bold">
@@ -91,12 +91,12 @@ export const TrafficList: React.FC = () => {
         )}
 
         {/* Filter Tabs */}
-        <div className="grid grid-cols-4 gap-1 p-0.5 bg-[#08172C] rounded border border-[#1E4478]">
+        <div className="grid grid-cols-4 gap-1 p-0.5 bg-[#08172C] rounded border border-[#1A3A66]">
           <button
             onClick={() => setTab('ALL')}
             className={`py-1 text-[11px] font-mono font-bold rounded transition-colors ${
               tab === 'ALL'
-                ? 'bg-[#F5A623] text-[#0B1F3A] shadow-sm'
+                ? 'bg-[#F5A623] text-[#0A1830] shadow-sm'
                 : 'text-[#FFFFFF]/70 hover:text-[#FFFFFF]'
             }`}
           >
@@ -106,7 +106,7 @@ export const TrafficList: React.FC = () => {
             onClick={() => setTab(activeControllerId === 'ALL' ? 'ARR' : 'MINE')}
             className={`py-1 text-[11px] font-mono font-bold rounded transition-colors ${
               tab === (activeControllerId === 'ALL' ? 'ARR' : 'MINE')
-                ? 'bg-[#F5A623] text-[#0B1F3A] shadow-sm'
+                ? 'bg-[#F5A623] text-[#0A1830] shadow-sm'
                 : 'text-[#FFFFFF]/70 hover:text-[#FFFFFF]'
             }`}
           >
@@ -116,7 +116,7 @@ export const TrafficList: React.FC = () => {
             onClick={() => setTab('DEP')}
             className={`py-1 text-[11px] font-mono font-bold rounded transition-colors ${
               tab === 'DEP'
-                ? 'bg-[#F5A623] text-[#0B1F3A] shadow-sm'
+                ? 'bg-[#F5A623] text-[#0A1830] shadow-sm'
                 : 'text-[#FFFFFF]/70 hover:text-[#FFFFFF]'
             }`}
           >
@@ -126,7 +126,7 @@ export const TrafficList: React.FC = () => {
             onClick={() => setTab('OTHER')}
             className={`py-1 text-[11px] font-mono font-bold rounded transition-colors ${
               tab === 'OTHER'
-                ? 'bg-[#F5A623] text-[#0B1F3A] shadow-sm'
+                ? 'bg-[#F5A623] text-[#0A1830] shadow-sm'
                 : 'text-[#FFFFFF]/70 hover:text-[#FFFFFF]'
             }`}
           >
@@ -136,7 +136,7 @@ export const TrafficList: React.FC = () => {
       </div>
 
       {/* Flight Rows */}
-      <div className="flex-1 overflow-y-auto divide-y divide-[#1E4478]/60">
+      <div className="flex-1 overflow-y-auto divide-y divide-[#1A3A66]/60">
         {sortedFlights.map((ac) => {
           const isSelected = selectedId === ac.callsign;
           const isAssignedToMe = activeControllerId === 'ALL' || ac.assignedControllerId === activeControllerId;
@@ -146,14 +146,12 @@ export const TrafficList: React.FC = () => {
 
           // Priority indicator border
           let priorityBorder = 'border-transparent';
-          if (ac.priority.level === 'MINIMUM_FUEL' || ac.priority.level === 'EMERGENCY') {
-            priorityBorder = 'border-l-4 border-l-[#F5A623] bg-[#F5A623]/10';
-          } else if (ac.priority.level === 'MEDICAL') {
-            priorityBorder = 'border-l-4 border-l-rose-500 bg-rose-950/20';
+          if (ac.priority.level === 'MINIMUM_FUEL' || ac.priority.level === 'EMERGENCY' || ac.priority.level === 'MEDICAL') {
+            priorityBorder = 'border border-red-500 border-l-4 bg-red-950/30';
           } else if (ac.status === 'UNABLE_TO_LAND' || ac.flightPhase === 'DIVERTING') {
             priorityBorder = 'border-l-4 border-l-[#F5A623] bg-[#F5A623]/5';
           } else if (isAssignedToMe && activeControllerId !== 'ALL') {
-            priorityBorder = 'border-l-4 border-l-[#FFFFFF] bg-[#102A4C]/40';
+            priorityBorder = 'border-l-4 border-l-[#FFFFFF] bg-[#0F2444]/40';
           }
 
           let statusText = `${Math.round(ac.position.distanceToThresholdNm)} nm`;
@@ -188,8 +186,8 @@ export const TrafficList: React.FC = () => {
               onClick={() => setSelectedId(ac.callsign)}
               className={`p-2.5 flex items-center justify-between cursor-pointer transition-all ${
                 isSelected
-                  ? 'bg-[#102A4C] ring-1 ring-[#F5A623]'
-                  : 'hover:bg-[#102A4C]/60'
+                  ? 'bg-[#0F2444] ring-1 ring-[#F5A623]'
+                  : 'hover:bg-[#0F2444]/60'
               } ${priorityBorder} ${
                 activeControllerId !== 'ALL' && !isAssignedToMe
                   ? 'opacity-30 hover:opacity-80'
@@ -205,12 +203,12 @@ export const TrafficList: React.FC = () => {
                     </span>
                     <span className="text-[10px] font-mono text-[#FFFFFF]/70">{ac.aircraftType}</span>
                     {ac.callsign === 'UAE231' && (
-                      <span className="text-[8px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#F5A623] text-[#0B1F3A]">
+                      <span className="text-[8px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#F5A623] text-[#0A1830]">
                         PRIMARY
                       </span>
                     )}
                     {isAssignedToMe && activeControllerId !== 'ALL' && (
-                      <span className="text-[8px] font-mono font-bold px-1 rounded bg-[#F5A623] text-[#0B1F3A]">
+                      <span className="text-[8px] font-mono font-bold px-1 rounded bg-[#F5A623] text-[#0A1830]">
                         MINE
                       </span>
                     )}
@@ -219,10 +217,10 @@ export const TrafficList: React.FC = () => {
                     <span
                       className={`text-[9px] font-bold px-1 py-0.2 rounded font-mono ${
                         isArr
-                          ? 'bg-[#F5A623] text-[#0B1F3A]'
+                          ? 'bg-[#F5A623] text-[#0A1830]'
                           : isDep
-                          ? 'bg-[#102A4C] text-[#F5A623] border border-[#F5A623]/50'
-                          : 'bg-[#08172C] text-[#FFFFFF]/80 border border-[#1E4478]'
+                          ? 'bg-[#0F2444] text-[#F5A623] border border-[#F5A623]/50'
+                          : 'bg-[#08172C] text-[#FFFFFF]/80 border border-[#1A3A66]'
                       }`}
                     >
                       {isArr ? 'ARR' : isDep ? 'DEP' : 'GND'}
