@@ -3,8 +3,9 @@ import json
 import logging
 import os
 import sys
+import time
 from contextlib import asynccontextmanager
-from typing import Dict, Any, Optional, Set
+from typing import Dict, Any, Optional, Set, List
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -35,6 +36,12 @@ from app.models import (
     RunwayOperationalStatus,
     RunwayMode,
     Provenance,
+    DataMode,
+    PilotFuelReportRequest,
+    PilotEmergencyReportRequest,
+    ForkScenarioRequest,
+    ProviderHealth,
+    ProviderStatus,
 )
 from app.simulator import Simulator
 from app.weather import WeatherManager
@@ -43,6 +50,9 @@ from app.suggestion import SuggestionEngine
 from app.ai import ask_ai, explain_risk_evaluation
 from app.risk_advisor import EmergencySequenceRiskAdvisor
 from app.knowledge_core import default_knowledge_core
+from app.providers.osm_geometry import OsmGeometryProvider
+from app.providers.ourairports import OurAirportsProvider
+from app.providers.recording_manager import RecordingManager
 import copy
 
 logging.basicConfig(level=logging.INFO)
@@ -98,6 +108,39 @@ class ConnectionManager:
 
 manager = ConnectionManager()
 
+# Background live data ingestion poller (NOAA AviationWeather & adsb.lol)
+async def real_data_ingestion_loop():
+    last_metar_time = -9999.0
+    last_adsb_time = -9999.0
+    while True:
+        try:
+            if state.mode == DataMode.LIVE_OBSERVE:
+                now_mono = time.monotonic()
+
+                # 1. Fetch NOAA METAR/TAF every 60s
+                if (now_mono - last_metar_time) >= 60.0:
+                    last_metar_time = now_mono
+                    wx = await state.weather_provider.fetch_metar_and_taf()
+                    if wx:
+                        state.observed_weather = wx
+                        wx_env = state.create_envelope("weather.updated", wx, aircraft_id=None)
+                        await manager.broadcast_event(wx_env)
+
+                # 2. Fetch ADS-B every 30s
+                if (now_mono - last_adsb_time) >= 30.0:
+                    last_adsb_time = now_mono
+                    tracks, evicted = await state.adsb_provider.fetch_observations()
+                    if tracks:
+                        state.observed_aircraft = tracks
+                    if evicted:
+                        rm_env = state.create_envelope("aircraft.removed", {"removedCallsigns": evicted}, aircraft_id=None)
+                        await manager.broadcast_event(rm_env)
+
+        except Exception as e:
+            logger.warning(f"Error in real data ingestion: {e}")
+
+        await asyncio.sleep(2.0)
+
 # Background simulation runner
 async def simulation_loop():
     while True:
@@ -129,12 +172,20 @@ async def simulation_loop():
                 "stands": list(state.stands.values()),
                 "runwayStates": {k: v.model_dump() for k, v in state.runway_states.items()},
                 "approvedSequenceAdvisory": state.approved_sequence_advisory,
+                "dataMode": state.mode.value,
+                "providerHealth": [
+                    state.weather_provider.get_health().model_dump(),
+                    state.adsb_provider.get_health().model_dump()
+                ],
                 "metrics": {
                     "totalFlights": len(state.aircraft),
                     "atRiskCount": sum(1 for a in state.aircraft.values() if a.priority.level in ["MINIMUM_FUEL", "EMERGENCY", "MEDICAL"]),
-                    "delayedMinutes": round(max(0, (state.sim_time_sec / 60.0) * 1.5), 1),
-                    "fcfsBaselineDelayMin": round(max(0, (state.sim_time_sec / 60.0) * 2.8), 1),
-                    "conflictsAvoided": 4 if state.weather and state.weather.lvp.active else 1
+                    "airborneCount": sum(1 for a in state.aircraft.values() if a.altitudeFt > 100),
+                    "surfaceCount": sum(1 for a in state.aircraft.values() if a.altitudeFt <= 100),
+                    "mode": state.mode.value,
+                    "delayedMinutes": None,
+                    "fcfsBaselineDelayMin": None,
+                    "conflictsAvoided": None
                 }
             }
             ctrl_env = state.create_envelope("ground.metrics", controller_update, aircraft_id=None)
@@ -147,12 +198,16 @@ async def simulation_loop():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: start background simulator task
+    # Startup: start background simulator and real data ingestion tasks
     sim_task = asyncio.create_task(simulation_loop())
+    ingest_task = asyncio.create_task(real_data_ingestion_loop())
     logger.info("Honey B Ground Control Hub started on 0.0.0.0:8000")
     yield
     # Shutdown
     sim_task.cancel()
+    ingest_task.cancel()
+    await state.weather_provider.close()
+    await state.adsb_provider.close()
 
 app = FastAPI(title="Honey B Ground Control Hub", version="1.0.0", lifespan=lifespan)
 
@@ -167,8 +222,12 @@ app.add_middleware(
 # Helper to build state.snapshot
 def build_snapshot(role: str, aircraft_id: Optional[str] = None) -> Dict[str, Any]:
     role = role.lower()
+    prov_health = [
+        state.weather_provider.get_health().model_dump(),
+        state.adsb_provider.get_health().model_dump()
+    ]
     if role == "pilot" and aircraft_id:
-        ac = state.aircraft.get(aircraft_id)
+        ac = state.get_aircraft(aircraft_id)
         ac_data = ac.model_dump() if ac else None
         stand_data = state.stands.get(ac.assignedStand) if ac and ac.assignedStand else None
         cmds = [c.model_dump() for c in state.commands.values() if c.aircraftId == aircraft_id][-10:]
@@ -176,13 +235,15 @@ def build_snapshot(role: str, aircraft_id: Optional[str] = None) -> Dict[str, An
         return {
             "serverTime": state.get_sim_time_iso(),
             "simSpeed": state.sim_speed,
+            "dataMode": state.mode.value,
+            "providerHealth": prov_health,
             "aircraft": ac_data,
             "weather": state.weather.model_dump() if state.weather else None,
             "commands": cmds,
             "stand": {
-                "standId": stand_data["id"] if stand_data else "B14",
-                "terminal": stand_data["terminal"] if stand_data else "Terminal 3",
-                "provenance": "SIMULATED"
+                "standId": stand_data["id"] if stand_data else (None if state.mode == DataMode.LIVE_OBSERVE else "B14"),
+                "terminal": stand_data["terminal"] if stand_data else (None if state.mode == DataMode.LIVE_OBSERVE else "Terminal 3"),
+                "provenance": "UNKNOWN" if state.mode == DataMode.LIVE_OBSERVE else "SIMULATED"
             },
             "advisories": advisories,
             "approvedSequenceAdvisory": state.approved_sequence_advisory,
@@ -192,6 +253,8 @@ def build_snapshot(role: str, aircraft_id: Optional[str] = None) -> Dict[str, An
         return {
             "serverTime": state.get_sim_time_iso(),
             "simSpeed": state.sim_speed,
+            "dataMode": state.mode.value,
+            "providerHealth": prov_health,
             "aircraft": [a.model_dump() for a in state.aircraft.values()],
             "weather": state.weather.model_dump() if state.weather else None,
             "commands": [c.model_dump() for c in state.commands.values()][-25:],
@@ -247,6 +310,13 @@ async def websocket_endpoint(
             if msg_type == "client.subscribe":
                 # Fresh snapshot on subscribe
                 sub_role = msg_payload.get("role", role)
+                if role.lower() == "pilot" and sub_role.lower() == "controller":
+                    err_env = state.create_envelope("error", ErrorPayload(
+                        code="UNAUTHORIZED_ROLE_SWITCH",
+                        message="Pilot connection cannot subscribe as controller."
+                    ), aircraft_id=aircraftId)
+                    await manager.send_to_socket(websocket, err_env)
+                    continue
                 snap = build_snapshot(sub_role, msg_aid)
                 snap_env = state.create_envelope("state.snapshot", snap, aircraft_id=msg_aid)
                 await manager.send_to_socket(websocket, snap_env)
@@ -343,9 +413,9 @@ async def demo_fog(req: FogRequest):
         "metrics": {
             "totalFlights": len(state.aircraft),
             "atRiskCount": sum(1 for a in state.aircraft.values() if a.priority.level in ["MINIMUM_FUEL", "EMERGENCY", "MEDICAL"]),
-            "delayedMinutes": round(max(0, (state.sim_time_sec / 60.0) * 1.5), 1),
-            "fcfsBaselineDelayMin": round(max(0, (state.sim_time_sec / 60.0) * 2.8), 1),
-            "conflictsAvoided": 4 if state.weather and state.weather.lvp.active else 1
+            "delayedMinutes": round(sum(a.predictedDelayMin for a in state.aircraft.values() if a.predictedDelayMin), 1),
+            "fcfsBaselineDelayMin": round(sum(a.predictedDelayMin for a in state.aircraft.values() if a.predictedDelayMin) * 1.2, 1) if state.mode != DataMode.LIVE_OBSERVE else None,
+            "conflictsAvoided": 0 if state.mode == DataMode.LIVE_OBSERVE else (4 if state.weather and state.weather.lvp.active else 1)
         }
     }
     ctrl_env = state.create_envelope("ground.metrics", controller_update, aircraft_id=None)
@@ -368,6 +438,8 @@ class CommandRequest(BaseModel):
     alternateIcao: Optional[str] = None
     displayText: Optional[str] = None
     relatedSuggestionId: Optional[str] = None
+    optionGroupId: Optional[str] = None
+    optionLabel: Optional[str] = None
 
 @app.post("/demo/command")
 async def demo_command(req: CommandRequest):
@@ -392,6 +464,8 @@ async def demo_command(req: CommandRequest):
         instruction_type=req.instructionType,
         displayText=text,
         params=req.model_dump(exclude_unset=True),
+        option_group_id=req.optionGroupId,
+        option_label=req.optionLabel,
         related_suggestion_id=req.relatedSuggestionId,
         bypass_controller_check=True
     )
@@ -422,13 +496,11 @@ class StandRequest(BaseModel):
 
 @app.post("/demo/stand")
 async def demo_stand(req: StandRequest):
-    ac = state.aircraft.get(req.aircraftId)
-    if not ac:
-        raise HTTPException(status_code=404, detail="Aircraft not found")
-    prev_stand = ac.assignedStand
-    ac.assignedStand = req.standId
+    success, err_msg, prev_stand, stand_info = state.validate_and_reassign_stand(req.aircraftId, req.standId)
+    if not success:
+        raise HTTPException(status_code=409, detail=err_msg)
 
-    stand_info = state.stands.get(req.standId, {"terminal": "Terminal 3, Concourse B"})
+    stand_info = stand_info or {"terminal": "Terminal 3, Concourse B"}
     payload = StandUpdatedPayload(
         standId=req.standId,
         terminal=stand_info.get("terminal", "Terminal 3"),
@@ -436,7 +508,7 @@ async def demo_stand(req: StandRequest):
         reason="OPERATIONAL_REASSIGNMENT",
         effectiveFrom=state.get_sim_time_iso(),
         isClearance=False,
-        provenance="SIMULATED"
+        provenance=Provenance.SIMULATED if state.mode != DataMode.LIVE_OBSERVE else Provenance.AUTHORITATIVE
     )
     st_env = state.create_envelope("stand.updated", payload, aircraft_id=req.aircraftId)
     await manager.broadcast_event(st_env)
@@ -452,7 +524,7 @@ def demo_aircraft():
             "assignedRunway": a.assignedRunway,
             "altitudeFt": a.altitudeFt,
             "fuelKg": a.fuel.totalKg,
-            "enduranceMin": round(a.fuel.enduranceMin),
+            "enduranceMin": round(a.fuel.enduranceMin) if a.fuel.enduranceMin is not None else None,
             "priority": a.priority.level,
             "controller": a.assignedControllerId
         }
@@ -742,15 +814,18 @@ async def api_pilot_response(req: PilotHttpResponseRequest):
         "STANDBY": PilotResponse.STANDBY,
         "FUEL_CONCERN": PilotResponse.UNABLE,
     }
-    resp_enum = mapped_map.get(req.responseType.upper(), PilotResponse.WILCO)
+    resp_type_upper = (req.responseType or "").upper()
+    if resp_type_upper not in mapped_map:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid responseType: '{req.responseType}'. Allowed: {list(mapped_map.keys())}"
+        )
+
+    resp_enum = mapped_map[resp_type_upper]
     raw_ref_id = req.referencedMessageId or ""
     target_cmd_id = raw_ref_id.split("::")[0]
     if target_cmd_id not in state.commands:
-        # Fallback to the most recent active command for this aircraft
-        for cmd in reversed(list(state.commands.values())):
-            if cmd.aircraftId == req.flightId and cmd.status.value in ("SENT", "STANDBY", "ACKNOWLEDGED"):
-                target_cmd_id = cmd.commandId
-                break
+        raise HTTPException(status_code=404, detail=f"Command '{target_cmd_id}' not found.")
 
     status_payload, err = CommandManager.handle_pilot_response(
         target_cmd_id,
@@ -758,19 +833,18 @@ async def api_pilot_response(req: PilotHttpResponseRequest):
         resp_enum,
         req.pilotNotes,
     )
+    if err:
+        raise HTTPException(status_code=400, detail={"code": err.code, "message": err.message})
+
     if status_payload:
         st_env = state.create_envelope("command.status", status_payload, aircraft_id=req.flightId)
         await manager.broadcast_event(st_env)
-    else:
-        state.log_event(
-            "PILOT_RESPONSE",
-            f"{req.flightId} sent {req.responseType} for {req.referencedMessageId}: {req.pilotNotes or ''}",
-        )
+
     return {"success": True, "transmissionId": tx_id}
 
 @app.get("/api/dashboard/{aircraft_id}")
 def pilot_dashboard(aircraft_id: str):
-    ac = state.aircraft.get(aircraft_id)
+    ac = state.get_aircraft(aircraft_id)
     if not ac:
         raise HTTPException(status_code=404, detail=f"Aircraft '{aircraft_id}' not found")
 
@@ -923,6 +997,11 @@ def pilot_dashboard(aircraft_id: str):
         "connectionLastSeenUtc": obs_utc,
         "revision": state.revision,
         "generatedAtUtc": now,
+        "dataMode": state.mode.value,
+        "providerHealth": [
+            state.weather_provider.get_health().model_dump(),
+            state.adsb_provider.get_health().model_dump()
+        ],
         "aircraft": {
             "flightId": aircraft_id,
             "callsign": ac.callsign,
@@ -930,19 +1009,23 @@ def pilot_dashboard(aircraft_id: str):
             "originIcao": ac.origin,
             "destinationIcao": ac.destination,
             "flightPhase": pilot_phase,
-            "altitudeFt": int(round(ac.altitudeFt)),
-            "verticalSpeedFpm": int(round(ac.verticalRateFpm)),
-            "indicatedAirspeedKts": int(round(ac.speed.indicatedAirspeedKt)),
-            "groundspeedKts": int(round(ac.speed.groundSpeedKt)),
-            "mach": 0.72,
+            "altitudeFt": int(round(ac.altitudeFt)) if ac.altitudeFt is not None else 0,
+            "verticalSpeedFpm": int(round(ac.verticalRateFpm)) if ac.verticalRateFpm is not None else 0,
+            "indicatedAirspeedKts": int(round(ac.speed.indicatedAirspeedKt)) if (ac.speed and ac.speed.indicatedAirspeedKt is not None) else None,
+            "groundspeedKts": int(round(ac.speed.groundSpeedKt)) if (ac.speed and ac.speed.groundSpeedKt is not None) else None,
+            "mach": round(ac.speed.groundSpeedKt / 573.0, 2) if (ac.speed and ac.speed.groundSpeedKt and ac.altitudeFt and ac.altitudeFt > 10000) else None,
             "position": {
-                "latitude": ac.position.lat,
-                "longitude": ac.position.lon,
-                "headingDegTrue": int(round(ac.headingDeg)),
-                "remainingDistanceNm": round(ac.position.distanceToThresholdNm, 1),
-                "formattedCoordinates": f"{abs(ac.position.lat):.4f}{'N' if ac.position.lat >= 0 else 'S'} {abs(ac.position.lon):.4f}{'E' if ac.position.lon >= 0 else 'W'}",
+                "latitude": ac.position.lat if ac.position else 0.0,
+                "longitude": ac.position.lon if ac.position else 0.0,
+                "headingDegTrue": int(round(ac.headingDeg)) if ac.headingDeg is not None else 0,
+                "remainingDistanceNm": round(ac.position.distanceToThresholdNm, 1) if ac.position else 0.0,
+                "formattedCoordinates": f"{abs(ac.position.lat):.4f}{'N' if ac.position.lat >= 0 else 'S'} {abs(ac.position.lon):.4f}{'E' if ac.position.lon >= 0 else 'W'}" if ac.position else "UNKNOWN",
             },
-            "currentClearedRoute": f"{ac.origin} STAR DESDI ILS RWY {active_rwy} {ac.destination}",
+            "currentClearedRoute": (
+                ac.currentClearedRoute
+                if ac.currentClearedRoute
+                else ("RADAR VECTORS / DIRECT (Route unfiled in public ADS-B)" if state.mode == DataMode.LIVE_OBSERVE else f"{ac.origin} STAR DESDI ILS RWY {active_rwy} {ac.destination}")
+            ),
             "fmsEtaUtc": ac.etaUtc or now,
             "fmsEtaCalculatedAtUtc": obs_utc,
             "fuel": fuel_block,
@@ -992,4 +1075,169 @@ def pilot_dashboard(aircraft_id: str):
         },
         "notices": notices,
         "messages": messages,
+    }
+
+
+# ── Real Data Migration & Multi-Mode Operational Endpoints ───────────────────
+
+@app.get("/api/mode")
+def get_mode():
+    return {
+        "mode": state.mode.value,
+        "activeScenarioId": state.active_what_if.scenario_id if state.active_what_if else None,
+        "aircraftCount": len(state.aircraft),
+        "isLive": state.mode == DataMode.LIVE_OBSERVE,
+    }
+
+
+class ModeChangeRequest(BaseModel):
+    mode: DataMode
+    recordingFile: Optional[str] = None
+    scenarioId: Optional[str] = None
+
+
+@app.post("/api/mode")
+async def set_mode(req: ModeChangeRequest):
+    if req.mode == DataMode.REPLAY:
+        state.start_replay(req.recordingFile)
+    else:
+        state.switch_mode(req.mode, req.scenarioId)
+
+    # Broadcast updated snapshot to all clients
+    for ws, info in manager.active_connections.items():
+        snap = build_snapshot(info["role"], info.get("aircraftId"))
+        snap_env = state.create_envelope("state.snapshot", snap, aircraft_id=info.get("aircraftId"))
+        await manager.send_to_socket(ws, snap_env)
+
+    return {
+        "status": "mode_updated",
+        "mode": state.mode.value,
+        "activeScenarioId": state.active_what_if.scenario_id if state.active_what_if else None,
+        "aircraftCount": len(state.aircraft)
+    }
+
+
+@app.post("/api/scenario/fork")
+async def fork_scenario(req: ForkScenarioRequest):
+    base_ac = state.observed_aircraft if state.observed_aircraft else state._fixture_aircraft
+    scenario = RecordingManager.create_what_if_scenario(
+        name=req.name,
+        base_aircraft=base_ac,
+        base_weather=state.weather
+    )
+    state.switch_mode(DataMode.WHAT_IF, scenario.scenario_id)
+
+    # Broadcast snapshot
+    for ws, info in manager.active_connections.items():
+        snap = build_snapshot(info["role"], info.get("aircraftId"))
+        snap_env = state.create_envelope("state.snapshot", snap, aircraft_id=info.get("aircraftId"))
+        await manager.send_to_socket(ws, snap_env)
+
+    return {
+        "scenarioId": scenario.scenario_id,
+        "name": scenario.name,
+        "aircraftCount": len(scenario.aircraft),
+        "createdAt": scenario.created_at_utc,
+    }
+
+
+@app.get("/api/scenarios")
+def list_scenarios():
+    return RecordingManager.list_scenarios()
+
+
+@app.post("/api/scenario/{scenario_id}/fuel-report")
+async def scenario_fuel_report(scenario_id: str, req: PilotFuelReportRequest):
+    scen = RecordingManager.get_scenario(scenario_id)
+    if not scen:
+        raise HTTPException(status_code=404, detail=f"Scenario '{scenario_id}' not found.")
+    ok = scen.inject_fuel_report(
+        aircraft_id=req.aircraftId,
+        fuel_kg=req.fuelOnBoardKg,
+        endurance_min=req.enduranceMin,
+        pilot_callsign=req.pilotCallsign or req.aircraftId
+    )
+    if not ok:
+        raise HTTPException(status_code=404, detail=f"Aircraft '{req.aircraftId}' not in scenario '{scenario_id}'.")
+
+    if state.active_what_if and state.active_what_if.scenario_id == scenario_id:
+        ac = state.aircraft.get(req.aircraftId)
+        if ac:
+            ac_env = state.create_envelope("aircraft.state", ac, aircraft_id=req.aircraftId)
+            await manager.broadcast_event(ac_env)
+
+    return {"status": "ok", "scenarioId": scenario_id, "aircraftId": req.aircraftId}
+
+
+@app.post("/api/scenario/{scenario_id}/emergency")
+async def scenario_emergency(scenario_id: str, req: PilotEmergencyReportRequest):
+    scen = RecordingManager.get_scenario(scenario_id)
+    if not scen:
+        raise HTTPException(status_code=404, detail=f"Scenario '{scenario_id}' not found.")
+    ok = scen.inject_emergency(
+        aircraft_id=req.aircraftId,
+        declaration_type=req.declarationType,
+        nature=req.nature or "Pilot-reported in scenario"
+    )
+    if not ok:
+        raise HTTPException(status_code=404, detail=f"Aircraft '{req.aircraftId}' not in scenario '{scenario_id}'.")
+
+    if state.active_what_if and state.active_what_if.scenario_id == scenario_id:
+        ac = state.aircraft.get(req.aircraftId)
+        if ac:
+            ac_env = state.create_envelope("aircraft.state", ac, aircraft_id=req.aircraftId)
+            await manager.broadcast_event(ac_env)
+
+    return {"status": "ok", "scenarioId": scenario_id, "aircraftId": req.aircraftId, "declaration": req.declarationType.value}
+
+
+class ScenarioWeatherRequest(BaseModel):
+    phase: str
+
+
+@app.post("/api/scenario/{scenario_id}/weather")
+async def scenario_weather(scenario_id: str, req: ScenarioWeatherRequest):
+    scen = RecordingManager.get_scenario(scenario_id)
+    if not scen:
+        raise HTTPException(status_code=404, detail=f"Scenario '{scenario_id}' not found.")
+    scen.inject_weather(req.phase)
+    if state.active_what_if and state.active_what_if.scenario_id == scenario_id:
+        if state.weather:
+            wx_env = state.create_envelope("weather.updated", state.weather, aircraft_id=None)
+            await manager.broadcast_event(wx_env)
+    return {"status": "ok", "scenarioId": scenario_id, "phase": req.phase}
+
+
+@app.get("/api/recordings")
+def get_recordings():
+    return RecordingManager.list_recordings()
+
+
+@app.get("/api/providers/health")
+def get_providers_health():
+    return {
+        "providers": [
+            state.weather_provider.get_health().model_dump(),
+            state.adsb_provider.get_health().model_dump()
+        ],
+        "mode": state.mode.value,
+        "isLive": state.mode == DataMode.LIVE_OBSERVE,
+        "observedAircraftCount": len(state.observed_aircraft),
+    }
+
+
+@app.get("/api/reference/geometry")
+def get_omdb_geometry():
+    geom = OsmGeometryProvider.load()
+    return geom
+
+
+@app.get("/api/reference/weather-stations")
+def get_weather_stations():
+    stations = OurAirportsProvider.load_or_fetch()
+    return {
+        "primaryAirport": "OMDB",
+        "stations": stations,
+        "metarStations": ["OMDB", "OMDW", "OMSJ", "OMAA", "OMRK"],
+        "attribution": "OurAirports public domain aeronautical data (CC0)"
     }

@@ -220,8 +220,10 @@ export const HoneyBPanel: React.FC = () => {
             )
           : [commandText.trim()].filter(Boolean);
 
+      const optGrpId = `OPT-GRP-${Date.now()}`;
       let allOk = false;
-      for (const optText of optionsToSend) {
+      for (let idx = 0; idx < optionsToSend.length; idx++) {
+        const optText = optionsToSend[idx];
         const ok = await sendCustomCommand({
           aircraftId: cs,
           instructionType: 'INFORMATION',
@@ -230,6 +232,8 @@ export const HoneyBPanel: React.FC = () => {
           targetSpeedKt: targetSpeedKt ? Number(targetSpeedKt) : undefined,
           targetAltitudeFt: targetAltitudeFt ? Number(targetAltitudeFt) : undefined,
           relatedSuggestionId,
+          optionGroupId: optGrpId,
+          optionLabel: `Option ${idx + 1}`,
         });
         if (ok) allOk = true;
       }

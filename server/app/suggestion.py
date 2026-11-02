@@ -30,25 +30,28 @@ class SuggestionEngine:
 
         # 0. Primary Demo Flight UAE231 — Fog / LVP & Sequencing Decision Support
         uae = state.aircraft.get("UAE231")
+        rwy_30r_state = state.runway_states.get("30R")
+        rwy_30r_open = rwy_30r_state and rwy_30r_state.status.value == "OPEN"
         if uae and uae.flightPhase in [FlightPhase.ARRIVAL, FlightPhase.APPROACH, FlightPhase.HOLDING]:
             if lvp_active:
-                new_suggestions["SUG-FOG-UAE231"] = SuggestionItem(
-                    suggestionId="SUG-FOG-UAE231",
-                    aircraftId="UAE231",
-                    instructionType=InstructionType.RUNWAY_CHANGE,
-                    displayText="UAE231 Sidestep RWY 30R CAT IIIB Autoland (RVR 400m Fog — Bypass 30L LVP Delay)",
-                    params={"newRunway": "30R", "newApproach": "ILS CAT IIIB 30R"},
-                    reasonCodes=["LVP_FOG_SPACING_CONFLICT", "LOW_FUEL_MARGIN", "CAT_IIIB_CAPABLE"],
-                    reasonText=(
-                        f"DENSE FOG LVP ACTIVE (RVR {rvr_30l}m): RWY 30L spacing doubled to 6 NM behind SIA317 & DLH788. "
-                        f"UAE231 endurance is {round(uae.fuel.enduranceMin or 36)} min (B77W CAT IIIB Autoland certified) — "
-                        "Sidestep to RWY 30R or send Pilot Options (Sidestep 30R vs Hold DXB VOR)."
-                    ),
-                    urgency="CRITICAL",
-                    timeToDecisionPointSec=45,
-                    affectedAircraft=["UAE231", "DLH788", "SIA317"],
-                    targetControllerId=uae.assignedControllerId,
-                )
+                if rwy_30r_open:
+                    new_suggestions["SUG-FOG-UAE231"] = SuggestionItem(
+                        suggestionId="SUG-FOG-UAE231",
+                        aircraftId="UAE231",
+                        instructionType=InstructionType.RUNWAY_CHANGE,
+                        displayText="UAE231 Sidestep RWY 30R CAT IIIB Autoland (RVR 400m Fog — Bypass 30L LVP Delay)",
+                        params={"newRunway": "30R", "newApproach": "ILS CAT IIIB 30R"},
+                        reasonCodes=["LVP_FOG_SPACING_CONFLICT", "LOW_FUEL_MARGIN", "CAT_IIIB_CAPABLE"],
+                        reasonText=(
+                            f"DENSE FOG LVP ACTIVE (RVR {rvr_30l}m): RWY 30L spacing doubled to 6 NM behind SIA317 & DLH788. "
+                            f"UAE231 endurance is {round(uae.fuel.enduranceMin or 36)} min (B77W CAT IIIB Autoland certified) — "
+                            "Sidestep to RWY 30R or send Pilot Options (Sidestep 30R vs Hold DXB VOR)."
+                        ),
+                        urgency="CRITICAL",
+                        timeToDecisionPointSec=45,
+                        affectedAircraft=["UAE231", "DLH788", "SIA317"],
+                        targetControllerId=uae.assignedControllerId,
+                    )
                 new_suggestions["SUG-HOLD-UAE231"] = SuggestionItem(
                     suggestionId="SUG-HOLD-UAE231",
                     aircraftId="UAE231",
@@ -81,8 +84,11 @@ class SuggestionEngine:
                 )
 
         # 1. Check CAT I capability during low visibility (e.g. IGO1433)
+        vis_current = state.weather.visibilityM if state.weather else 9999.0
+        rvr_list = (state.weather.rvr or []) if state.weather else []
+        rvr_lowest = min([r.valueM for r in rvr_list] or [vis_current])
         for ac in arrivals:
-            if lvp_active and ac.capability.lvpApproach == "CAT_I":
+            if lvp_active and ac.capability.lvpApproach == "CAT_I" and (rvr_lowest < 550 or vis_current < 550):
                 sug_id = f"SUG-DIV-{ac.callsign}"
                 new_suggestions[sug_id] = SuggestionItem(
                     suggestionId=sug_id,
@@ -91,7 +97,7 @@ class SuggestionEngine:
                     displayText=f"{ac.callsign} Divert to Sharjah (OMSJ), weather below CAT I minima",
                     params={"alternateIcao": "OMSJ", "routeText": "Direct OMSJ, hold 4000 ft"},
                     reasonCodes=["CANNOT_LAND_IN_CURRENT_VIS", "CAT_I_LIMIT_EXCEEDED"],
-                    reasonText=f"RVR is {rvr_30l}m (below CAT I 550m minimum). Immediate alternate diversion required.",
+                    reasonText=f"RVR is {rvr_lowest:.0f}m (below CAT I 550m minimum). Immediate alternate diversion required.",
                     urgency="CRITICAL",
                     timeToDecisionPointSec=60,
                     affectedAircraft=[ac.callsign],
@@ -182,7 +188,8 @@ class SuggestionEngine:
                         )
                     else:
                         # Moderate spacing loss -> Suggest Speed Reduction
-                        target_spd = max(160, int(trail.speed.indicatedAirspeedKt - 30))
+                        cur_spd = trail.speed.indicatedAirspeedKt or trail.speed.groundSpeedKt or 210.0
+                        target_spd = max(160, int(cur_spd - 30))
                         new_suggestions[sug_id] = SuggestionItem(
                             suggestionId=sug_id,
                             aircraftId=trail.callsign,

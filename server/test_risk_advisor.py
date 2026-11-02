@@ -3,6 +3,7 @@ from app.state import AppState
 from app.risk_advisor import EmergencySequenceRiskAdvisor
 from app.knowledge_core import default_knowledge_core
 from app.models import (
+    DataMode,
     PriorityLevel,
     EmergencyDeclarationType,
     DeclarationStatus,
@@ -15,7 +16,9 @@ from app.models import (
 
 
 def _fresh_state() -> AppState:
-    return AppState()
+    st = AppState()
+    st.mode = DataMode.FIXTURE_SIMULATION
+    return st
 
 
 def test_knowledge_core_loaded_and_versioned():
@@ -468,6 +471,7 @@ def test_16_api_evaluation_endpoint_determinism_and_no_commands_issued():
 
     client = TestClient(app)
     client.post("/demo/reset")
+    live_state.switch_mode(DataMode.FIXTURE_SIMULATION)
     cmds_before = len(live_state.commands)
 
     r1 = client.post(

@@ -782,11 +782,27 @@ export class HttpDataLinkAdapter implements DataLinkAdapter {
   private timer: number | null = null;
   private listeners: Set<(state: ConsolidatedDashboardState) => void> = new Set();
   private latestState: ConsolidatedDashboardState | null = null;
+  private lastSuccessMs: number = Date.now();
+  private consecutiveErrors: number = 0;
 
   constructor(baseUrl: string, flightId: string = 'UAE231', pollIntervalMs: number = 1500) {
     this.baseUrl = baseUrl.replace(/\/$/, '');
     this.flightId = flightId;
     this.pollIntervalMs = pollIntervalMs;
+  }
+
+  private handleFetchFailure() {
+    this.consecutiveErrors++;
+    const elapsed = Date.now() - this.lastSuccessMs;
+    const status: ConnectionStatus =
+      elapsed > 120000 || this.consecutiveErrors >= 3 ? 'DISCONNECTED' : 'DELAYED';
+    if (this.latestState) {
+      this.latestState = {
+        ...this.latestState,
+        connectionStatus: status,
+      };
+      for (const l of this.listeners) l(this.latestState);
+    }
   }
 
   subscribe(onStateUpdate: (state: ConsolidatedDashboardState) => void): () => void {
@@ -809,10 +825,15 @@ export class HttpDataLinkAdapter implements DataLinkAdapter {
         if (res.ok) {
           const data: ConsolidatedDashboardState = await res.json();
           this.latestState = data;
+          this.lastSuccessMs = Date.now();
+          this.consecutiveErrors = 0;
           for (const l of this.listeners) l(data);
+        } else {
+          this.handleFetchFailure();
         }
       } catch (err) {
         console.warn('Ground Control HTTP polling error:', err);
+        this.handleFetchFailure();
       }
     };
     poll();

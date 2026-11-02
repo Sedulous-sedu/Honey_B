@@ -1,3 +1,16 @@
+export type DataMode = 'LIVE_OBSERVE' | 'REPLAY' | 'WHAT_IF' | 'FIXTURE_SIMULATION';
+
+export interface ProviderHealth {
+  provider: string;
+  status: 'ONLINE' | 'DEGRADED' | 'DISCONNECTED' | 'REPLAY';
+  endpoint: string;
+  lastSuccessUtc?: string | null;
+  latencyMs?: number | null;
+  recordsRetrieved?: number;
+  failureCount?: number;
+  message?: string | null;
+}
+
 export interface Position {
   lat: number;
   lon: number;

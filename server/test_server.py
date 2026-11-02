@@ -2,11 +2,15 @@ import pytest
 from fastapi.testclient import TestClient
 from app.main import app
 from app.state import state
-from app.models import CommandStatus, PilotResponse, InstructionType
+from app.models import CommandStatus, PilotResponse, InstructionType, DataMode
 from app.command_manager import CommandManager
 from app.suggestion import SuggestionEngine
 
 client = TestClient(app)
+
+def setup_module():
+    state.load_initial_data()
+    state.switch_mode(DataMode.FIXTURE_SIMULATION)
 
 def test_health():
     res = client.get("/health")
@@ -26,9 +30,19 @@ def test_pilot_dashboard_integration():
     assert data["landingSequence"]["totalInSequence"] >= 1
     assert data["conditions"]["airportIcao"] == "OMDB"
 
-    # Also test POST /api/pilot-response
+    # Issue command so pilot response acknowledges an active command
+    cmd_res = client.post("/demo/command", json={
+        "aircraftId": "UAE231",
+        "instructionType": "ALTITUDE",
+        "targetAltitudeFt": 3000,
+        "displayText": "Descend and maintain 3000 feet"
+    })
+    assert cmd_res.status_code == 200
+    issued_cmd_id = cmd_res.json()["commandId"]
+
+    # Also test POST /api/pilot-response with valid command
     resp = client.post("/api/pilot-response", json={
-        "referencedMessageId": "MSG-001",
+        "referencedMessageId": issued_cmd_id,
         "flightId": "UAE231",
         "responseType": "ACKNOWLEDGE",
         "pilotNotes": "Wilco",
@@ -36,6 +50,22 @@ def test_pilot_dashboard_integration():
     })
     assert resp.status_code == 200
     assert resp.json()["success"] is True
+
+    # Unknown command must be rejected with 404 per Defect 2
+    bad_resp = client.post("/api/pilot-response", json={
+        "referencedMessageId": "NONEXISTENT_CMD",
+        "flightId": "UAE231",
+        "responseType": "ACKNOWLEDGE",
+    })
+    assert bad_resp.status_code == 404
+
+    # Invalid responseType must be rejected with 400 per Defect 2
+    bad_type_resp = client.post("/api/pilot-response", json={
+        "referencedMessageId": issued_cmd_id,
+        "flightId": "UAE231",
+        "responseType": "INVALID_UNKNOWN_RESPONSE",
+    })
+    assert bad_type_resp.status_code == 400
 
 def test_weather_fog_jump():
     res = client.post("/demo/fog", json={"phase": "DENSE_FOG"})
@@ -85,6 +115,7 @@ def test_unable_and_supersede():
     assert res_sup.json()["status"] == "SUPERSEDED"
 
 def test_suggestions_generated():
+    client.post("/demo/fog", json={"phase": "DENSE_FOG"})
     suggestions = SuggestionEngine.compute_all_suggestions()
     assert len(suggestions) > 0
     # In dense fog, IGO1433 (CAT I) must have a divert suggestion

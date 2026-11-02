@@ -83,9 +83,9 @@ export interface AircraftData {
   flightPhase: FlightPhase;
   altitudeFt: number;
   verticalSpeedFpm: number;
-  indicatedAirspeedKts: number;
-  groundspeedKts: number;
-  mach: number;
+  indicatedAirspeedKts?: number | null;
+  groundspeedKts?: number | null;
+  mach?: number | null;
   position: AircraftPosition;
   currentClearedRoute: string;    // Operative FMS route
   fmsEtaUtc: string;              // Aircraft autonomous ETA
@@ -207,6 +207,15 @@ export interface ConsolidatedDashboardState {
   connectionLastSeenUtc: string;
   revision: number;
   generatedAtUtc: string;
+
+  // OPERATIONAL MODE & PROVIDER HEALTH (v2.0)
+  dataMode?: 'LIVE_OBSERVE' | 'REPLAY' | 'WHAT_IF' | 'FIXTURE_SIMULATION';
+  providerHealth?: Array<{
+    provider: string;
+    status: 'ONLINE' | 'DEGRADED' | 'DISCONNECTED' | 'REPLAY';
+    message?: string;
+    latencyMs?: number;
+  }>;
 
   // AIRCRAFT DATA SOURCE
   aircraft: AircraftData;

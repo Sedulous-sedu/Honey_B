@@ -10,7 +10,8 @@ from app.models import (
     PriorityLevel,
     LvpPhase,
     DeclarationStatus,
-    EmergencyDeclarationType
+    EmergencyDeclarationType,
+    DataMode
 )
 from app.command_manager import CommandManager
 from app.weather import WeatherManager
@@ -27,6 +28,13 @@ class Simulator:
         dt = 1.0 * state.sim_speed
         state.sim_time_sec += dt
 
+        # In LIVE_OBSERVE or REPLAY mode: aircraft motion and fuel are strictly read-only observations.
+        # No artificial motion, fuel burn, or synthetic traffic generator may alter this store.
+        if state.mode in (DataMode.LIVE_OBSERVE, DataMode.REPLAY):
+            CommandManager.check_expirations()
+            SuggestionEngine.compute_all_suggestions()
+            return
+
         # 1. Weather update
         WeatherManager.tick(dt)
 
@@ -39,8 +47,9 @@ class Simulator:
         # 4. Advance kinematics and fuel burn
         Simulator._advance_aircraft(dt)
 
-        # 4b. Synthetic traffic generator & lifecycle
-        TrafficGenerator.tick(dt)
+        # 4b. Synthetic traffic generator & lifecycle (for benchmark/fixture modes)
+        if state.mode == DataMode.FIXTURE_SIMULATION:
+            TrafficGenerator.tick(dt)
 
         # 5. Check command expirations
         CommandManager.check_expirations()
@@ -236,10 +245,11 @@ class Simulator:
                 ac.verticalRateFpm = 0.0
 
             # 3. Speed transition
-            if ac.targetSpeedKt is not None and abs(ac.speed.indicatedAirspeedKt - ac.targetSpeedKt) > 1:
-                diff_spd = ac.targetSpeedKt - ac.speed.indicatedAirspeedKt
+            cur_ias = ac.speed.indicatedAirspeedKt or ac.speed.groundSpeedKt or 210.0
+            if ac.targetSpeedKt is not None and abs(cur_ias - ac.targetSpeedKt) > 1:
+                diff_spd = ac.targetSpeedKt - cur_ias
                 step_spd = math.copysign(min(abs(diff_spd), 2.0 * dt), diff_spd)
-                ac.speed.indicatedAirspeedKt = round(ac.speed.indicatedAirspeedKt + step_spd)
+                ac.speed.indicatedAirspeedKt = round(cur_ias + step_spd)
                 ac.speed.groundSpeedKt = ac.speed.indicatedAirspeedKt + 5
 
             # 4. Heading transition

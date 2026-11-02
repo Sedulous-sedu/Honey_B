@@ -22,8 +22,7 @@ class WeatherManager:
         igo = state.aircraft.get("IGO1433")
 
         if phase_upper in ("FOG", "DENSE_FOG"):
-            # Primary flight UAE231 (B77W on RWY 30L): LVP spacing doubles to 6-7 NM behind SIA317 & DLH788,
-            # compressing UAE231's fuel margin and requiring immediate ATC action (Sidestep 30R / Hold / Priority)
+            # In scenario/what-if modes, mark LVP spacing constraints
             if uae:
                 uae.status = FlightStatus.PRIORITY
                 uae.priority.level = PriorityLevel.MINIMUM_FUEL
@@ -32,10 +31,6 @@ class WeatherManager:
                     "LOW_FUEL_MARGIN",
                     "CAT_IIIB_AUTOLAND_REQUIRED",
                 ]
-                # Tighten fuel so holding in dense fog creates real operational urgency (above 2900kg reserve)
-                if uae.fuel.totalKg is not None and uae.fuel.totalKg > 4600:
-                    uae.fuel.totalKg = 4450.0
-                    uae.fuel.enduranceMin = 36.0
 
                 rvr_val = 400 if phase_upper == "DENSE_FOG" else 900
                 state.advisories["UAE231"] = [
@@ -46,13 +41,13 @@ class WeatherManager:
                         title=f"OMDB {phase_upper.replace('_', ' ')} — LVP CAT IIIB Active (RVR {rvr_val}m)",
                         summary=(
                             f"Visibility {state.weather.visibilityM if state.weather else 350}m, RVR 30L {rvr_val}m. "
-                            "Arrival spacing doubled to 6 NM on RWY 30L; UAE231 fuel endurance 36 min. "
+                            "Arrival spacing doubled to 6 NM on RWY 30L. "
                             "Expect ATC options for RWY 30R CAT IIIB sidestep or DXB VOR holding."
                         ),
                         reasoning=[
                             f"OMDB RVR {rvr_val}m requires LVP CAT IIIB autoland protection",
                             "RWY 30L wake/LVO spacing increased from 3 NM to 6 NM behind DLH788",
-                            "UAE231 holding endurance (36 min) requires proactive sequencing",
+                            "Low visibility spacing requires proactive sequencing",
                         ],
                         provenance=Provenance.RULE_BASED,
                     )
@@ -69,8 +64,6 @@ class WeatherManager:
                 if uae.priority.declarationStatus.value != "CONFIRMED":
                     uae.priority.level = PriorityLevel.NORMAL
                     uae.priority.reasonCodes = []
-                    uae.fuel.totalKg = 11200.0
-                    uae.fuel.enduranceMin = 116.0
             if igo and igo.flightPhase not in ("DIVERTING",):
                 igo.status = FlightStatus.NORMAL
                 igo.priority.level = PriorityLevel.NORMAL

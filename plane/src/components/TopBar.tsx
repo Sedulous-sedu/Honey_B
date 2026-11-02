@@ -6,9 +6,15 @@ interface Props {
   aircraft?: AircraftData;
   connectionStatus: ConnectionStatus;
   lastSeenUtc: string;
+  dataMode?: 'LIVE_OBSERVE' | 'REPLAY' | 'WHAT_IF' | 'FIXTURE_SIMULATION';
+  providerHealth?: Array<{
+    provider: string;
+    status: 'ONLINE' | 'DEGRADED' | 'DISCONNECTED' | 'REPLAY';
+    message?: string;
+  }>;
 }
 
-export function TopBar({ aircraft, connectionStatus, lastSeenUtc }: Props) {
+export function TopBar({ aircraft, connectionStatus, lastSeenUtc, dataMode, providerHealth }: Props) {
   return (
     <header className="topbar" role="banner">
       <div className="topbar-brand">
@@ -17,6 +23,64 @@ export function TopBar({ aircraft, connectionStatus, lastSeenUtc }: Props) {
           <div className="topbar-brand-sub">Pilot display</div>
         </div>
       </div>
+
+      {dataMode && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <div
+            style={{
+              padding: '3px 8px',
+              borderRadius: 6,
+              fontSize: '0.72rem',
+              fontWeight: 800,
+              letterSpacing: '0.04em',
+              border: '1px solid',
+              borderColor:
+                dataMode === 'LIVE_OBSERVE'
+                  ? '#10b981'
+                  : dataMode === 'REPLAY'
+                  ? '#f59e0b'
+                  : '#8b5cf6',
+              color:
+                dataMode === 'LIVE_OBSERVE'
+                  ? '#34d399'
+                  : dataMode === 'REPLAY'
+                  ? '#fbbf24'
+                  : '#c084fc',
+              background: 'rgba(11, 31, 58, 0.85)',
+            }}
+            title={`Operational Mode: ${dataMode}`}
+          >
+            ● {dataMode}
+          </div>
+          {providerHealth && providerHealth.length > 0 && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+                fontSize: '0.68rem',
+                color: '#94a3b8',
+              }}
+              title={providerHealth.map((p) => `${p.provider}: ${p.status}`).join(' | ')}
+            >
+              {providerHealth.map((p) => (
+                <span
+                  key={p.provider}
+                  style={{
+                    padding: '2px 6px',
+                    borderRadius: 4,
+                    background: p.status === 'ONLINE' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                    color: p.status === 'ONLINE' ? '#34d399' : '#f87171',
+                    fontWeight: 700,
+                  }}
+                >
+                  {p.provider.split('_')[0]}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {aircraft && (
         <>

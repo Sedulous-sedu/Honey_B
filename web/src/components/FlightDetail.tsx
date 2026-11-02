@@ -8,6 +8,8 @@ export const FlightDetail: React.FC = () => {
   const commands = useAtcStore((s) => s.commands);
   const reassignController = useAtcStore((s) => s.reassignController);
   const controllers = useAtcStore((s) => s.controllers);
+  const forkScenario = useAtcStore((s) => s.forkScenario);
+  const dataMode = useAtcStore((s) => s.dataMode);
 
   const ac = selectedId ? aircraft[selectedId] : null;
   if (!ac) return null;
@@ -63,9 +65,14 @@ export const FlightDetail: React.FC = () => {
         </div>
 
         <div>
-          <div className="text-[10px] text-[#F5A623] uppercase">Runway / Stand</div>
+          <div className="text-[10px] text-[#F5A623] uppercase flex items-center space-x-1">
+            <span>Runway / Stand</span>
+            <span className="text-[9px] px-1 rounded bg-[#0F2444] text-[#93c5fd] font-bold">
+              {ac.assignedStand ? 'ASSIGNED' : 'UNKNOWN'}
+            </span>
+          </div>
           <div className="font-bold text-[#FFFFFF] mt-0.5">
-            RWY {ac.assignedRunway || '30L'} · Stand {ac.assignedStand || 'B14'}
+            RWY {ac.assignedRunway || '30L'} · Stand {ac.assignedStand || 'UNKNOWN'}
           </div>
         </div>
 
@@ -73,9 +80,20 @@ export const FlightDetail: React.FC = () => {
           <div className="text-[10px] text-[#F5A623] uppercase flex items-center space-x-1">
             <FuelIcon className="w-3 h-3 text-[#F5A623]" />
             <span>Fuel Remaining</span>
+            <span
+              className={`text-[9px] px-1 rounded font-bold ${
+                ac.fuel.provenance === 'UNKNOWN'
+                  ? 'bg-amber-500/20 text-amber-400'
+                  : 'bg-emerald-500/20 text-emerald-400'
+              }`}
+            >
+              {ac.fuel.provenance}
+            </span>
           </div>
           <div className={`font-bold mt-0.5 ${ac.fuel.enduranceMin < 45 ? 'text-[#F5A623]' : 'text-[#FFFFFF]'}`}>
-            {Math.round(ac.fuel.totalKg)} kg ({Math.round(ac.fuel.enduranceMin)} min)
+            {ac.fuel.totalKg && ac.fuel.totalKg > 0
+              ? `${Math.round(ac.fuel.totalKg)} kg (${Math.round(ac.fuel.enduranceMin)} min)`
+              : 'UNKNOWN (Not in ADS-B)'}
           </div>
         </div>
 
@@ -87,8 +105,16 @@ export const FlightDetail: React.FC = () => {
         </div>
       </div>
 
-      {/* Controller Assignment Switcher */}
+      {/* Controller Assignment Switcher & WHAT-IF Fork */}
       <div className="flex items-center space-x-3">
+        <button
+          onClick={() => forkScenario(`What-If for ${ac.callsign}`, `Forked scenario from flight ${ac.callsign}`)}
+          className="px-2.5 py-1.5 rounded-lg bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/50 text-xs font-mono font-bold flex items-center space-x-1 transition-all"
+          title="Fork into an isolated WHAT-IF sandbox with independent clock and fuel/emergency injection"
+        >
+          <span>Fork WHAT-IF</span>
+        </button>
+
         <div className="text-right">
           <div className="text-[10px] font-mono text-[#F5A623]">ASSIGNED CONTROLLER</div>
           <select

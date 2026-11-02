@@ -62,7 +62,7 @@ export function AircraftTelemetryCard({ aircraft, isStale }: Props) {
           <span className="metric-tile-label">Speed</span>
           <span className="metric-tile-value">{fmtKts(aircraft.indicatedAirspeedKts)} <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>IAS</span></span>
           <span className="metric-tile-sub">
-            GS {fmtKts(aircraft.groundspeedKts)} · M{aircraft.mach.toFixed(2)}
+            GS {fmtKts(aircraft.groundspeedKts)} · {aircraft.mach != null ? `M${aircraft.mach.toFixed(2)}` : 'M—'}
           </span>
         </div>
 

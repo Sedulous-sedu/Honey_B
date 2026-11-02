@@ -49,6 +49,7 @@ interface HoldAcceptButtonProps {
   isAccepted: boolean;
   isSending: boolean;
   compact?: boolean;
+  disabled?: boolean;
   onConfirmAccept: (card: CommandOptionCardItem) => void;
 }
 
@@ -62,6 +63,7 @@ function Hold1sAcceptPillButton({
   isAccepted,
   isSending,
   compact = false,
+  disabled = false,
   onConfirmAccept,
 }: HoldAcceptButtonProps) {
   const [isHolding, setIsHolding] = useState(false);
@@ -90,7 +92,7 @@ function Hold1sAcceptPillButton({
   }, [stopAnimation]);
 
   const startHold = useCallback(() => {
-    if (isAccepted || isSending) return;
+    if (isAccepted || isSending || disabled) return;
     stopAnimation();
     if (warningTimerRef.current !== null) {
       window.clearTimeout(warningTimerRef.current);
@@ -119,7 +121,7 @@ function Hold1sAcceptPillButton({
     };
 
     rafRef.current = requestAnimationFrame(tick);
-  }, [card, isAccepted, isSending, onConfirmAccept, stopAnimation]);
+  }, [card, isAccepted, isSending, disabled, onConfirmAccept, stopAnimation]);
 
   const cancelHold = useCallback(() => {
     if (!isHolding || completedRef.current) return;
@@ -187,7 +189,9 @@ function Hold1sAcceptPillButton({
           ? 'rgba(245, 166, 35, 0.16)'
           : 'rgba(34, 197, 94, 0.09)',
         border: `1.5px solid ${
-          isAccepted
+          disabled
+            ? '#64748b'
+            : isAccepted
             ? '#22c55e'
             : earlyReleaseWarning
             ? '#F5A623'
@@ -195,10 +199,15 @@ function Hold1sAcceptPillButton({
             ? '#4ade80'
             : 'rgba(34, 197, 94, 0.48)'
         }`,
-        color: '#FFFFFF',
-        cursor: isAccepted ? 'default' : 'pointer',
+        color: disabled ? '#94a3b8' : '#FFFFFF',
+        cursor: disabled ? 'not-allowed' : isAccepted ? 'default' : 'pointer',
+        opacity: disabled ? 0.45 : undefined,
       }}
-      title="Security Protected: Press and hold continuously for 1.0 second to accept and downlink WILCO"
+      title={
+        disabled
+          ? 'Clearance acceptance disabled: Datalink connection is disconnected or degraded'
+          : 'Security Protected: Press and hold continuously for 1.0 second to accept and downlink WILCO'
+      }
     >
       {/* Animated 1.0s Hold Progress Fill Bar */}
       {isHolding && (
@@ -592,16 +601,21 @@ export function TabletPilotOverview({
     ) || 8
   );
 
-  const hasFuel = aircraft.fuel && 'fuelOnBoardKg' in aircraft.fuel;
-  const fuelTons = hasFuel ? ((aircraft.fuel as any).fuelOnBoardKg / 1000).toFixed(1) : 'N/A';
-  const fuelEnduranceMin = hasFuel ? (aircraft.fuel as any).holdingEnduranceMinutes : 0;
+  const hasFuel = Boolean(
+    aircraft.fuel &&
+      'fuelOnBoardKg' in aircraft.fuel &&
+      (aircraft.fuel as any).fuelOnBoardKg !== undefined &&
+      (aircraft.fuel as any).fuelOnBoardKg !== null
+  );
+  const fuelTons = hasFuel ? ((aircraft.fuel as any).fuelOnBoardKg / 1000).toFixed(1) : 'UNKNOWN';
+  const fuelEnduranceMin = hasFuel ? ((aircraft.fuel as any).holdingEnduranceMinutes || 0) : 0;
   const fuelHours = Math.floor(fuelEnduranceMin / 60);
   const fuelMins = fuelEnduranceMin % 60;
   const fuelSub = hasFuel
     ? fuelHours > 0
       ? `~ ${fuelHours}h ${fuelMins}m`
       : `~ ${fuelMins}m above reserve`
-    : 'Fuel telemetry unavailable';
+    : 'Not available from ADS-B';
   const fuelPct = hasFuel ? Math.min(100, Math.max(12, Math.round((fuelEnduranceMin / 90) * 100))) : 0;
 
   return (
@@ -730,6 +744,34 @@ export function TabletPilotOverview({
             >
               {isFogActive ? `🌫 FOG ACTIVE (${visMeters}m)` : '🌫 Simulate Fog'}
             </button>
+            {state.dataMode && (
+              <span
+                style={{
+                  padding: '3px 8px',
+                  borderRadius: 6,
+                  fontSize: '0.68rem',
+                  fontWeight: 800,
+                  letterSpacing: '0.04em',
+                  border: '1px solid',
+                  borderColor:
+                    state.dataMode === 'LIVE_OBSERVE'
+                      ? '#10b981'
+                      : state.dataMode === 'REPLAY'
+                      ? '#f59e0b'
+                      : '#8b5cf6',
+                  color:
+                    state.dataMode === 'LIVE_OBSERVE'
+                      ? '#34d399'
+                      : state.dataMode === 'REPLAY'
+                      ? '#fbbf24'
+                      : '#c084fc',
+                  background: 'rgba(11, 31, 58, 0.9)',
+                }}
+                title={`Honey B Data Mode: ${state.dataMode}`}
+              >
+                ● {state.dataMode}
+              </span>
+            )}
             <span className={`datalink-icon ${connectionStatus.toLowerCase()}`}>●</span>
             <span className={`datalink-text ${connectionStatus.toLowerCase()}`}>
               {connectionStatus === 'LIVE'
@@ -938,6 +980,7 @@ export function TabletPilotOverview({
                     isAccepted={false}
                     isSending={sendingCardId === card.cardId}
                     compact={true}
+                    disabled={isDisconnected}
                     onConfirmAccept={handleCardAccept}
                   />
                   <button
@@ -1134,6 +1177,7 @@ export function TabletPilotOverview({
                       isAccepted={isAccepted}
                       isSending={sendingCardId === card.cardId}
                       compact={false}
+                      disabled={isDisconnected}
                       onConfirmAccept={handleCardAccept}
                     />
 
@@ -1239,10 +1283,12 @@ export function TabletPilotOverview({
           </div>
           <div className="tile-content-col">
             <div className="tile-label">FUEL</div>
-            <div className="tile-value">
-              {fuelTons} {hasFuel ? 'T' : ''}
+            <div className="tile-value" style={!hasFuel ? { fontSize: '0.92rem', color: '#94a3b8' } : undefined}>
+              {hasFuel ? `${fuelTons} T` : 'UNKNOWN'}
             </div>
-            <div className="tile-subtext">{fuelSub}</div>
+            <div className="tile-subtext" style={!hasFuel ? { color: '#fbbf24', fontSize: '0.72rem' } : undefined}>
+              {hasFuel ? fuelSub : 'Not in ADS-B (Click to report)'}
+            </div>
             {hasFuel && (
               <div className="tile-progress-bar">
                 <div

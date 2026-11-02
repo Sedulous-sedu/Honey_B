@@ -1,0 +1,193 @@
+{
+  "version": "1.0.0",
+  "retrievedAtUtc": "2026-11-02T20:22:41Z",
+  "license": "Public Domain (Creative Commons CC0)",
+  "source": "OurAirports open data (David Megginson)",
+  "airportsSha256": "e869f2a5c500aa0a5c74c680559c4e3ab7e65c7a442daa7c92b7f99fb51613ca",
+  "runwaysSha256": "62a2c7a9979e63b1ceed2553aa8d2bc3ad012340e4cb330663578aa500a309e5",
+  "airports": {
+    "OMAA": {
+      "icao": "OMAA",
+      "name": "Zayed International Airport",
+      "type": "large_airport",
+      "lat": 24.440966,
+      "lon": 54.649237,
+      "elevationFt": 88.0,
+      "municipality": "Abu Dhabi",
+      "runways": [
+        {
+          "id": "308419",
+          "le_ident": "13L",
+          "he_ident": "31R",
+          "lengthFt": 13451.0,
+          "widthFt": 197.0,
+          "surface": "ASP",
+          "lighted": true,
+          "closed": false,
+          "le_lat": 24.465,
+          "le_lon": 54.638329,
+          "he_lat": 24.442329,
+          "he_lon": 54.67017,
+          "le_headingDeg": 128.0,
+          "he_headingDeg": 308.0
+        },
+        {
+          "id": "232764",
+          "le_ident": "13R",
+          "he_ident": "31L",
+          "lengthFt": 13471.0,
+          "widthFt": 197.0,
+          "surface": "ASP",
+          "lighted": true,
+          "closed": false,
+          "le_lat": 24.444401,
+          "le_lon": 54.635201,
+          "he_lat": 24.4217,
+          "he_lon": 54.667198,
+          "le_headingDeg": 128.0,
+          "he_headingDeg": 308.0
+        }
+      ]
+    },
+    "OMDB": {
+      "icao": "OMDB",
+      "name": "Dubai International Airport",
+      "type": "large_airport",
+      "lat": 25.24979,
+      "lon": 55.370992,
+      "elevationFt": 62.0,
+      "municipality": "Dubai",
+      "runways": [
+        {
+          "id": "232769",
+          "le_ident": "12L",
+          "he_ident": "30R",
+          "lengthFt": 14275.0,
+          "widthFt": 197.0,
+          "surface": "ASP",
+          "lighted": true,
+          "closed": false,
+          "le_lat": 25.26462745666504,
+          "le_lon": 55.35042190551758,
+          "he_lat": 25.247709274291992,
+          "he_lon": 55.38093185424805,
+          "le_headingDeg": 121.0,
+          "he_headingDeg": 301.0
+        },
+        {
+          "id": "232768",
+          "le_ident": "12R",
+          "he_ident": "30L",
+          "lengthFt": 14590.0,
+          "widthFt": 197.0,
+          "surface": "ASP",
+          "lighted": true,
+          "closed": false,
+          "le_lat": 25.252836227416992,
+          "le_lon": 55.364376068115234,
+          "he_lat": 25.235919952392578,
+          "he_lon": 55.39488220214844,
+          "le_headingDeg": 121.0,
+          "he_headingDeg": 301.0
+        }
+      ]
+    },
+    "OMDW": {
+      "icao": "OMDW",
+      "name": "Al Maktoum International Airport",
+      "type": "large_airport",
+      "lat": 24.896171,
+      "lon": 55.16235,
+      "elevationFt": 114.0,
+      "municipality": "Dubai(Jebel Ali)",
+      "runways": [
+        {
+          "id": "300755",
+          "le_ident": "12",
+          "he_ident": "30",
+          "lengthFt": 14764.0,
+          "widthFt": 197.0,
+          "surface": "ASPH",
+          "lighted": true,
+          "closed": false,
+          "le_lat": 24.907091,
+          "le_lon": 55.142071,
+          "he_lat": 24.88607,
+          "he_lon": 55.180138,
+          "le_headingDeg": 120.0,
+          "he_headingDeg": 300.0
+        },
+        {
+          "id": "335239",
+          "le_ident": "13",
+          "he_ident": "31",
+          "lengthFt": 6030.0,
+          "widthFt": 98.0,
+          "surface": "asphalt",
+          "lighted": false,
+          "closed": false,
+          "le_lat": 24.870681762695312,
+          "le_lon": 55.15243911743164,
+          "he_lat": 24.862060546875,
+          "he_lon": 55.167999267578125,
+          "le_headingDeg": 121.0,
+          "he_headingDeg": 301.0
+        }
+      ]
+    },
+    "OMRK": {
+      "icao": "OMRK",
+      "name": "Ras Al Khaimah International Airport",
+      "type": "large_airport",
+      "lat": 25.613501,
+      "lon": 55.938801,
+      "elevationFt": 102.0,
+      "municipality": "Ras Al Khaimah",
+      "runways": [
+        {
+          "id": "232771",
+          "le_ident": "16",
+          "he_ident": "34",
+          "lengthFt": 12336.0,
+          "widthFt": 148.0,
+          "surface": "ASP",
+          "lighted": true,
+          "closed": false,
+          "le_lat": 25.62969970703125,
+          "le_lon": 55.93389892578125,
+          "he_lat": 25.597000122070312,
+          "he_lon": 55.94380187988281,
+          "le_headingDeg": 164.8,
+          "he_headingDeg": 344.8
+        }
+      ]
+    },
+    "OMSJ": {
+      "icao": "OMSJ",
+      "name": "Sharjah International Airport",
+      "type": "large_airport",
+      "lat": 25.3286,
+      "lon": 55.5172,
+      "elevationFt": 111.0,
+      "municipality": "Sharjah",
+      "runways": [
+        {
+          "id": "232763",
+          "le_ident": "12",
+          "he_ident": "30",
+          "lengthFt": 13320.0,
+          "widthFt": 197.0,
+          "surface": "ASP",
+          "lighted": true,
+          "closed": false,
+          "le_lat": 25.338503,
+          "le_lon": 55.5048405,
+          "he_lat": 25.32238,
+          "he_lon": 55.53261,
+          "le_headingDeg": 122.0,
+          "he_headingDeg": 302.0
+        }
+      ]
+    }
+  }
+}

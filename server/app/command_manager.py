@@ -19,7 +19,9 @@ class CommandManager:
         displayText: str,
         params: Dict[str, Any],
         related_suggestion_id: Optional[str] = None,
-        bypass_controller_check: bool = False
+        bypass_controller_check: bool = False,
+        option_group_id: Optional[str] = None,
+        option_label: Optional[str] = None
     ) -> Tuple[Optional[CommandIssuedPayload], Optional[ErrorPayload]]:
         """Issues an ATC command. Enforces single ownership and claims."""
         aircraft = state.aircraft.get(aircraft_id)
@@ -76,6 +78,8 @@ class CommandManager:
             controllerId=controller_id,
             controllerName=controller_name,
             instructionType=instruction_type,
+            optionGroupId=option_group_id,
+            optionLabel=option_label,
             targetAltitudeFt=params.get("targetAltitudeFt"),
             targetHeadingDeg=params.get("targetHeadingDeg"),
             turnDirection=params.get("turnDirection"),
@@ -118,10 +122,38 @@ class CommandManager:
         if not cmd:
             return None, ErrorPayload(code="UNKNOWN_COMMAND", message=f"Command {command_id} not found.", commandId=command_id)
 
+        # Exact aircraft identity check
+        if cmd.aircraftId and aircraft_id and cmd.aircraftId != aircraft_id:
+            return None, ErrorPayload(
+                code="AIRCRAFT_MISMATCH",
+                message=f"Command {command_id} was issued to {cmd.aircraftId}, not {aircraft_id}.",
+                commandId=command_id
+            )
+
+        # Idempotent response check: if already responded identically, return current status
+        if cmd.status == CommandStatus.ACKNOWLEDGED and cmd.response == response:
+            return CommandStatusPayload(
+                commandId=command_id,
+                status=cmd.status,
+                previousStatus=cmd.status,
+                response=response,
+                reason="Idempotent duplicate response",
+                changedAt=state.get_sim_time_iso()
+            ), None
+
+        # Disallow response if command is in a terminal state
+        terminal_states = [CommandStatus.DONE, CommandStatus.EXPIRED, CommandStatus.SUPERSEDED, CommandStatus.CANCELLED, CommandStatus.UNABLE]
+        if cmd.status in terminal_states:
+            return None, ErrorPayload(
+                code="COMMAND_ALREADY_TERMINAL",
+                message=f"Command {command_id} is in terminal status {cmd.status.value} and cannot be modified.",
+                commandId=command_id
+            )
+
         if cmd.status not in [CommandStatus.SENT, CommandStatus.STANDBY, CommandStatus.ACKNOWLEDGED, CommandStatus.UNABLE]:
             return None, ErrorPayload(
                 code="COMMAND_NOT_AWAITING_RESPONSE",
-                message=f"Command {command_id} is in {cmd.status} status and not awaiting response.",
+                message=f"Command {command_id} is in {cmd.status.value} status and not awaiting response.",
                 commandId=command_id
             )
 
@@ -133,6 +165,23 @@ class CommandManager:
             cmd.response = response
             cmd.pilotNotes = reason_text
             state.log_event("PILOT", f"{aircraft_id} acknowledged {command_id} with WILCO ({reason_text or 'Accepted'}).")
+
+            # Atomic option group retirement: if this command belongs to an option group,
+            # retire all sibling options for this aircraft
+            if cmd.optionGroupId:
+                for sib_id, sib_cmd in list(state.commands.items()):
+                    if (
+                        sib_id != command_id
+                        and sib_cmd.optionGroupId == cmd.optionGroupId
+                        and sib_cmd.aircraftId == aircraft_id
+                        and sib_cmd.status in [CommandStatus.SENT, CommandStatus.STANDBY]
+                    ):
+                        CommandManager.supersede_command(
+                            sib_id,
+                            new_command_id=command_id,
+                            reason=f"Sibling option {command_id} was accepted by pilot."
+                        )
+
         elif response == PilotResponse.UNABLE:
             cmd.status = CommandStatus.UNABLE
             cmd.response = response

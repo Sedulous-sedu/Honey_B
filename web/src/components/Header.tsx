@@ -13,6 +13,9 @@ export const Header: React.FC = () => {
   const weather = useAtcStore((s) => s.weather);
   const triggerFog = useAtcStore((s) => s.triggerFog);
   const resetSim = useAtcStore((s) => s.resetSim);
+  const dataMode = useAtcStore((s) => s.dataMode);
+  const providerHealth = useAtcStore((s) => s.providerHealth);
+  const setMode = useAtcStore((s) => s.setMode);
 
   // Parse time
   const timeStr = serverTime ? serverTime.replace('T', ' ').replace('Z', ' UTC') : '03:00:00 UTC';
@@ -86,8 +89,52 @@ export const Header: React.FC = () => {
         </div>
       </div>
 
-      {/* Center: Live UTC Clock & Scenario Quick Controls */}
-      <div className="flex items-center space-x-4">
+      {/* Center: Mode Switcher, Provider Health, Clock & Controls */}
+      <div className="flex items-center space-x-3">
+        {/* Mode Selector */}
+        <div className="flex items-center bg-[#08172C] p-0.5 rounded-lg border border-[#F5A623]/60 space-x-1">
+          <span className="text-[10px] font-mono uppercase px-1.5 text-[#F5A623] font-bold">MODE:</span>
+          {(['LIVE_OBSERVE', 'REPLAY', 'WHAT_IF', 'FIXTURE_SIMULATION'] as const).map((m) => (
+            <button
+              key={m}
+              onClick={() => setMode(m)}
+              className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold transition-all ${
+                dataMode === m
+                  ? m === 'LIVE_OBSERVE'
+                    ? 'bg-emerald-500 text-[#0A1830]'
+                    : m === 'REPLAY'
+                    ? 'bg-amber-500 text-[#0A1830]'
+                    : m === 'WHAT_IF'
+                    ? 'bg-purple-500 text-[#FFFFFF]'
+                    : 'bg-[#F5A623] text-[#0A1830]'
+                  : 'text-[#FFFFFF]/60 hover:text-[#FFFFFF]'
+              }`}
+              title={`Switch operational mode to ${m}`}
+            >
+              {m === 'LIVE_OBSERVE' ? 'LIVE' : m === 'REPLAY' ? 'REPLAY' : m === 'WHAT_IF' ? 'WHAT-IF' : 'FIXTURE'}
+            </button>
+          ))}
+        </div>
+
+        {/* Provider Health Badges */}
+        {providerHealth && providerHealth.length > 0 && (
+          <div className="flex items-center space-x-1 px-1.5 py-0.5 rounded bg-[#0F2444] border border-[#1A3A66] text-[10px] font-mono">
+            {providerHealth.map((p) => (
+              <span
+                key={p.provider}
+                className={`px-1.5 py-0.2 rounded font-bold ${
+                  p.status === 'ONLINE'
+                    ? 'bg-emerald-500/20 text-emerald-400'
+                    : 'bg-rose-500/20 text-rose-400'
+                }`}
+                title={`${p.provider}: ${p.status} (${p.endpoint})`}
+              >
+                {p.provider.includes('WEATHER') ? 'NOAA' : 'ADS-B'}
+              </span>
+            ))}
+          </div>
+        )}
+
         <div className="flex items-center space-x-2 px-3 py-1 rounded bg-[#0F2444] border border-[#F5A623]/40 text-xs font-mono">
           <Clock className="w-3.5 h-3.5 text-[#F5A623]" />
           <span className="font-bold text-[#FFFFFF]">{timeStr}</span>

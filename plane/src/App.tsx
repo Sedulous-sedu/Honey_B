@@ -90,6 +90,8 @@ export default function App() {
           aircraft={state?.aircraft}
           connectionStatus={state?.connectionStatus ?? 'DISCONNECTED'}
           lastSeenUtc={state?.connectionLastSeenUtc ?? ''}
+          dataMode={state?.dataMode}
+          providerHealth={state?.providerHealth}
         />
       )}
 

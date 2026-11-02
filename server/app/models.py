@@ -2,10 +2,28 @@ from enum import Enum
 from typing import List, Optional, Dict, Any, Union
 from pydantic import BaseModel, Field
 
+class DataMode(str, Enum):
+    LIVE_OBSERVE = "LIVE_OBSERVE"
+    REPLAY = "REPLAY"
+    WHAT_IF = "WHAT_IF"
+    FIXTURE_SIMULATION = "FIXTURE_SIMULATION"
+
+class ProviderStatus(str, Enum):
+    OK = "OK"
+    DEGRADED = "DEGRADED"
+    DOWN = "DOWN"
+    NO_COVERAGE = "NO_COVERAGE"
+
 class Provenance(str, Enum):
-    AUTHORITATIVE = "AUTHORITATIVE"
-    SIMULATED = "SIMULATED"
+    OBSERVED = "OBSERVED"
+    REFERENCE = "REFERENCE"
     PILOT_REPORTED = "PILOT_REPORTED"
+    OPERATOR_REPORTED = "OPERATOR_REPORTED"
+    DERIVED = "DERIVED"
+    SIMULATED = "SIMULATED"
+    UNKNOWN = "UNKNOWN"
+    # Compatibility aliases
+    AUTHORITATIVE = "AUTHORITATIVE"
     RULE_BASED = "RULE_BASED"
     AI_DERIVED = "AI_DERIVED"
     DEMO_ASSUMPTION = "DEMO_ASSUMPTION"
@@ -33,6 +51,8 @@ class RunwayMode(str, Enum):
     CLOSED = "CLOSED"
 
 class FlightPhase(str, Enum):
+    UNKNOWN = "UNKNOWN"
+    EN_ROUTE = "EN_ROUTE"
     PARKED = "PARKED"
     TAXI_OUT = "TAXI_OUT"
     DEPARTURE = "DEPARTURE"
@@ -111,9 +131,13 @@ class Position(BaseModel):
     distanceToThresholdNm: float
 
 class Speed(BaseModel):
-    indicatedAirspeedKt: float
-    groundSpeedKt: float
+    indicatedAirspeedKt: Optional[float] = 0.0
+    groundSpeedKt: Optional[float] = 0.0
+    trueAirspeedKt: Optional[float] = None
+    mach: Optional[float] = None
+    trackDeg: Optional[float] = None
     airspeedType: str = "IAS_APPROX"
+    provenance: Provenance = Provenance.OBSERVED
 
 class Fuel(BaseModel):
     totalKg: Optional[float] = None
@@ -183,10 +207,20 @@ class AircraftStatePayload(BaseModel):
     squawk: Optional[str] = None
     icao24: Optional[str] = None
     observedAtUtc: Optional[str] = None
+    receivedAtUtc: Optional[str] = None
     dataFreshnessSec: Optional[float] = 0.0
     isStale: bool = False
     slotFrozen: bool = False
     missingDataReasons: List[str] = Field(default_factory=list)
+    trackDeg: Optional[float] = None
+    altBaroFt: Optional[float] = None
+    altGeomFt: Optional[float] = None
+    onGround: bool = False
+    sourceProvider: Optional[str] = None
+    sourceRecordId: Optional[str] = None
+    scenarioId: Optional[str] = None
+    currentClearedRoute: Optional[str] = None
+    predictedDelayMin: Optional[float] = None
     provenance: Provenance = Provenance.SIMULATED
 
 class RvrItem(BaseModel):
@@ -220,6 +254,11 @@ class WeatherPayload(BaseModel):
     dataFreshnessSec: Optional[float] = 0.0
     missingDataReasons: List[str] = Field(default_factory=list)
     alerts: List[str] = Field(default_factory=list)
+    rawTaf: Optional[str] = None
+    tafValidity: Optional[str] = None
+    sourceProvider: str = "NOAA_AVIATION_WEATHER"
+    sourceRecordId: Optional[str] = None
+    receivedAtUtc: Optional[str] = None
     provenance: Provenance = Provenance.SIMULATED
 
 class CommandIssuedPayload(BaseModel):
@@ -229,6 +268,8 @@ class CommandIssuedPayload(BaseModel):
     controllerId: str
     controllerName: str
     instructionType: InstructionType
+    optionGroupId: Optional[str] = None
+    optionLabel: Optional[str] = None
     targetAltitudeFt: Optional[float] = None
     targetHeadingDeg: Optional[float] = None
     turnDirection: Optional[str] = None
@@ -318,3 +359,35 @@ class ErrorPayload(BaseModel):
     message: str
     relatedEventId: Optional[str] = None
     commandId: Optional[str] = None
+
+class PilotFuelReportRequest(BaseModel):
+    aircraftId: str
+    fuelOnBoardKg: float
+    enduranceMin: float
+    finalReserveKg: Optional[float] = 2900.0
+    pilotCallsign: Optional[str] = None
+    reportedAtUtc: Optional[str] = None
+
+class PilotEmergencyReportRequest(BaseModel):
+    aircraftId: str
+    declarationType: EmergencyDeclarationType
+    nature: str
+    reportedAtUtc: Optional[str] = None
+
+class ForkScenarioRequest(BaseModel):
+    name: str = "WHAT_IF Scenario"
+    baseTrackId: Optional[str] = None
+    injectedWeatherPhase: Optional[str] = None
+    injectedEmergency: Optional[Dict[str, Any]] = None
+    injectedFuel: Optional[Dict[str, Any]] = None
+
+class ProviderHealth(BaseModel):
+    provider: str
+    status: ProviderStatus
+    endpoint: str
+    lastSuccessUtc: Optional[str] = None
+    lastAttemptUtc: Optional[str] = None
+    latencyMs: Optional[float] = None
+    recordsRetrieved: int = 0
+    failureCount: int = 0
+    message: Optional[str] = None

@@ -66,13 +66,13 @@ export function fmtKg(kg?: number): string {
   return `${Math.round(kg).toLocaleString()} kg`;
 }
 
-export function fmtKts(kts?: number): string {
-  if (kts === undefined) return '—';
+export function fmtKts(kts?: number | null): string {
+  if (kts === undefined || kts === null) return '—';
   return `${Math.round(kts)} kts`;
 }
 
-export function fmtNm(nm?: number): string {
-  if (nm === undefined) return '—';
+export function fmtNm(nm?: number | null): string {
+  if (nm === undefined || nm === null) return '—';
   return `${Math.round(nm)} NM`;
 }
 

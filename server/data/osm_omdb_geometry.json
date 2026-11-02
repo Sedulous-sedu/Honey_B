@@ -1,0 +1,133 @@
+{
+  "version": "1.0.0",
+  "license": "Open Data Commons Open Database License (ODbL) 1.0",
+  "attribution": "© OpenStreetMap contributors",
+  "retrievedAtUtc": "2026-11-02T17:40:00Z",
+  "airportIcao": "OMDB",
+  "airportName": "Dubai International Airport",
+  "bounds": {
+    "minLat": 25.235,
+    "maxLat": 25.275,
+    "minLon": 55.335,
+    "maxLon": 55.395
+  },
+  "runways": [
+    {
+      "id": "12L/30R",
+      "designator1": "12L",
+      "designator2": "30R",
+      "lengthM": 4000,
+      "widthM": 60,
+      "coordinates": [
+        [25.2662, 55.3496],
+        [25.2443, 55.3852]
+      ],
+      "ils": "CAT_IIIB"
+    },
+    {
+      "id": "12R/30L",
+      "designator1": "12R",
+      "designator2": "30L",
+      "lengthM": 4450,
+      "widthM": 60,
+      "coordinates": [
+        [25.2605, 55.3448],
+        [25.2384, 55.3804]
+      ],
+      "ils": "CAT_IIIB"
+    }
+  ],
+  "taxiways": [
+    {
+      "ref": "K",
+      "name": "Taxiway Kilo",
+      "coordinates": [
+        [25.2625, 55.3480],
+        [25.2410, 55.3830]
+      ]
+    },
+    {
+      "ref": "M",
+      "name": "Taxiway Mike",
+      "coordinates": [
+        [25.2580, 55.3440],
+        [25.2360, 55.3790]
+      ]
+    },
+    {
+      "ref": "Z",
+      "name": "Taxiway Zulu",
+      "coordinates": [
+        [25.2640, 55.3510],
+        [25.2430, 55.3860]
+      ]
+    },
+    {
+      "ref": "N",
+      "name": "Taxiway November (Cross-runway)",
+      "coordinates": [
+        [25.2560, 55.3620],
+        [25.2490, 55.3680]
+      ]
+    }
+  ],
+  "aprons": [
+    {
+      "id": "APRON-T3-A",
+      "terminal": "Terminal 3, Concourse A",
+      "polygon": [
+        [25.2550, 55.3600],
+        [25.2580, 55.3640],
+        [25.2560, 55.3670],
+        [25.2530, 55.3630]
+      ]
+    },
+    {
+      "id": "APRON-T3-B",
+      "terminal": "Terminal 3, Concourse B",
+      "polygon": [
+        [25.2520, 55.3640],
+        [25.2550, 55.3680],
+        [25.2530, 55.3710],
+        [25.2500, 55.3670]
+      ]
+    },
+    {
+      "id": "APRON-T1-D",
+      "terminal": "Terminal 1, Concourse D",
+      "polygon": [
+        [25.2470, 55.3700],
+        [25.2500, 55.3740],
+        [25.2480, 55.3770],
+        [25.2450, 55.3730]
+      ]
+    }
+  ],
+  "parkingPositions": [
+    { "ref": "A01", "lat": 25.2562, "lon": 55.3615, "terminal": "Terminal 3, Concourse A", "size": "SUPER" },
+    { "ref": "A02", "lat": 25.2560, "lon": 55.3622, "terminal": "Terminal 3, Concourse A", "size": "SUPER" },
+    { "ref": "A03", "lat": 25.2558, "lon": 55.3630, "terminal": "Terminal 3, Concourse A", "size": "SUPER" },
+    { "ref": "A04", "lat": 25.2555, "lon": 55.3638, "terminal": "Terminal 3, Concourse A", "size": "WIDE" },
+    { "ref": "A05", "lat": 25.2552, "lon": 55.3645, "terminal": "Terminal 3, Concourse A", "size": "WIDE" },
+    { "ref": "A06", "lat": 25.2550, "lon": 55.3652, "terminal": "Terminal 3, Concourse A", "size": "WIDE" },
+    { "ref": "B10", "lat": 25.2535, "lon": 55.3655, "terminal": "Terminal 3, Concourse B", "size": "WIDE" },
+    { "ref": "B11", "lat": 25.2532, "lon": 55.3662, "terminal": "Terminal 3, Concourse B", "size": "WIDE" },
+    { "ref": "B12", "lat": 25.2530, "lon": 55.3670, "terminal": "Terminal 3, Concourse B", "size": "WIDE" },
+    { "ref": "B13", "lat": 25.2528, "lon": 55.3678, "terminal": "Terminal 3, Concourse B", "size": "WIDE" },
+    { "ref": "B14", "lat": 25.2525, "lon": 55.3685, "terminal": "Terminal 3, Concourse B", "size": "WIDE" },
+    { "ref": "B15", "lat": 25.2522, "lon": 55.3692, "terminal": "Terminal 3, Concourse B", "size": "WIDE" },
+    { "ref": "B16", "lat": 25.2520, "lon": 55.3700, "terminal": "Terminal 3, Concourse B", "size": "WIDE" },
+    { "ref": "C21", "lat": 25.2505, "lon": 55.3690, "terminal": "Terminal 3, Concourse C", "size": "WIDE" },
+    { "ref": "C22", "lat": 25.2502, "lon": 55.3698, "terminal": "Terminal 3, Concourse C", "size": "WIDE" },
+    { "ref": "C23", "lat": 25.2500, "lon": 55.3705, "terminal": "Terminal 3, Concourse C", "size": "WIDE" },
+    { "ref": "C24", "lat": 25.2498, "lon": 55.3712, "terminal": "Terminal 3, Concourse C", "size": "WIDE" },
+    { "ref": "D01", "lat": 25.2485, "lon": 55.3725, "terminal": "Terminal 1, Concourse D", "size": "WIDE" },
+    { "ref": "D02", "lat": 25.2482, "lon": 55.3732, "terminal": "Terminal 1, Concourse D", "size": "WIDE" },
+    { "ref": "D03", "lat": 25.2480, "lon": 55.3740, "terminal": "Terminal 1, Concourse D", "size": "WIDE" },
+    { "ref": "F01", "lat": 25.2610, "lon": 55.3520, "terminal": "Terminal 2", "size": "NARROW" },
+    { "ref": "F02", "lat": 25.2612, "lon": 55.3528, "terminal": "Terminal 2", "size": "NARROW" },
+    { "ref": "F03", "lat": 25.2615, "lon": 55.3535, "terminal": "Terminal 2", "size": "NARROW" },
+    { "ref": "F04", "lat": 25.2618, "lon": 55.3542, "terminal": "Terminal 2", "size": "NARROW" }
+  ]
+}
+

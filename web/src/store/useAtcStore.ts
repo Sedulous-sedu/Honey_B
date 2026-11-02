@@ -1,5 +1,16 @@
 import { create } from 'zustand';
-import { Aircraft, Weather, Suggestion, Command, Stand, Controller, EventLogEntry, Metrics } from '../types';
+import {
+  Aircraft,
+  Weather,
+  Suggestion,
+  Command,
+  Stand,
+  Controller,
+  EventLogEntry,
+  Metrics,
+  DataMode,
+  ProviderHealth,
+} from '../types';
 
 export interface CustomCommandDraft {
   aircraftId: string;
@@ -16,6 +27,8 @@ export interface CustomCommandDraft {
   newRunway?: string;
   alternateIcao?: string;
   relatedSuggestionId?: string;
+  optionGroupId?: string;
+  optionLabel?: string;
 }
 
 interface AtcState {
@@ -26,6 +39,8 @@ interface AtcState {
   serverTime: string;
   simSpeed: number;
   revision: number;
+  dataMode: DataMode;
+  providerHealth: ProviderHealth[];
 
   aircraft: Record<string, Aircraft>;
   weather: Weather | null;
@@ -64,9 +79,10 @@ interface AtcState {
   sendCommand: (aircraftId: string, suggestion: Suggestion) => Promise<boolean>;
   sendCustomCommand: (payload: CustomCommandDraft) => Promise<boolean>;
   triggerFog: (phase: string) => Promise<boolean>;
-  resetSim: (
-  ) => Promise<boolean>;
+  resetSim: () => Promise<boolean>;
   setSpeed: (speed: number) => Promise<boolean>;
+  setMode: (mode: DataMode, scenarioId?: string, recordingFile?: string) => Promise<boolean>;
+  forkScenario: (name: string, description?: string) => Promise<string | null>;
   reassignStand: (aircraftId: string, standId: string) => Promise<boolean>;
   reassignController: (aircraftId: string, controllerId: string) => Promise<boolean>;
 }
@@ -81,6 +97,8 @@ export const useAtcStore = create<AtcState>((set, get) => ({
   serverTime: '2026-10-28T03:00:00Z',
   simSpeed: 1.0,
   revision: 100,
+  dataMode: 'LIVE_OBSERVE',
+  providerHealth: [],
 
   aircraft: {},
   weather: null,
@@ -123,6 +141,8 @@ export const useAtcStore = create<AtcState>((set, get) => ({
     set({
       serverTime: snap.serverTime || get().serverTime,
       simSpeed: snap.simSpeed || 1.0,
+      dataMode: snap.dataMode || get().dataMode,
+      providerHealth: snap.providerHealth || get().providerHealth,
       aircraft: Object.keys(acMap).length > 0 ? acMap : get().aircraft,
       weather: snap.weather || get().weather,
       commands: snap.commands || get().commands,
@@ -254,7 +274,9 @@ export const useAtcStore = create<AtcState>((set, get) => ({
           holdAltitudeFt: payload.holdAltitudeFt,
           newRunway: payload.newRunway,
           alternateIcao: payload.alternateIcao,
-          relatedSuggestionId: payload.relatedSuggestionId
+          relatedSuggestionId: payload.relatedSuggestionId,
+          optionGroupId: payload.optionGroupId,
+          optionLabel: payload.optionLabel
         })
       });
       if (res.ok) {
@@ -309,6 +331,41 @@ export const useAtcStore = create<AtcState>((set, get) => ({
       return false;
     } catch {
       return false;
+    }
+  },
+
+  setMode: async (mode, scenarioId, recordingFile) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/mode`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode, scenarioId, recordingFile })
+      });
+      if (res.ok) {
+        set({ dataMode: mode });
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  },
+
+  forkScenario: async (name, description) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/scenario/fork`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, description })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        set({ dataMode: 'WHAT_IF' });
+        return data.scenarioId;
+      }
+      return null;
+    } catch {
+      return null;
     }
   },
 
