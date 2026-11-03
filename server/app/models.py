@@ -129,6 +129,35 @@ class Position(BaseModel):
     lat: float
     lon: float
     distanceToThresholdNm: float
+    distanceReference: str = "OMDB_ARP"
+
+
+class OperatingAirline(BaseModel):
+    icao: str
+    iata: Optional[str] = None
+    name: str
+    logoAssetPath: Optional[str] = None
+    matchMethod: str = "CALLSIGN_DIRECTORY"  # 'PROVIDER_OPERATOR' | 'CALLSIGN_DIRECTORY'
+    source: str = "OpenFlights ODbL + Reviewed UAE Overrides"
+    reviewedAtUtc: Optional[str] = None
+
+
+class MarketingAirline(BaseModel):
+    iata: str
+    flightNumber: str
+
+
+class FlightIdentity(BaseModel):
+    trackId: str
+    icao24: str
+    callsignObserved: Optional[str] = None
+    callsignRaw: Optional[str] = None
+    flightNumberIata: Optional[str] = None
+    flightNumberStatus: str = "UNAVAILABLE"  # 'CONFIRMED_MATCH' | 'REFERENCE_ONLY' | 'UNAVAILABLE'
+    operatingAirline: Optional[OperatingAirline] = None
+    marketingAirlines: List[MarketingAirline] = Field(default_factory=list)
+    identitySource: str = "ADSB_CALLSIGN_DIRECTORY"
+    identityFetchedAtUtc: str
 
 class Speed(BaseModel):
     indicatedAirspeedKt: Optional[float] = 0.0
@@ -181,11 +210,13 @@ class RunwayOperationalState(BaseModel):
 
 class AircraftStatePayload(BaseModel):
     callsign: str
+    trackId: Optional[str] = None
     aircraftType: str
     wakeCategory: str
     origin: str
     destination: str
     flightPhase: FlightPhase
+    inferredFlightClass: Optional[str] = None  # e.g. 'OBSERVED', 'INFERRED_APPROACH', 'SURFACE'
     status: FlightStatus
     position: Position
     altitudeFt: float
@@ -206,6 +237,8 @@ class AircraftStatePayload(BaseModel):
     assignedStand: Optional[str] = None
     squawk: Optional[str] = None
     icao24: Optional[str] = None
+    registration: Optional[str] = None
+    identity: Optional[FlightIdentity] = None
     observedAtUtc: Optional[str] = None
     receivedAtUtc: Optional[str] = None
     dataFreshnessSec: Optional[float] = 0.0

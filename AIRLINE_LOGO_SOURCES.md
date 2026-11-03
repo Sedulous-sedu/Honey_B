@@ -1,0 +1,23 @@
+# Airline Logo Sources & Trademark Attribution (`AIRLINE_LOGO_SOURCES.md`)
+
+All airline marks bundled in `web/public/logos/` and `plane/public/logos/` are sanitized static SVG files without scripts or external references. Airline trademarks remain the property of their respective owners and are displayed solely for nominative identification of observed aircraft operators in this educational, non-production hackathon demonstration without implying any partnership or endorsement.
+
+## 1. Bundled & Verified Local SVG Assets
+
+| Airline ICAO | Airline IATA | Airline Name | Local File | Source Page | Original Author / Brand Owner | License / Permission Basis | Retrieval & Review Date (UTC) | SHA-256 Hash |
+|---|---|---|---|---|---|---|---|---|
+| **UAE** | `EK` | Emirates | `/logos/uae.svg` | [File:Emirates_Logo.svg](https://commons.wikimedia.org/wiki/File:Emirates_Logo.svg) | The Emirates Group | Public domain (ineligible for copyright as geometric/text mark; trademark of The Emirates Group) | `2026-11-02T21:08:00Z` | `9ad8b2085c8c7f68d684437cca21c55a107d31bcbc993029405e9206fa8ed490` |
+| **FDB** | `FZ` | flydubai | `/logos/fdb.svg` | [File:Fly_Dubai_logo_2010_03.svg](https://commons.wikimedia.org/wiki/File:Fly_Dubai_logo_2010_03.svg) | Dubai Aviation Corporation (flydubai) | Public domain (simple text/geometric mark below threshold of originality; trademark of flydubai) | `2026-11-02T21:08:00Z` | `ac165ee3e428266adab4e35f020415643eeb2a4ff1715c87f26de5ae9a430af4` |
+| **ETD** | `EY` | Etihad Airways | `/logos/etd.svg` | [File:Etihad-airways-logo.svg](https://commons.wikimedia.org/wiki/File:Etihad-airways-logo.svg) | Etihad Aviation Group | Public domain (text/calligraphic wordmark; trademark of Etihad Airways PJSC) | `2026-11-02T21:08:00Z` | `cd7037313ebe53e14178ebd2607c4bbd259c762ecb6a9cc2710b7d5b5e3c518a` |
+| **ABY** | `G9` | Air Arabia | `/logos/aby.svg` | [File:Air_Arabia_logo_2018.svg](https://commons.wikimedia.org/wiki/File:Air_Arabia_logo_2018.svg) | Air Arabia PJSC | Public domain (trademark of Air Arabia PJSC; nominative identification) | `2026-11-02T21:08:00Z` | `ac24d904396ccd3a21871582d627ece6a6289e8d8818b4417a4ec7aa16d386e7` |
+| **ADY** | `3L` | Air Arabia Abu Dhabi | `/logos/ady.svg` | [File:Air_Arabia_logo_2018.svg](https://commons.wikimedia.org/wiki/File:Air_Arabia_logo_2018.svg) | Air Arabia PJSC / Air Arabia Abu Dhabi | Public domain (trademark of Air Arabia PJSC; shared group brand mark) | `2026-11-02T21:08:00Z` | `ac24d904396ccd3a21871582d627ece6a6289e8d8818b4417a4ec7aa16d386e7` |
+| **DLH** | `LH` | Lufthansa | `/logos/dlh.svg` | [File:Lufthansa_Logo_2018.svg](https://commons.wikimedia.org/wiki/File:Lufthansa_Logo_2018.svg) | Deutsche Lufthansa AG | Public domain (threshold of originality; trademark of Deutsche Lufthansa AG) | `2026-11-02T21:08:00Z` | `3fde724dce168651d9288d25814ac9cd54d1db6f1a7dc079f088197b924420fd` |
+| **THY** | `TK` | Turkish Airlines | `/logos/thy.svg` | [File:Turkish_Airlines_logo_2019_compact.svg](https://commons.wikimedia.org/wiki/File:Turkish_Airlines_logo_2019_compact.svg) | Türk Hava Yolları A.O. | Public domain (threshold of originality; trademark of Turkish Airlines) | `2026-11-02T21:08:00Z` | `703a4d8758a1557a3f0ce8d692c1ed1388bbe9f6c95d07ccfcce8e1e56528594` |
+| **IGO** | `6E` | IndiGo | `/logos/igo.svg` | [File:IndiGo_Airlines_logo.svg](https://commons.wikimedia.org/wiki/File:IndiGo_Airlines_logo.svg) | InterGlobe Aviation Ltd. (IndiGo) | Public domain (simple geometric/text logo; trademark of InterGlobe Aviation Ltd.) | `2026-11-02T21:08:00Z` | `091ed8743d86dea8d3f5bf01a941d3638e54c1bb4828145c80a0bd3b1ef7102e` |
+
+## 2. Fallback & Unbundled Airlines Policy
+
+- **No Imitation Logos**: We never generate fake or imitation artwork for airlines without a vetted, locally bundled SVG asset.
+- **Verified Directory Code Fallback**: When an aircraft matches a verified airline in `server/data/airlines_directory.json` (e.g., `QTR` Qatar Airways, `GFA` Gulf Air, `BAW` British Airways, `AXB` Air India Express, `AIC` Air India, `KAC` Kuwait Airways, `KNE` flynas, `PIA` Pakistan International Airlines, `SIA` Singapore Airlines, `CPA` Cathay Pacific, `KAL` Korean Air, `SEY` Air Seychelles, `AZG` Silk Way West, `NCR` National Airlines) that does not yet have a bundled SVG file, `AirlineLogo` renders the verified 3-letter ICAO / 2-letter IATA badge on a neutral container — never another airline's logo.
+- **Unresolved / Non-Airline / Failed Image Load**: When an aircraft has no matched operating airline (e.g., private registrations such as `TCAKB`, ground vehicles such as `MAINT` / `GO2`, or hex-only tracks `HEX-896E32`), or if an `<img>` asset fails to load (`onError`), `AirlineLogo` gracefully falls back to a neutral aircraft silhouette icon.
+

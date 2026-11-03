@@ -15,7 +15,8 @@ _SERVER_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _SERVER_DIR not in sys.path:
     sys.path.insert(0, _SERVER_DIR)
 
-from app.state import state
+from app.state import state, TrackStore
+from app.providers.airline_directory import AirlineDirectory
 from app.models import (
     EventEnvelope,
     AircraftStatePayload,
@@ -130,10 +131,17 @@ async def real_data_ingestion_loop():
                 if (now_mono - last_adsb_time) >= 30.0:
                     last_adsb_time = now_mono
                     tracks, evicted = await state.adsb_provider.fetch_observations()
-                    if tracks:
-                        state.observed_aircraft = tracks
+                    state.observed_aircraft = TrackStore(tracks)
                     if evicted:
-                        rm_env = state.create_envelope("aircraft.removed", {"removedCallsigns": evicted}, aircraft_id=None)
+                        rm_env = state.create_envelope(
+                            "aircraft.removed",
+                            {
+                                "removedTrackIds": [f"TRK-{h.upper()}" for h in evicted],
+                                "removedIcao24s": evicted,
+                                "removedCallsigns": evicted,
+                            },
+                            aircraft_id=None,
+                        )
                         await manager.broadcast_event(rm_env)
 
         except Exception as e:
@@ -519,14 +527,28 @@ def demo_aircraft():
     return [
         {
             "aircraftId": a.callsign,
+            "trackId": a.trackId or (f"TRK-{a.icao24.upper()}" if a.icao24 else a.callsign),
+            "icao24": a.icao24,
+            "callsign": a.callsign,
+            "registration": a.registration,
+            "aircraftType": a.aircraftType,
+            "wakeCategory": a.wakeCategory,
             "flightPhase": a.flightPhase,
+            "inferredFlightClass": a.inferredFlightClass,
             "status": a.status,
             "assignedRunway": a.assignedRunway,
             "altitudeFt": a.altitudeFt,
+            "groundSpeedKt": a.speed.groundSpeedKt if a.speed else None,
+            "distanceNm": a.position.distanceToThresholdNm if a.position else None,
+            "distanceReference": a.position.distanceReference if a.position else "OMDB_ARP",
             "fuelKg": a.fuel.totalKg,
             "enduranceMin": round(a.fuel.enduranceMin) if a.fuel.enduranceMin is not None else None,
             "priority": a.priority.level,
-            "controller": a.assignedControllerId
+            "controller": a.assignedControllerId,
+            "identity": a.identity.model_dump() if a.identity else None,
+            "sourceProvider": a.sourceProvider,
+            "observedAtUtc": a.observedAtUtc,
+            "dataFreshnessSec": a.dataFreshnessSec,
         }
         for a in state.aircraft.values()
     ]
@@ -1005,6 +1027,7 @@ def pilot_dashboard(aircraft_id: str):
         "aircraft": {
             "flightId": aircraft_id,
             "callsign": ac.callsign,
+            "identity": ac.identity.model_dump() if ac.identity else None,
             "aircraftType": ac.aircraftType,
             "originIcao": ac.origin,
             "destinationIcao": ac.destination,
@@ -1215,15 +1238,36 @@ def get_recordings():
 
 @app.get("/api/providers/health")
 def get_providers_health():
+    pool_health = state.adsb_pool.get_all_health() if hasattr(state, "adsb_pool") else [state.adsb_provider.get_health().model_dump()]
     return {
         "providers": [
             state.weather_provider.get_health().model_dump(),
             state.adsb_provider.get_health().model_dump()
         ],
+        "adsbPoolSlots": pool_health,
+        "switchDiagnostics": getattr(state.adsb_pool, "switch_diagnostics", []),
         "mode": state.mode.value,
         "isLive": state.mode == DataMode.LIVE_OBSERVE,
         "observedAircraftCount": len(state.observed_aircraft),
     }
+
+
+@app.get("/api/traffic")
+def get_normalized_traffic():
+    """Returns normalized aircraft collection with FlightIdentity and airline metadata."""
+    return {
+        "mode": state.mode.value,
+        "generatedAtUtc": state.get_sim_time_iso(),
+        "activeProvider": getattr(state.adsb_pool, "active_provider_name", "adsb.lol"),
+        "count": len(state.aircraft),
+        "aircraft": [a.model_dump() for a in state.aircraft.values()],
+    }
+
+
+@app.get("/api/reference/airlines")
+def get_airline_directory():
+    """Returns cached OpenFlights ODbL airline directory and bundled logo manifest."""
+    return AirlineDirectory.get_directory_summary()
 
 
 @app.get("/api/reference/geometry")

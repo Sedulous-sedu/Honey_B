@@ -84,8 +84,33 @@ export function TopBar({ aircraft, connectionStatus, lastSeenUtc, dataMode, prov
 
       {aircraft && (
         <>
-          <div className="topbar-flight-badge">
-            <span className="topbar-flight-id">{aircraft.flightId}</span>
+          <div className="topbar-flight-badge" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {aircraft.identity?.operatingAirline?.logoAssetPath && (
+              <div
+                style={{
+                  width: 44,
+                  height: 26,
+                  borderRadius: 5,
+                  background: '#FFFFFF',
+                  padding: '2px 4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '1px solid rgba(245, 166, 35, 0.5)',
+                }}
+                title={aircraft.identity.operatingAirline.name}
+              >
+                <img
+                  src={aircraft.identity.operatingAirline.logoAssetPath}
+                  alt={`${aircraft.identity.operatingAirline.name} logo`}
+                  style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+              </div>
+            )}
+            <span className="topbar-flight-id">{aircraft.identity?.callsignObserved || aircraft.flightId}</span>
             <span className="topbar-flight-type">{aircraft.aircraftType}</span>
           </div>
 
@@ -93,7 +118,9 @@ export function TopBar({ aircraft, connectionStatus, lastSeenUtc, dataMode, prov
             <span className="route-icao">{aircraft.originIcao}</span>
             <span className="topbar-route-arrow">→</span>
             <span className="route-icao">{aircraft.destinationIcao}</span>
-            <span className="topbar-callsign">({aircraft.callsign})</span>
+            <span className="topbar-callsign">
+              ({aircraft.identity?.operatingAirline?.name || aircraft.callsign})
+            </span>
           </div>
         </>
       )}

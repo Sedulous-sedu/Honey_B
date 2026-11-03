@@ -1,0 +1,105 @@
+{
+  "version": "1.0.0",
+  "retrievedAtUtc": "2026-11-02T21:08:00Z",
+  "reviewedAtUtc": "2026-11-02T21:08:00Z",
+  "disclaimer": "Airline trademarks and brand marks remain the property of their respective owners. Bundled static SVG assets are sanitized and displayed solely for nominative identification of observed aircraft operators without implying endorsement or partnership.",
+  "logos": {
+    "UAE": {
+      "icao": "UAE",
+      "iata": "EK",
+      "name": "Emirates",
+      "localPath": "/logos/uae.svg",
+      "commonsPage": "https://commons.wikimedia.org/wiki/File:Emirates_Logo.svg",
+      "authorOrOwner": "The Emirates Group",
+      "licenseBasis": "Public domain (ineligible for copyright as simple geometric/text mark; trademark of The Emirates Group)",
+      "retrievedAtUtc": "2026-11-02T21:08:00Z",
+      "reviewedAtUtc": "2026-11-02T21:08:00Z",
+      "sha256": "9ad8b2085c8c7f68d684437cca21c55a107d31bcbc993029405e9206fa8ed490"
+    },
+    "FDB": {
+      "icao": "FDB",
+      "iata": "FZ",
+      "name": "flydubai",
+      "localPath": "/logos/fdb.svg",
+      "commonsPage": "https://commons.wikimedia.org/wiki/File:Fly_Dubai_logo_2010_03.svg",
+      "authorOrOwner": "Dubai Aviation Corporation (flydubai)",
+      "licenseBasis": "Public domain (simple text/geometric mark below threshold of originality; trademark of flydubai)",
+      "retrievedAtUtc": "2026-11-02T21:08:00Z",
+      "reviewedAtUtc": "2026-11-02T21:08:00Z",
+      "sha256": "ac165ee3e428266adab4e35f020415643eeb2a4ff1715c87f26de5ae9a430af4"
+    },
+    "ETD": {
+      "icao": "ETD",
+      "iata": "EY",
+      "name": "Etihad Airways",
+      "localPath": "/logos/etd.svg",
+      "commonsPage": "https://commons.wikimedia.org/wiki/File:Etihad-airways-logo.svg",
+      "authorOrOwner": "Etihad Aviation Group",
+      "licenseBasis": "Public domain (text/calligraphic wordmark; trademark of Etihad Airways PJSC)",
+      "retrievedAtUtc": "2026-11-02T21:08:00Z",
+      "reviewedAtUtc": "2026-11-02T21:08:00Z",
+      "sha256": "cd7037313ebe53e14178ebd2607c4bbd259c762ecb6a9cc2710b7d5b5e3c518a"
+    },
+    "ABY": {
+      "icao": "ABY",
+      "iata": "G9",
+      "name": "Air Arabia",
+      "localPath": "/logos/aby.svg",
+      "commonsPage": "https://commons.wikimedia.org/wiki/File:Air_Arabia_logo_2018.svg",
+      "authorOrOwner": "Air Arabia PJSC",
+      "licenseBasis": "Public domain (trademark of Air Arabia PJSC; nominative identification)",
+      "retrievedAtUtc": "2026-11-02T21:08:00Z",
+      "reviewedAtUtc": "2026-11-02T21:08:00Z",
+      "sha256": "ac24d904396ccd3a21871582d627ece6a6289e8d8818b4417a4ec7aa16d386e7"
+    },
+    "ADY": {
+      "icao": "ADY",
+      "iata": "3L",
+      "name": "Air Arabia Abu Dhabi",
+      "localPath": "/logos/ady.svg",
+      "commonsPage": "https://commons.wikimedia.org/wiki/File:Air_Arabia_logo_2018.svg",
+      "authorOrOwner": "Air Arabia PJSC / Air Arabia Abu Dhabi",
+      "licenseBasis": "Public domain (trademark of Air Arabia PJSC; shared group brand mark)",
+      "retrievedAtUtc": "2026-11-02T21:08:00Z",
+      "reviewedAtUtc": "2026-11-02T21:08:00Z",
+      "sha256": "ac24d904396ccd3a21871582d627ece6a6289e8d8818b4417a4ec7aa16d386e7"
+    },
+    "DLH": {
+      "icao": "DLH",
+      "iata": "LH",
+      "name": "Lufthansa",
+      "localPath": "/logos/dlh.svg",
+      "commonsPage": "https://commons.wikimedia.org/wiki/File:Lufthansa_Logo_2018.svg",
+      "authorOrOwner": "Deutsche Lufthansa AG",
+      "licenseBasis": "Public domain (threshold of originality; trademark of Deutsche Lufthansa AG)",
+      "retrievedAtUtc": "2026-11-02T21:08:00Z",
+      "reviewedAtUtc": "2026-11-02T21:08:00Z",
+      "sha256": "3fde724dce168651d9288d25814ac9cd54d1db6f1a7dc079f088197b924420fd"
+    },
+    "THY": {
+      "icao": "THY",
+      "iata": "TK",
+      "name": "Turkish Airlines",
+      "localPath": "/logos/thy.svg",
+      "commonsPage": "https://commons.wikimedia.org/wiki/File:Turkish_Airlines_logo_2019_compact.svg",
+      "authorOrOwner": "Türk Hava Yolları A.O.",
+      "licenseBasis": "Public domain (threshold of originality; trademark of Turkish Airlines)",
+      "retrievedAtUtc": "2026-11-02T21:08:00Z",
+      "reviewedAtUtc": "2026-11-02T21:08:00Z",
+      "sha256": "703a4d8758a1557a3f0ce8d692c1ed1388bbe9f6c95d07ccfcce8e1e56528594"
+    },
+    "IGO": {
+      "icao": "IGO",
+      "iata": "6E",
+      "name": "IndiGo",
+      "localPath": "/logos/igo.svg",
+      "commonsPage": "https://commons.wikimedia.org/wiki/File:IndiGo_Airlines_logo.svg",
+      "authorOrOwner": "InterGlobe Aviation Ltd. (IndiGo)",
+      "licenseBasis": "Public domain (simple geometric/text logo; trademark of InterGlobe Aviation Ltd.)",
+      "retrievedAtUtc": "2026-11-02T21:08:00Z",
+      "reviewedAtUtc": "2026-11-02T21:08:00Z",
+      "sha256": "091ed8743d86dea8d3f5bf01a941d3638e54c1bb4828145c80a0bd3b1ef7102e"
+    }
+  }
+}
+

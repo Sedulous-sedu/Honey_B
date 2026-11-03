@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAtcStore } from '../store/useAtcStore';
+import { useAtcStore, resolveSelectedAircraft } from '../store/useAtcStore';
 import {
   Send,
   AlertTriangle,
@@ -24,14 +24,18 @@ export const HoneyBPanel: React.FC = () => {
   const approvedSequenceAdvisory = useAtcStore((s) => s.approvedSequenceAdvisory);
   const composerDraft = useAtcStore((s) => s.composerDraft);
   const setComposerDraft = useAtcStore((s) => s.setComposerDraft);
+  const dataMode = useAtcStore((s) => s.dataMode);
 
   const weather = useAtcStore((s) => s.weather);
   const triggerFog = useAtcStore((s) => s.triggerFog);
   const [advisorOpen, setAdvisorOpen] = useState(false);
 
+  const selectedAc = resolveSelectedAircraft(aircraft, selectedAircraftId);
+  const isFixtureSim = dataMode === 'FIXTURE_SIMULATION';
+
   // Free-form ATC Command & Pilot Options Composer state
   const [composerMode, setComposerMode] = useState<'OPTIONS' | 'COMMAND'>('OPTIONS');
-  const [targetFlightId, setTargetFlightId] = useState<string>(selectedAircraftId || 'UAE231');
+  const [targetFlightId, setTargetFlightId] = useState<string>(selectedAc?.callsign || 'UAE231');
   const [instructionType, setInstructionType] = useState<string>('INFORMATION');
   const [commandText, setCommandText] = useState<string>(
     'UAE231 ATC OPTIONS — OPTION 1: Sidestep RWY 30R ILS CAT IIIB Autoland (RVR 450m, zero holding delay) | OPTION 2: Hold at DXB VOR 4000 ft for RWY 30L LVP sequence (EFC +8 min) — Advise crew preference.'
@@ -47,10 +51,10 @@ export const HoneyBPanel: React.FC = () => {
 
   // Sync target aircraft when user clicks a flight on radar or traffic list
   useEffect(() => {
-    if (selectedAircraftId && aircraft[selectedAircraftId]) {
-      setTargetFlightId(selectedAircraftId);
+    if (selectedAc) {
+      setTargetFlightId(selectedAc.callsign);
     }
-  }, [selectedAircraftId, aircraft]);
+  }, [selectedAc]);
 
   // Sync when a suggestion or modal loads a draft into the composer
   useEffect(() => {
@@ -75,53 +79,58 @@ export const HoneyBPanel: React.FC = () => {
 
   const allFlights = Object.values(aircraft);
 
-  // Filter suggestions and alerts to the active controller's sector (or show all if 'ALL'), pinning UAE231 first
+  // Filter suggestions and alerts to the active controller's sector (or show all if 'ALL'), pinning UAE231 first in fixture mode
   const sectorSuggestions = suggestions
     .filter((s) => {
       if (s.status !== 'ACTIVE') return false;
       if (activeControllerId === 'ALL') return true;
-      const ac = aircraft[s.aircraftId];
-      return ac && ac.assignedControllerId === activeControllerId;
+      const ac = resolveSelectedAircraft(aircraft, s.aircraftId);
+      return ac && (!ac.assignedControllerId || ac.assignedControllerId === activeControllerId);
     })
     .sort((a, b) => {
-      if (a.aircraftId === 'UAE231' && b.aircraftId !== 'UAE231') return -1;
-      if (b.aircraftId === 'UAE231' && a.aircraftId !== 'UAE231') return 1;
+      if (isFixtureSim) {
+        if (a.aircraftId === 'UAE231' && b.aircraftId !== 'UAE231') return -1;
+        if (b.aircraftId === 'UAE231' && a.aircraftId !== 'UAE231') return 1;
+      }
       return 0;
     });
 
-  // Identify critical alerts from aircraft state (pinning UAE231 first)
+  // Identify critical alerts from aircraft state
   const alerts: Array<{ id: string; callsign: string; type: 'CRITICAL' | 'WARNING'; title: string; detail: string }> = [];
 
-  if (weather?.lvp.active && aircraft['UAE231']) {
-    const uae = aircraft['UAE231'];
-    const marginKg = Math.round(uae.fuel.totalKg - uae.fuel.finalReserveKg);
+  const uae231Ac = isFixtureSim ? resolveSelectedAircraft(aircraft, 'UAE231') : null;
+  if (weather?.lvp.active && uae231Ac && uae231Ac.fuel.totalKg != null && uae231Ac.fuel.finalReserveKg != null) {
+    const marginKg = Math.round(uae231Ac.fuel.totalKg - uae231Ac.fuel.finalReserveKg);
     alerts.push({
       id: 'alert-fog-uae231',
       callsign: 'UAE231',
       type: 'CRITICAL',
       title: `🌫 LVP FOG PRIORITY: UAE231 (B77W)`,
-      detail: `Vis ${weather.visibilityM}m (RVR 400m) · RWY 30L spacing 6 NM · Endurance ${Math.round(uae.fuel.enduranceMin)}m (${marginKg}kg margin). Send 30R Sidestep / Hold Options to Pilot!`
+      detail: `Vis ${weather.visibilityM}m (RVR 400m) · RWY 30L spacing 6 NM · Endurance ${Math.round(uae231Ac.fuel.enduranceMin || 0)}m (${marginKg}kg margin). Send 30R Sidestep / Hold Options to Pilot!`
     });
   }
 
   allFlights.forEach((ac) => {
-    if (ac.callsign === 'UAE231' && weather?.lvp.active) return; // Already added at top
-    if (activeControllerId !== 'ALL' && ac.assignedControllerId !== activeControllerId) {
+    if (isFixtureSim && ac.callsign === 'UAE231' && weather?.lvp.active) return; // Already added at top
+    if (activeControllerId !== 'ALL' && ac.assignedControllerId && ac.assignedControllerId !== activeControllerId) {
       return;
     }
 
     if (ac.priority.level === 'MINIMUM_FUEL' || ac.priority.level === 'EMERGENCY') {
-      const marginKg = Math.round(ac.fuel.totalKg - ac.fuel.finalReserveKg);
+      const marginKg =
+        ac.fuel.totalKg != null && ac.fuel.finalReserveKg != null
+          ? `${Math.round(ac.fuel.totalKg - ac.fuel.finalReserveKg)} kg reserve margin`
+          : 'Fuel quantity UNKNOWN (ADS-B)';
       alerts.push({
-        id: `alert-fuel-${ac.callsign}`,
+        id: `alert-fuel-${ac.trackId || ac.callsign}`,
         callsign: ac.callsign,
         type: 'CRITICAL',
-        title: `MINIMUM FUEL: ${ac.callsign}`,
-        detail: `${Math.round(ac.fuel.enduranceMin)} min endurance (${marginKg} kg reserve margin). Immediate priority required.`
+        title: `${ac.priority.level}: ${ac.callsign}`,
+        detail: `${ac.fuel.enduranceMin ? `${Math.round(ac.fuel.enduranceMin)} min endurance` : 'Emergency squawk / priority'} (${marginKg}). Immediate priority required.`
       });
     } else if (ac.priority.level === 'MEDICAL') {
       alerts.push({
-        id: `alert-med-${ac.callsign}`,
+        id: `alert-med-${ac.trackId || ac.callsign}`,
         callsign: ac.callsign,
         type: 'CRITICAL',
         title: `MEDICAL PRIORITY: ${ac.callsign}`,
@@ -129,7 +138,7 @@ export const HoneyBPanel: React.FC = () => {
       });
     } else if (ac.status === 'UNABLE_TO_LAND') {
       alerts.push({
-        id: `alert-cat-${ac.callsign}`,
+        id: `alert-cat-${ac.trackId || ac.callsign}`,
         callsign: ac.callsign,
         type: 'WARNING',
         title: `APPROACH LIMIT EXCEEDED: ${ac.callsign}`,
@@ -534,8 +543,8 @@ export const HoneyBPanel: React.FC = () => {
               className="w-full bg-[#0A1830] border border-[#1A3A66] focus:border-[#F5A623] rounded-lg px-2 py-1 text-xs font-mono font-bold text-[#FFFFFF] focus:outline-none"
             >
               {allFlights.map((f) => (
-                <option key={f.callsign} value={f.callsign}>
-                  {f.callsign} ({f.aircraftType} · {f.flightPhase})
+                <option key={f.trackId || f.callsign} value={f.callsign}>
+                  {f.identity?.callsignObserved || f.callsign} ({f.identity?.operatingAirline?.icao || f.aircraftType} · {f.flightPhase})
                 </option>
               ))}
             </select>

@@ -24,19 +24,27 @@ This document catalogs all external public data sources utilized by Honey B, the
 
 ---
 
-### 2. adsb.lol (Open Transponder Aggregation)
-- **Authority**: adsb.lol community-run open ADS-B / MLAT network.
-- **Service**: Point-based radius transponder API.
-- **Target Coordinates**: OMDB (`25.2532°N`, `55.3657°E`), radius `100 NM`.
-- **Endpoint**: `https://api.adsb.lol/v2/point/25.2532/55.3657/100`
-- **Cadence**: Polled every 5 seconds.
-- **License / Cost**: Open Community ADS-B; zero cost; no authentication required.
+### 2. Automatic Multi-Provider ADS-B Pool (`adsb.lol`, `adsb.fi`, `OpenSky_Network`)
+- **Router / Pool**: `AdsbProviderPool` (`server/app/providers/adsb_pool.py`)
+- **Target Region**: OMDB (`25.2498°N`, `55.3710°E`), radius `100 NM` (and UAE bounding box `23.6–26.9°N`, `53.5–57.2°E`).
+- **Configured Providers (in priority order)**:
+  1. **`adsb.lol`** (Primary): `https://api.adsb.lol/v2/point/25.2498/55.3710/100` — ODbL 1.0 open community ADS-B/MLAT feed.
+  2. **`adsb.fi`** (Secondary failover): `https://opendata.adsb.fi/api/v3/lat/25.2498/lon/55.3710/dist/100` — Open data API (1 req/s personal/educational).
+  3. **`OpenSky_Network`** (Tertiary failover): `https://opensky-network.org/api/states/all?lamin=23.6&lomin=53.5&lamax=26.9&lomax=57.2` — Educational/research non-profit feed (supports optional OAuth2 client credentials via `OPENSKY_CLIENT_ID` / `OPENSKY_CLIENT_SECRET`).
+- **Automatic Rotation & Failover Rules**:
+  - Tracks per-provider request budgets, `next_eligible_mono` cooldowns from `Retry-After` headers, consecutive error counts, regional coverage counts, and median observation age.
+  - Automatically fails over to the next eligible provider on HTTP `429`, exhausted budget (`<= 1`), network timeout, `5xx` error, or `0` regional tracks.
+  - Enforces timestamp monotonicity (`obs_epoch`) across provider switches so an older observation from a secondary provider never moves a track backwards in time.
+  - Preserves stable `trackId` (`TRK-{ICAO24}`) and active 120s session callsign across provider switches so controller selection in `TrafficList`, `RadarScope`, and `FlightDetail` is never lost.
 - **Ingestion & Normalization Rules**:
-  - Transponder identity resolved via `hex` (ICAO 24-bit address) as the primary immutable key, with `flight` (squawked callsign) as operational callsign.
-  - Ground tracks: When `alt_baro == "ground"`, aircraft is normalized with `onGround = True`, `altitudeFt = 62.0` (OMDB field elevation), and `flightPhase = "TAXI_IN"` or `"PARKED"`.
-  - Ground Speed vs Airspeed: Transponders report ground speed in knots (`gs`). Indicated Airspeed is marked as derived from ground speed or reported as separate telemetry.
-  - Telemetry not broadcast over public ADS-B (fuel quantity, gate/stand assignment, operative ATC clearance route) is marked as `UNKNOWN` with `provenance = UNKNOWN` or `missingDataReasons = ["Not available in public ADS-B transponder broadcast"]`.
-  - Stale Track Watchdog: Any track with no fresh transponder packets for > 30 seconds is flagged with `isStale = True`. Any track unseen for > 120 seconds is evicted from active memory, and an eviction event is broadcast to controllers.
+  - Transponder identity is keyed by `trackId` / `icao24` (`hex`), preventing duplicate callsigns on distinct transponders from overwriting each other.
+  - **Flight Identity & Airline Directory (`AirlineDirectory`)**:
+    - Matches strict 3-letter ICAO airline callsign prefixes against `server/data/airlines_directory.json` (OpenFlights ODbL + reviewed UAE/international overrides).
+    - Never converts an ICAO callsign (`UAE231` or alphanumeric `UAE6RM`) into a guessed passenger IATA flight number (`flightNumberIata = null`, `flightNumberStatus = "UNAVAILABLE"` unless confirmed by a verified schedule source).
+    - Non-airline civil registrations (`TCAKB`, `A6-...`) and surface vehicles (`MAINT`, `GO2`, `OP18`, category `C1–C3`) are never assigned a guessed airline.
+    - Verified local SVG airline logos (`web/public/logos/`, `plane/public/logos/`) are documented with Wikimedia Commons source URLs, licenses, and SHA-256 checksums in `AIRLINE_LOGO_SOURCES.md` and `server/data/airline_logos_manifest.json`.
+  - Distance is computed to OMDB ARP (`25.2498°N, 55.3710°E`) and explicitly labeled `distanceReference = "OMDB_ARP"` until a runway is assigned.
+  - Telemetry not broadcast over public ADS-B (fuel quantity, stand assignment, crew LVO minima, operative ATC clearances) is represented honestly as `UNKNOWN`.
 
 ---
 

@@ -27,9 +27,54 @@ from app.models import (
 )
 from app.providers.aviation_weather import AviationWeatherProvider
 from app.providers.adsb_lol import AdsbLolProvider
+from app.providers.adsb_pool import AdsbProviderPool
+from app.providers.airline_directory import AirlineDirectory
 from app.providers.ourairports import OurAirportsProvider
 from app.providers.osm_geometry import OsmGeometryProvider
 from app.providers.recording_manager import RecordingManager, WhatIfScenario
+
+
+class TrackStore(dict):
+    """
+    Dictionary of AircraftStatePayload keyed primarily by stable trackId / icao24
+    (or aircraftId in fixture mode), while supporting lookup by trackId, icao24, or callsign.
+    Prevents duplicate callsigns on distinct ICAO24 transponders from overwriting one another.
+    """
+    def _find_match(self, key: Any) -> Optional[AircraftStatePayload]:
+        if not isinstance(key, str):
+            return None
+        k_up = key.upper()
+        k_low = key.lower()
+        for val in self.values():
+            if (
+                val.trackId == key
+                or val.trackId == k_up
+                or val.icao24 == k_low
+                or val.callsign == k_up
+                or val.sourceRecordId == k_low
+            ):
+                return val
+        return None
+
+    def get(self, key: Any, default: Any = None) -> Any:
+        if super().__contains__(key):
+            return super().__getitem__(key)
+        match = self._find_match(key)
+        return match if match is not None else default
+
+    def __getitem__(self, key: Any) -> AircraftStatePayload:
+        if super().__contains__(key):
+            return super().__getitem__(key)
+        match = self._find_match(key)
+        if match is not None:
+            return match
+        raise KeyError(key)
+
+    def __contains__(self, key: Any) -> bool:
+        if super().__contains__(key):
+            return True
+        return self._find_match(key) is not None
+
 
 class AppState:
     def __init__(self):
@@ -37,16 +82,16 @@ class AppState:
         self.mode: DataMode = DataMode.LIVE_OBSERVE
 
         # Real observation stores (immutable to simulation loops)
-        self.observed_aircraft: Dict[str, AircraftStatePayload] = {}
+        self.observed_aircraft: TrackStore = TrackStore()
         self.observed_weather: Optional[WeatherPayload] = None
         self.station_weather: Dict[str, Any] = {}
 
         # Replay stores (holds recorded observations from genuine flights)
-        self.replay_aircraft: Dict[str, AircraftStatePayload] = {}
+        self.replay_aircraft: TrackStore = TrackStore()
         self.replay_weather: Optional[WeatherPayload] = None
 
         # Fixture simulation stores (for labeled benchmark/fixture testing)
-        self._fixture_aircraft: Dict[str, AircraftStatePayload] = {}
+        self._fixture_aircraft: TrackStore = TrackStore()
         self._fixture_weather: Optional[WeatherPayload] = None
         self.weather_timeline: List[Dict[str, Any]] = []
         self.current_weather_idx: int = 0
@@ -69,9 +114,10 @@ class AppState:
         self.runway_states: Dict[str, RunwayOperationalState] = {}
         self.approved_sequence_advisory: Optional[Dict[str, Any]] = None
 
-        # Providers
+        # Providers (Multi-Provider ADS-B Pool with automatic rotation)
         self.weather_provider = AviationWeatherProvider()
-        self.adsb_provider = AdsbLolProvider()
+        self.adsb_pool = AdsbProviderPool()
+        self.adsb_provider = self.adsb_pool
 
         # Clocks
         self.sim_time_sec: float = 0.0
@@ -109,14 +155,15 @@ class AppState:
 
     @aircraft.setter
     def aircraft(self, val: Dict[str, AircraftStatePayload]):
+        wrapped = val if isinstance(val, TrackStore) else TrackStore(val)
         if self.mode == DataMode.WHAT_IF and self.active_what_if:
-            self.active_what_if.aircraft = val
+            self.active_what_if.aircraft = wrapped
         elif self.mode == DataMode.LIVE_OBSERVE:
-            self.observed_aircraft = val
+            self.observed_aircraft = wrapped
         elif self.mode == DataMode.REPLAY:
-            self.replay_aircraft = val
+            self.replay_aircraft = wrapped
         else:
-            self._fixture_aircraft = val
+            self._fixture_aircraft = wrapped
 
     @property
     def weather(self) -> Optional[WeatherPayload]:
@@ -258,11 +305,24 @@ class AppState:
         # Load benchmark / fixture flights
         with open(os.path.join(self.data_dir, "flights.json")) as f:
             flights_list = json.load(f)
-            self._fixture_aircraft = {}
-            for fl in flights_list:
+            self._fixture_aircraft = TrackStore()
+            for idx, fl in enumerate(flights_list):
                 ac_obj = AircraftStatePayload(**fl)
                 if not ac_obj.observedAtUtc:
                     ac_obj.observedAtUtc = now_iso
+                if not ac_obj.icao24:
+                    ac_obj.icao24 = f"896f{idx:02x}"
+                if not ac_obj.trackId:
+                    ac_obj.trackId = f"TRK-{ac_obj.icao24.upper()}"
+                if not ac_obj.identity:
+                    ident, _ = AirlineDirectory.resolve_identity(
+                        icao24=ac_obj.icao24,
+                        callsign_raw=ac_obj.callsign,
+                        fetched_at_utc=now_iso,
+                        track_id=ac_obj.trackId,
+                    )
+                    ac_obj.identity = ident
+                ac_obj.position.distanceReference = "RUNWAY_THRESHOLD" if ac_obj.assignedRunway else "OMDB_ARP"
                 if ac_obj.fuel.holdingFuelFlowKgH is not None:
                     if ac_obj.fuel.approachFuelFlowKgH is None:
                         ac_obj.fuel.approachFuelFlowKgH = round(ac_obj.fuel.holdingFuelFlowKgH * 0.92, 1)
@@ -276,16 +336,17 @@ class AppState:
                 self._fixture_aircraft[fl["aircraftId"]] = ac_obj
 
         # Pre-load genuine recording into REPLAY store
-        self.observed_aircraft = {}
+        self.observed_aircraft = TrackStore()
         self.observed_weather = None
-        self.replay_aircraft = {}
+        self.replay_aircraft = TrackStore()
         self.replay_weather = None
         try:
             rec = RecordingManager.load_recording()
-            rec_aircraft = {}
+            rec_aircraft = TrackStore()
             for fl in rec.get("aircraft", []):
                 obj = self._normalize_replay_aircraft_dict(fl)
-                rec_aircraft[obj.callsign] = obj
+                key = obj.trackId or obj.icao24 or obj.callsign
+                rec_aircraft[key] = obj
             self.replay_aircraft = rec_aircraft
             if "weather" in rec:
                 rec_wx = rec["weather"].copy()
@@ -397,16 +458,32 @@ class AppState:
                 "declarationStatus": "NONE",
                 "provenance": "UNKNOWN"
             }
-        return AircraftStatePayload(**fl_copy)
+        ac_obj = AircraftStatePayload(**fl_copy)
+        hex_id = (ac_obj.icao24 or ac_obj.sourceRecordId or ac_obj.callsign).lower()
+        ac_obj.icao24 = hex_id
+        if not ac_obj.trackId:
+            ac_obj.trackId = f"TRK-{hex_id.upper()}"
+        if not ac_obj.identity:
+            ident, disp = AirlineDirectory.resolve_identity(
+                icao24=hex_id,
+                callsign_raw=ac_obj.callsign,
+                fetched_at_utc=ac_obj.observedAtUtc or "2026-11-02T17:30:00Z",
+                track_id=ac_obj.trackId,
+                registration=ac_obj.registration,
+            )
+            ac_obj.identity = ident
+            ac_obj.callsign = disp
+        return ac_obj
 
     def start_replay(self, recording_file: Optional[str] = None):
         data = RecordingManager.load_recording(recording_file)
         self.mode = DataMode.REPLAY
         self.active_what_if = None
-        rec_aircraft = {}
+        rec_aircraft = TrackStore()
         for fl in data.get("aircraft", []):
             obj = self._normalize_replay_aircraft_dict(fl)
-            rec_aircraft[obj.callsign] = obj
+            key = obj.trackId or obj.icao24 or obj.callsign
+            rec_aircraft[key] = obj
         self.replay_aircraft = rec_aircraft
         if "weather" in data:
             rec_wx = data["weather"].copy()

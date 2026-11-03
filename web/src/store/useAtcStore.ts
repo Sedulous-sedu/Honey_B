@@ -69,6 +69,7 @@ interface AtcState {
 
   applySnapshot: (snapshot: any) => void;
   updateAircraft: (ac: Aircraft) => void;
+  removeAircraft: (payload: { removedTrackIds?: string[]; removedIcao24s?: string[]; removedCallsigns?: string[] }) => void;
   updateWeather: (w: Weather) => void;
   addOrUpdateCommand: (cmd: Command) => void;
   updateCommandStatus: (statusPayload: any) => void;
@@ -89,12 +90,37 @@ interface AtcState {
 
 const API_BASE = `http://${window.location.hostname || 'localhost'}:8000`;
 
+export function getTrackKey(ac: Aircraft): string {
+  return ac.trackId || ac.icao24 || ac.callsign;
+}
+
+export function resolveSelectedAircraft(
+  aircraftMap: Record<string, Aircraft>,
+  selectedId: string | null
+): Aircraft | null {
+  if (!selectedId) return null;
+  if (aircraftMap[selectedId]) return aircraftMap[selectedId];
+  const selUpper = selectedId.toUpperCase();
+  const selLower = selectedId.toLowerCase();
+  for (const ac of Object.values(aircraftMap)) {
+    if (
+      ac.trackId === selectedId ||
+      ac.trackId === selUpper ||
+      ac.icao24 === selLower ||
+      ac.callsign === selUpper
+    ) {
+      return ac;
+    }
+  }
+  return null;
+}
+
 export const useAtcStore = create<AtcState>((set, get) => ({
   connected: false,
   activePage: 'wall',
-  activeControllerId: 'ALL', // Default to ALL (Overview Wall Screen)
-  selectedAircraftId: 'UAE231', // Default demo flight
-  serverTime: '2026-10-28T03:00:00Z',
+  activeControllerId: 'ALL',
+  selectedAircraftId: null,
+  serverTime: '2026-11-02T20:00:00Z',
   simSpeed: 1.0,
   revision: 100,
   dataMode: 'LIVE_OBSERVE',
@@ -109,8 +135,8 @@ export const useAtcStore = create<AtcState>((set, get) => ({
   claims: {},
   eventLog: [],
   metrics: {
-    totalFlights: 15,
-    atRiskCount: 2,
+    totalFlights: 0,
+    atRiskCount: 0,
     delayedMinutes: 0,
     fcfsBaselineDelayMin: 0,
     conflictsAvoided: 0
@@ -132,19 +158,28 @@ export const useAtcStore = create<AtcState>((set, get) => ({
 
   applySnapshot: (snap) => {
     const acMap: Record<string, Aircraft> = {};
+    const hasAircraftField = snap && snap.aircraft !== undefined;
     if (Array.isArray(snap.aircraft)) {
-      snap.aircraft.forEach((a: Aircraft) => { acMap[a.callsign] = a; });
+      snap.aircraft.forEach((a: Aircraft) => {
+        acMap[getTrackKey(a)] = a;
+      });
     } else if (snap.aircraft) {
-      acMap[snap.aircraft.callsign] = snap.aircraft;
+      acMap[getTrackKey(snap.aircraft)] = snap.aircraft;
     }
+
+    const nextAircraft = hasAircraftField ? acMap : get().aircraft;
+    const currentSel = get().selectedAircraftId;
+    const resolvedSel = resolveSelectedAircraft(nextAircraft, currentSel);
+    const firstKey = Object.keys(nextAircraft)[0] || null;
 
     set({
       serverTime: snap.serverTime || get().serverTime,
       simSpeed: snap.simSpeed || 1.0,
       dataMode: snap.dataMode || get().dataMode,
       providerHealth: snap.providerHealth || get().providerHealth,
-      aircraft: Object.keys(acMap).length > 0 ? acMap : get().aircraft,
-      weather: snap.weather || get().weather,
+      aircraft: nextAircraft,
+      selectedAircraftId: resolvedSel ? getTrackKey(resolvedSel) : firstKey,
+      weather: snap.weather !== undefined ? snap.weather : get().weather,
       commands: snap.commands || get().commands,
       stands: snap.stands || get().stands,
       controllers: snap.controllers || get().controllers,
@@ -157,9 +192,40 @@ export const useAtcStore = create<AtcState>((set, get) => ({
   },
 
   updateAircraft: (ac) => {
-    set((state) => ({
-      aircraft: { ...state.aircraft, [ac.callsign]: ac }
-    }));
+    set((state) => {
+      const key = getTrackKey(ac);
+      const next = { ...state.aircraft, [key]: ac };
+      return {
+        aircraft: next,
+        selectedAircraftId: state.selectedAircraftId || key,
+      };
+    });
+  },
+
+  removeAircraft: (payload) => {
+    set((state) => {
+      const rmIds = new Set([
+        ...(payload.removedTrackIds || []),
+        ...(payload.removedIcao24s || []).map((h) => h.toLowerCase()),
+        ...(payload.removedCallsigns || []).map((c) => c.toUpperCase()),
+      ]);
+      const next: Record<string, Aircraft> = {};
+      for (const [k, ac] of Object.entries(state.aircraft)) {
+        const match =
+          rmIds.has(k) ||
+          (ac.trackId && rmIds.has(ac.trackId)) ||
+          (ac.icao24 && rmIds.has(ac.icao24.toLowerCase())) ||
+          rmIds.has(ac.callsign.toUpperCase());
+        if (!match) {
+          next[k] = ac;
+        }
+      }
+      const resolvedSel = resolveSelectedAircraft(next, state.selectedAircraftId);
+      return {
+        aircraft: next,
+        selectedAircraftId: resolvedSel ? getTrackKey(resolvedSel) : (Object.keys(next)[0] || null),
+      };
+    });
   },
 
   updateWeather: (weather) => set({ weather }),

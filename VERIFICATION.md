@@ -23,7 +23,7 @@ This document details the test execution evidence and verification procedures pr
 
 ## 2. Test Execution Evidence
 
-### Backend Pytest Suite (30 Tests Passing)
+### Backend Pytest Suite (33 Tests Passing)
 Run the automated test suite across all modules:
 ```bash
 server/.venv/bin/pytest server/ -v
@@ -35,41 +35,52 @@ Output:
 platform darwin -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0 -- server/.venv/bin/python
 rootdir: /Users/abinrajbhaskarandevarajan/Honey B
 plugins: anyio-4.15.1
-collected 30 items
+collected 33 items
 
 server/test_real_data.py::test_mode_isolation_what_if PASSED             [  3%]
 server/test_real_data.py::test_command_option_group_atomic_retirement PASSED [  6%]
-server/test_real_data.py::test_terminal_state_protection PASSED          [ 10%]
-server/test_real_data.py::test_transactional_stand_validation PASSED     [ 13%]
-server/test_real_data.py::test_pilot_role_authorization_on_subscribe PASSED [ 16%]
-server/test_risk_advisor.py::test_knowledge_core_loaded_and_versioned PASSED [ 20%]
-server/test_risk_advisor.py::test_1_normal_traffic_requires_manual_review PASSED [ 23%]
-server/test_risk_advisor.py::test_2_confirmed_mayday_feasible_resequencing_and_frozen_slot_protection PASSED [ 26%]
-server/test_risk_advisor.py::test_3_confirmed_pan_pan_resequencing_and_cps_swap PASSED [ 30%]
-server/test_risk_advisor.py::test_4_minimum_fuel_without_declaration_does_not_infer_mayday PASSED [ 33%]
-server/test_risk_advisor.py::test_5_medical_report_awaiting_confirmation_blocks_autonomous_resequence PASSED [ 36%]
-server/test_risk_advisor.py::test_6_two_simultaneous_emergencies_hierarchy_and_parallel_split PASSED [ 40%]
-server/test_risk_advisor.py::test_7_low_visibility_approach_ineligibility_and_smr_check PASSED [ 43%]
-server/test_risk_advisor.py::test_8_runway_closure_rejects_closed_runway_and_recommends_parallel_sidestep PASSED [ 46%]
-server/test_risk_advisor.py::test_9_unknown_wake_category_requires_manual_review PASSED [ 50%]
-server/test_risk_advisor.py::test_10_stale_telemetry_requires_manual_review PASSED [ 53%]
-server/test_risk_advisor.py::test_11_missing_fuel_data_reports_unknown_and_requires_review PASSED [ 56%]
-server/test_risk_advisor.py::test_12_plan_helping_emergency_but_endangering_displaced_aircraft_is_rejected PASSED [ 60%]
-server/test_risk_advisor.py::test_13_determinism_and_non_mutation PASSED [ 63%]
-server/test_risk_advisor.py::test_14_no_infeasible_recommendation_ever_displayed_as_safe PASSED [ 66%]
-server/test_risk_advisor.py::test_15_advisor_vs_current_order_and_fcfs_baseline_comparison PASSED [ 70%]
-server/test_risk_advisor.py::test_16_api_evaluation_endpoint_determinism_and_no_commands_issued PASSED [ 73%]
-server/test_server.py::test_health PASSED                                [ 76%]
-server/test_server.py::test_pilot_dashboard_integration PASSED           [ 80%]
-server/test_server.py::test_weather_fog_jump PASSED                      [ 83%]
-server/test_server.py::test_command_lifecycle PASSED                     [ 86%]
+server/test_real_data.py::test_terminal_state_protection PASSED          [  9%]
+server/test_real_data.py::test_transactional_stand_validation PASSED     [ 12%]
+server/test_real_data.py::test_pilot_role_authorization_on_subscribe PASSED [ 15%]
+server/test_real_data.py::test_a0_airline_directory_and_callsign_rules PASSED [ 18%]
+server/test_real_data.py::test_a0_duplicate_callsigns_distinct_icao24_and_callsign_dropout PASSED [ 21%]
+server/test_real_data.py::test_b_adsb_provider_pool_failover_cooldown_and_monotonicity PASSED [ 24%]
+server/test_risk_advisor.py::test_knowledge_core_loaded_and_versioned PASSED [ 27%]
+server/test_risk_advisor.py::test_1_normal_traffic_requires_manual_review PASSED [ 30%]
+server/test_risk_advisor.py::test_2_confirmed_mayday_feasible_resequencing_and_frozen_slot_protection PASSED [ 33%]
+server/test_risk_advisor.py::test_3_confirmed_pan_pan_resequencing_and_cps_swap PASSED [ 36%]
+server/test_risk_advisor.py::test_4_minimum_fuel_without_declaration_does_not_infer_mayday PASSED [ 39%]
+server/test_risk_advisor.py::test_5_medical_report_awaiting_confirmation_blocks_autonomous_resequence PASSED [ 42%]
+server/test_risk_advisor.py::test_6_two_simultaneous_emergencies_hierarchy_and_parallel_split PASSED [ 45%]
+server/test_risk_advisor.py::test_7_low_visibility_approach_ineligibility_and_smr_check PASSED [ 48%]
+server/test_risk_advisor.py::test_8_runway_closure_rejects_closed_runway_and_recommends_parallel_sidestep PASSED [ 51%]
+server/test_risk_advisor.py::test_9_unknown_wake_category_requires_manual_review PASSED [ 54%]
+server/test_risk_advisor.py::test_10_stale_telemetry_requires_manual_review PASSED [ 57%]
+server/test_risk_advisor.py::test_11_missing_fuel_data_reports_unknown_and_requires_review PASSED [ 60%]
+server/test_risk_advisor.py::test_12_plan_helping_emergency_but_endangering_displaced_aircraft_is_rejected PASSED [ 63%]
+server/test_risk_advisor.py::test_13_determinism_and_non_mutation PASSED [ 66%]
+server/test_risk_advisor.py::test_14_no_infeasible_recommendation_ever_displayed_as_safe PASSED [ 69%]
+server/test_risk_advisor.py::test_15_advisor_vs_current_order_and_fcfs_baseline_comparison PASSED [ 72%]
+server/test_risk_advisor.py::test_16_api_evaluation_endpoint_determinism_and_no_commands_issued PASSED [ 75%]
+server/test_server.py::test_health PASSED                                [ 78%]
+server/test_server.py::test_pilot_dashboard_integration PASSED           [ 81%]
+server/test_server.py::test_weather_fog_jump PASSED                      [ 84%]
+server/test_server.py::test_command_lifecycle PASSED                     [ 87%]
 server/test_server.py::test_unable_and_supersede PASSED                  [ 90%]
 server/test_server.py::test_suggestions_generated PASSED                 [ 93%]
 server/test_server.py::test_stand_reassign PASSED                        [ 96%]
 server/test_server.py::test_risk_advisor_api_non_mutating_and_approval_separation PASSED [100%]
 
-======================== 30 passed, 1 warning in 0.75s =========================
+======================== 33 passed, 1 warning in 1.89s =========================
 ```
+
+---
+
+### Live Provider Smoke Test Evidence (Executed from Development Machine)
+- **`adsb.lol`** (`https://api.adsb.lol/v2/point/25.2498/55.3710/100`): HTTP `200`, `47–71` live UAE aircraft tracks around OMDB (`~800 ms`).
+- **`adsb.fi`** (`https://opendata.adsb.fi/api/v3/lat/25.2498/lon/55.3710/dist/100`): HTTP `200`, `49` live UAE aircraft tracks (`~311 ms`).
+- **`OpenSky_Network`** (`https://opensky-network.org/api/states/all?lamin=23.6&lomin=53.5&lamax=26.9&lomax=57.2`): HTTP `200`, `35` live UAE state vectors (`~656 ms`).
+- **`NOAA AviationWeather`** (`https://aviationweather.gov/api/data/metar?ids=OMDB,OMDW,OMSJ,OMAA,OMRK&format=json`): HTTP `200`, `5` UAE METAR stations (`OMAA`, `OMDB`, `OMDW`, `OMRK`, `OMSJ`).
 
 ---
 

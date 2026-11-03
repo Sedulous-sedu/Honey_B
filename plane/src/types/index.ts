@@ -74,9 +74,32 @@ export interface AircraftFuelData {
   unavailableReason?: string;
 }
 
+export interface OperatingAirline {
+  icao: string | null;
+  iata: string | null;
+  name: string;
+  callsignTelephony: string | null;
+  country: string | null;
+  logoAssetPath: string | null;
+  confidence: 'VERIFIED_OPERATOR' | 'CALLSIGN_PREFIX_MATCH' | 'UNRESOLVED';
+}
+
+export interface FlightIdentity {
+  trackId: string;
+  icao24: string | null;
+  callsignObserved: string | null;
+  callsignRaw: string | null;
+  flightNumberIata: string | null;
+  flightNumberStatus: 'CONFIRMED_MATCH' | 'REFERENCE_ONLY' | 'UNAVAILABLE';
+  operatingAirline: OperatingAirline | null;
+  identitySource: 'ENRICHED_MATCH' | 'CALLSIGN_DIRECTORY' | 'ICAO24_REGISTRY' | 'NONE';
+  identityFetchedAtUtc: string;
+}
+
 export interface AircraftData {
   flightId: string;               // e.g. "EK201"
   callsign: string;               // e.g. "EMIRATES 201"
+  identity?: FlightIdentity | null;
   aircraftType: string;           // e.g. "A388"
   originIcao: string;             // e.g. "OMDB"
   destinationIcao: string;        // e.g. "EGLL"

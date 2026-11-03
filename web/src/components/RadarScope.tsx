@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { useAtcStore } from '../store/useAtcStore';
+import { useAtcStore, getTrackKey, resolveSelectedAircraft } from '../store/useAtcStore';
 import { Eye, EyeOff, ZoomIn, ZoomOut, CloudFog } from 'lucide-react';
 
 export const RadarScope: React.FC = () => {
@@ -10,6 +10,7 @@ export const RadarScope: React.FC = () => {
   const controllers = useAtcStore((s) => s.controllers);
   const weather = useAtcStore((s) => s.weather);
   const triggerFog = useAtcStore((s) => s.triggerFog);
+  const dataMode = useAtcStore((s) => s.dataMode);
 
   const activeCtrl = controllers.find((c) => c.id === activeControllerId);
   const [zoom, setZoom] = useState(1.1);
@@ -17,6 +18,9 @@ export const RadarScope: React.FC = () => {
 
   const isFogActive = Boolean(weather && (weather.lvp.active || weather.visibilityM < 1500));
   const isDenseFog = Boolean(weather && weather.visibilityM <= 450);
+  const isFixtureSim = dataMode === 'FIXTURE_SIMULATION';
+  const selectedAircraft = resolveSelectedAircraft(aircraft, selectedId);
+  const selectedTrackKey = selectedAircraft ? getTrackKey(selectedAircraft) : selectedId;
 
   // OMDB center reference: 25.2532 N, 55.3657 E
   const centerLat = 25.2532;
@@ -354,11 +358,15 @@ export const RadarScope: React.FC = () => {
 
         {/* Aircraft Blips & Airplanes */}
         {flightsList.map((ac) => {
+          const trackKey = getTrackKey(ac);
           const [px, py] = project(ac.position.lat, ac.position.lon);
-          const isSelected = selectedId === ac.callsign;
-          const isPrimaryUae = ac.callsign === 'UAE231';
+          const isSelected = selectedTrackKey === trackKey || selectedId === ac.callsign;
+          const isPrimaryUae = isFixtureSim && ac.callsign === 'UAE231';
+          const observedCallsign = ac.identity?.callsignObserved || (ac.callsign.startsWith('HEX-') || ac.callsign.startsWith('ICAO-') ? null : ac.callsign);
+          const radarLabel = observedCallsign || `ICAO ${ac.icao24?.toUpperCase() || ac.callsign}`;
+          const airlineCode = ac.identity?.operatingAirline?.icao || ac.identity?.operatingAirline?.iata || null;
 
-          const isOwnedByActiveCtrl = activeControllerId === 'ALL' || ac.assignedControllerId === activeControllerId;
+          const isOwnedByActiveCtrl = activeControllerId === 'ALL' || !ac.assignedControllerId || ac.assignedControllerId === activeControllerId;
           const opacity = isOwnedByActiveCtrl ? 1.0 : 0.25;
 
           // Color coding anchored around #FFFFFF, #F5A623, and critical red
@@ -366,7 +374,7 @@ export const RadarScope: React.FC = () => {
           if (!isOwnedByActiveCtrl && activeControllerId !== 'ALL') {
             color = "#8FAAD0";
           } else if (isPrimaryUae) {
-            color = "#F5A623"; // Always highlight UAE231 in Honey Gold
+            color = "#F5A623"; // Always highlight UAE231 in Honey Gold in fixture mode
           } else if (isSelected) {
             color = "#F5A623";
           } else if (ac.priority.level === "MINIMUM_FUEL" || ac.priority.level === "EMERGENCY") {
@@ -393,9 +401,9 @@ export const RadarScope: React.FC = () => {
 
           return (
             <g
-              key={ac.callsign}
+              key={trackKey}
               opacity={opacity}
-              onClick={() => setSelectedId(ac.callsign)}
+              onClick={() => setSelectedId(trackKey)}
               className="cursor-pointer transition-all duration-300"
             >
               {/* Primary Flight UAE231 Approach & Sidestep Preview Vectors in Fog */}
@@ -460,7 +468,7 @@ export const RadarScope: React.FC = () => {
                   <rect
                     x="0"
                     y="0"
-                    width={isPrimaryUae ? "88" : "64"}
+                    width={isPrimaryUae || isSelected ? "92" : "74"}
                     height={isPrimaryUae ? "32" : "24"}
                     fill="#0A1830"
                     fillOpacity="0.95"
@@ -470,11 +478,11 @@ export const RadarScope: React.FC = () => {
                   />
                   {/* Line 1: Callsign */}
                   <text x="4" y="10" fill={isPrimaryUae || isSelected ? "#F5A623" : color} fontSize="9.5" fontFamily="'B612 Mono', ui-monospace, monospace" fontWeight="bold">
-                    {isPrimaryUae ? `★ ${ac.callsign}` : ac.callsign}
+                    {isPrimaryUae ? `★ ${radarLabel}` : radarLabel}
                   </text>
                   {/* Line 2: Altitude & Speed */}
                   <text x="4" y="19" fill="#FFFFFF" fontSize="8.5" fontFamily="'B612 Mono', ui-monospace, monospace">
-                    {ac.altitudeFt > 6000 ? `FL${Math.round(ac.altitudeFt / 100)}` : `${ac.altitudeFt}${vTrend}`} {Math.round(ac.speed.groundSpeedKt)}K
+                    {ac.altitudeFt > 6000 ? `FL${Math.round(ac.altitudeFt / 100)}` : `${ac.altitudeFt}${vTrend}`} {Math.round(ac.speed.groundSpeedKt)}K{airlineCode ? ` · ${airlineCode}` : ''}
                   </text>
                   {/* Line 3 for UAE231: Runway & LVP/Fuel tag */}
                   {isPrimaryUae && (

@@ -2,7 +2,7 @@ export type DataMode = 'LIVE_OBSERVE' | 'REPLAY' | 'WHAT_IF' | 'FIXTURE_SIMULATI
 
 export interface ProviderHealth {
   provider: string;
-  status: 'ONLINE' | 'DEGRADED' | 'DISCONNECTED' | 'REPLAY';
+  status: 'OK' | 'ONLINE' | 'DEGRADED' | 'DOWN' | 'DISCONNECTED' | 'NO_COVERAGE' | 'REPLAY';
   endpoint: string;
   lastSuccessUtc?: string | null;
   latencyMs?: number | null;
@@ -11,25 +11,54 @@ export interface ProviderHealth {
   message?: string | null;
 }
 
+export interface OperatingAirline {
+  icao: string;
+  iata: string | null;
+  name: string;
+  logoAssetPath?: string | null;
+  matchMethod: 'PROVIDER_OPERATOR' | 'CALLSIGN_DIRECTORY';
+  source: string;
+  reviewedAtUtc: string | null;
+}
+
+export interface MarketingAirline {
+  iata: string;
+  flightNumber: string;
+}
+
+export interface FlightIdentity {
+  trackId: string;
+  icao24: string;
+  callsignObserved: string | null;
+  callsignRaw: string | null;
+  flightNumberIata: string | null;
+  flightNumberStatus: 'CONFIRMED_MATCH' | 'REFERENCE_ONLY' | 'UNAVAILABLE';
+  operatingAirline: OperatingAirline | null;
+  marketingAirlines?: MarketingAirline[];
+  identitySource: string;
+  identityFetchedAtUtc: string;
+}
+
 export interface Position {
   lat: number;
   lon: number;
   distanceToThresholdNm: number;
+  distanceReference?: string;
 }
 
 export interface Speed {
-  indicatedAirspeedKt: number;
+  indicatedAirspeedKt: number | null;
   groundSpeedKt: number;
   airspeedType: string;
 }
 
 export interface Fuel {
-  totalKg: number;
-  enduranceMin: number;
-  holdingFuelFlowKgH: number;
+  totalKg: number | null;
+  enduranceMin: number | null;
+  holdingFuelFlowKgH?: number | null;
   approachFuelFlowKgH?: number | null;
   descentFuelFlowKgH?: number | null;
-  finalReserveKg: number;
+  finalReserveKg?: number | null;
   missingDataReasons?: string[];
   provenance: string;
 }
@@ -47,11 +76,13 @@ export interface Priority {
 
 export interface Aircraft {
   callsign: string;
+  trackId?: string | null;
   aircraftType: string;
   wakeCategory: string;
   origin: string;
   destination: string;
-  flightPhase: 'PARKED' | 'TAXI_OUT' | 'DEPARTURE' | 'CRUISE' | 'ARRIVAL' | 'HOLDING' | 'APPROACH' | 'FINAL' | 'LANDED' | 'TAXI_IN' | 'AT_STAND' | 'DIVERTING';
+  flightPhase: 'UNKNOWN' | 'EN_ROUTE' | 'PARKED' | 'TAXI_OUT' | 'DEPARTURE' | 'CRUISE' | 'ARRIVAL' | 'HOLDING' | 'APPROACH' | 'FINAL' | 'LANDED' | 'TAXI_IN' | 'AT_STAND' | 'DIVERTING';
+  inferredFlightClass?: string | null;
   status: 'NORMAL' | 'HOLDING' | 'DIVERTING' | 'PRIORITY' | 'UNABLE_TO_LAND';
   position: Position;
   altitudeFt: number;
@@ -68,16 +99,23 @@ export interface Aircraft {
     minApprovedRvrM?: number | null;
     operatorLvoApproved?: boolean;
     eligibleRunways?: string[];
+    missingDataReasons?: string[];
   };
   assignedControllerId: string | null;
   priority: Priority;
   assignedStand: string | null;
-  squawk?: string;
-  icao24?: string;
+  squawk?: string | null;
+  icao24?: string | null;
+  registration?: string | null;
+  identity?: FlightIdentity | null;
   observedAtUtc?: string | null;
+  receivedAtUtc?: string | null;
   dataFreshnessSec?: number | null;
   isStale?: boolean;
+  onGround?: boolean;
   slotFrozen?: boolean;
+  sourceProvider?: string | null;
+  provenance?: string;
   missingDataReasons?: string[];
 }
 

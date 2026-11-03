@@ -37,11 +37,13 @@ def test_mode_isolation_what_if():
     state.switch_mode(DataMode.LIVE_OBSERVE)
     # Populate a mock observed aircraft in LIVE_OBSERVE
     mock_ac = state._fixture_aircraft["UAE231"].model_copy(deep=True)
+    mock_ac.trackId = "TEST123"
     mock_ac.callsign = "TEST123"
     mock_ac.provenance = Provenance.OBSERVED
     mock_ac.fuel.provenance = Provenance.OBSERVED
     mock_ac.fuel.totalKg = 8500.0
-    state.observed_aircraft = {"TEST123": mock_ac}
+    state.observed_aircraft.clear()
+    state.observed_aircraft["TEST123"] = mock_ac
     ac_before_fuel = state.aircraft["TEST123"].fuel.totalKg
 
     fork_res = client.post("/api/scenario/fork", json={
@@ -194,3 +196,269 @@ def test_pilot_role_authorization_on_subscribe():
         err_msg = ws.receive_json()
         assert err_msg["type"] == "error"
         assert err_msg["payload"]["code"] == "UNAUTHORIZED_ROLE_SWITCH"
+
+
+def test_a0_airline_directory_and_callsign_rules():
+    """Verify A0 flight identity matching, alphanumeric callsigns, non-airlines, and no guessed IATA flight numbers."""
+    from app.providers.airline_directory import AirlineDirectory
+
+    now_iso = "2026-11-03T07:00:00Z"
+
+    # 1. Known airline match: UAE158 -> Emirates, NO guessed passenger flightNumberIata
+    id_uae, disp_uae = AirlineDirectory.resolve_identity(
+        icao24="896158",
+        callsign_raw="UAE158  ",
+        fetched_at_utc=now_iso,
+        registration="A6-EQA",
+    )
+    assert disp_uae == "UAE158"
+    assert id_uae.callsignObserved == "UAE158"
+    assert id_uae.callsignRaw == "UAE158  "
+    assert id_uae.flightNumberIata is None
+    assert id_uae.flightNumberStatus == "UNAVAILABLE"
+    assert id_uae.operatingAirline is not None
+    assert id_uae.operatingAirline.icao == "UAE"
+    assert id_uae.operatingAirline.name == "Emirates"
+    assert id_uae.identitySource == "CALLSIGN_DIRECTORY"
+
+    # 2. Alphanumeric ATC callsign: UAE6RM -> Emirates, never converted to EK6RM
+    id_alpha, disp_alpha = AirlineDirectory.resolve_identity(
+        icao24="8965d5",
+        callsign_raw="UAE6RM",
+        fetched_at_utc=now_iso,
+        registration="A6-EOT",
+    )
+    assert disp_alpha == "UAE6RM"
+    assert id_alpha.callsignObserved == "UAE6RM"
+    assert id_alpha.flightNumberIata is None
+    assert id_alpha.flightNumberStatus == "UNAVAILABLE"
+    assert id_alpha.operatingAirline is not None
+    assert id_alpha.operatingAirline.icao == "UAE"
+
+    # 3. Air Arabia Abu Dhabi: ADY442 -> ADY / 3L
+    id_ady, _ = AirlineDirectory.resolve_identity(
+        icao24="896aa1",
+        callsign_raw="ADY442",
+        fetched_at_utc=now_iso,
+        registration="A6-ANH",
+    )
+    assert id_ady.operatingAirline is not None
+    assert id_ady.operatingAirline.icao == "ADY"
+    assert id_ady.operatingAirline.iata == "3L"
+    assert id_ady.operatingAirline.name == "Air Arabia Abu Dhabi"
+
+    # 4. Civil registration callsign: TCAKB -> NOT matched to an airline
+    id_reg, disp_reg = AirlineDirectory.resolve_identity(
+        icao24="4bb862",
+        callsign_raw="TCAKB",
+        fetched_at_utc=now_iso,
+        registration="TC-AKB",
+    )
+    assert disp_reg == "TCAKB"
+    assert id_reg.operatingAirline is None
+    assert id_reg.identitySource == "REGISTRATION_ONLY"
+
+    # 5. Surface vehicle: MAINT -> SURFACE_TRANSPONDER, no airline
+    id_veh, _ = AirlineDirectory.resolve_identity(
+        icao24="896c2a",
+        callsign_raw="MAINT",
+        fetched_at_utc=now_iso,
+        registration="VG-01",
+    )
+    assert id_veh.operatingAirline is None
+    assert id_veh.identitySource == "SURFACE_TRANSPONDER"
+    assert AirlineDirectory.is_surface_vehicle("MAINT", "C1") is True
+
+    # 6. Missing callsign: "" -> callsignObserved is None, fallback ICAO-896E32
+    id_empty, disp_empty = AirlineDirectory.resolve_identity(
+        icao24="896e32",
+        callsign_raw="   ",
+        fetched_at_utc=now_iso,
+        registration=None,
+    )
+    assert id_empty.callsignObserved is None
+    assert id_empty.trackId == "TRK-896E32"
+    assert id_empty.operatingAirline is None
+    assert disp_empty == "ICAO-896E32"
+
+
+def test_a0_duplicate_callsigns_distinct_icao24_and_callsign_dropout():
+    """Verify two distinct icao24 tracks sharing a callsign do not overwrite each other, and callsign dropout preserves identity."""
+    from app.providers.adsb_lol import AdsbLolProvider
+    from app.state import TrackStore
+
+    now_iso = "2026-11-03T07:00:00Z"
+    raw_1 = {
+        "hex": "896111",
+        "flight": "UAE158  ",
+        "lat": 25.30,
+        "lon": 55.45,
+        "alt_baro": 4500,
+        "gs": 210,
+        "track": 300,
+        "t": "B77W",
+        "r": "A6-EQA",
+        "category": "A5",
+        "seen": 0.4,
+    }
+    raw_2 = {
+        "hex": "896222",
+        "flight": "UAE158  ",
+        "lat": 25.18,
+        "lon": 55.30,
+        "alt_baro": 8000,
+        "gs": 260,
+        "track": 120,
+        "t": "A388",
+        "r": "A6-EEO",
+        "category": "A5",
+        "seen": 0.8,
+    }
+
+    ac1, _ = AdsbLolProvider.normalize_readsb_track(raw_1, hex_id="896111", received_iso=now_iso, now_epoch=1700000000.0)
+    ac2, _ = AdsbLolProvider.normalize_readsb_track(raw_2, hex_id="896222", received_iso=now_iso, now_epoch=1700000000.0)
+    assert ac1 is not None and ac2 is not None
+    assert ac1.trackId == "TRK-896111"
+    assert ac2.trackId == "TRK-896222"
+    assert ac1.callsign == "UAE158"
+    assert ac2.callsign == "UAE158"
+
+    store = TrackStore()
+    store[ac1.trackId] = ac1
+    store[ac2.trackId] = ac2
+    # Both tracks must coexist in TrackStore without overwriting each other!
+    assert len(store) == 2
+    assert store["TRK-896111"].registration == "A6-EQA"
+    assert store["TRK-896222"].registration == "A6-EEO"
+
+    # Now simulate callsign dropout on 896111 within 120s session
+    raw_1_dropout = dict(raw_1, flight="   ", alt_baro=4200)
+    ac1_after, _ = AdsbLolProvider.normalize_readsb_track(
+        raw_1_dropout,
+        hex_id="896111",
+        received_iso=now_iso,
+        now_epoch=1700000010.0,
+        previous_track=ac1,
+    )
+    assert ac1_after is not None
+    assert ac1_after.trackId == "TRK-896111"
+    # Session retains previous callsign UAE158 within 120s window
+    assert ac1_after.callsign == "UAE158"
+    assert ac1_after.identity is not None
+    assert ac1_after.identity.operatingAirline is not None
+    assert ac1_after.identity.operatingAirline.icao == "UAE"
+
+
+def test_b_adsb_provider_pool_failover_cooldown_and_monotonicity():
+    """Verify AdsbProviderPool automatically fails over on HTTP 429, respects cooldown, rejects older timestamps, and preserves trackId."""
+    import asyncio
+    import time
+    from app.providers.adsb_pool import AdsbProviderPool
+    from app.providers.adsb_lol import AdsbLolProvider
+
+    pool = AdsbProviderPool()
+    now_iso = "2026-11-03T07:00:00Z"
+    now_mono = time.monotonic()
+
+    # Seed shared pool with 2 tracks:
+    # - 896abc at obs_epoch = 1000.0
+    # - 896old at obs_epoch = 1010.0
+    ac_initial, _ = AdsbLolProvider.normalize_readsb_track({
+        "hex": "896abc",
+        "flight": "FDB574",
+        "lat": 25.27,
+        "lon": 55.40,
+        "alt_baro": 3500,
+        "gs": 180,
+        "track": 300,
+        "t": "B38M",
+        "r": "A6-FMJ",
+        "seen": 0.5,
+    }, hex_id="896abc", received_iso=now_iso, now_epoch=1000.5)
+    assert ac_initial is not None
+
+    ac_old_seed, _ = AdsbLolProvider.normalize_readsb_track({
+        "hex": "896old",
+        "flight": "ETD101",
+        "lat": 24.90,
+        "lon": 54.90,
+        "alt_baro": 9500,
+        "gs": 250,
+        "track": 290,
+        "seen": 0.2,
+    }, hex_id="896old", received_iso=now_iso, now_epoch=1010.2)
+    assert ac_old_seed is not None
+
+    pool.shared_tracks["896abc"] = ac_initial
+    pool.shared_last_seen_mono["896abc"] = now_mono
+    pool.shared_last_obs_epoch["896abc"] = 1000.0
+
+    pool.shared_tracks["896old"] = ac_old_seed
+    pool.shared_last_seen_mono["896old"] = now_mono
+    pool.shared_last_obs_epoch["896old"] = 1010.0
+
+    # Mock primary adsb.lol to return HTTP 429 with Retry-After = 60s
+    async def mock_lol_429():
+        pool.lol.last_http_status = 429
+        pool.lol.last_retry_after_sec = 60.0
+        return pool.lol.cached_tracks, []
+
+    # Mock secondary adsb.fi to return HTTP 200 with:
+    # - 896abc updated at newer obs_epoch 1008.0 (alt 3100 ft)
+    # - 896old with older obs_epoch 1004.0 (alt 12000 ft -> must be rejected by monotonicity!)
+    ac_fi_newer, _ = AdsbLolProvider.normalize_readsb_track({
+        "hex": "896abc",
+        "flight": "FDB574",
+        "lat": 25.26,
+        "lon": 55.39,
+        "alt_baro": 3100,
+        "gs": 172,
+        "track": 300,
+        "t": "B38M",
+        "r": "A6-FMJ",
+        "seen": 0.2,
+    }, hex_id="896abc", received_iso=now_iso, now_epoch=1008.2, provider_name="adsb.fi", previous_track=ac_initial)
+
+    ac_fi_older, _ = AdsbLolProvider.normalize_readsb_track({
+        "hex": "896old",
+        "flight": "ETD101",
+        "lat": 24.90,
+        "lon": 54.90,
+        "alt_baro": 12000,
+        "gs": 250,
+        "track": 290,
+        "seen": 5.0,
+    }, hex_id="896old", received_iso=now_iso, now_epoch=1009.0, provider_name="adsb.fi", previous_track=ac_old_seed)
+
+    async def mock_fi_ok():
+        now_m = time.monotonic()
+        pool.fi.last_http_status = 200
+        pool.fi.last_retry_after_sec = None
+        pool.fi.cached_tracks["896abc"] = ac_fi_newer
+        pool.fi.last_seen_monotonic["896abc"] = now_m
+        pool.fi.last_obs_epoch["896abc"] = 1008.0
+
+        pool.fi.cached_tracks["896old"] = ac_fi_older
+        pool.fi.last_seen_monotonic["896old"] = now_m
+        pool.fi.last_obs_epoch["896old"] = 1004.0  # Older than 1010.0!
+        return pool.fi.cached_tracks, []
+
+    pool.lol.fetch_observations = mock_lol_429
+    pool.fi.fetch_observations = mock_fi_ok
+
+    tracks, _ = asyncio.run(pool.fetch_observations())
+
+    # 1. Pool automatically switched from adsb.lol to adsb.fi
+    assert pool.active_provider_name == "adsb.fi"
+    # 2. Primary adsb.lol slot is placed in cooldown (> now + 50s)
+    assert pool.slots[0].next_eligible_mono > time.monotonic() + 50.0
+    assert len(pool.switch_diagnostics) >= 1
+    assert "429" in pool.switch_diagnostics[0]["reason"] or "failover" in pool.switch_diagnostics[0]["reason"]
+    # 3. Newer observation for 896abc is accepted and preserves trackId "TRK-896ABC"
+    assert tracks["896abc"].trackId == "TRK-896ABC"
+    assert tracks["896abc"].altitudeFt == 3100
+    assert tracks["896abc"].sourceProvider == "adsb.fi"
+    # 4. Older observation for 896old (1004.0 < 1010.0) was rejected, retaining 9500 ft
+    assert tracks["896old"].altitudeFt == 9500
+
+

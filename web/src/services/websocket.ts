@@ -32,6 +32,8 @@ export function initWebSocket() {
         store.applySnapshot(payload);
       } else if (type === 'aircraft.state') {
         store.updateAircraft(payload);
+      } else if (type === 'aircraft.removed') {
+        store.removeAircraft(payload);
       } else if (type === 'weather.updated') {
         store.updateWeather(payload);
       } else if (type === 'command.issued') {
