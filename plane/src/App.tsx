@@ -127,6 +127,19 @@ export default function App() {
         <TouchSafetyShowcase onClose={() => setShowTouchSafety(false)} />
       )}
 
+      {/* ── Loading / Connecting State (Fallback if link is initializing) ── */}
+      {!state && (
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', gap: 14, minHeight: '60vh' }}>
+          <div style={{ width: 40, height: 40, border: '3px solid rgba(245, 166, 35, 0.2)', borderTopColor: '#F5A623', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+          <div style={{ fontFamily: 'monospace', fontSize: '0.9rem', color: '#F5A623', fontWeight: 'bold' }}>
+            CONNECTING TO HONEY B COCKPIT DATALINK...
+          </div>
+          <div style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#64748b' }}>
+            Polling flight telemetry ({activeDataLinkAdapter.getCurrentScenario()})
+          </div>
+        </div>
+      )}
+
       {/* ── FIRST SCREEN & DEFAULT VIEW: Single-Glance Pilot Overview ── */}
       {state && activeTab === 'overview' && (
         <TabletPilotOverview

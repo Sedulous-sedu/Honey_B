@@ -784,6 +784,7 @@ export class HttpDataLinkAdapter implements DataLinkAdapter {
   private latestState: ConsolidatedDashboardState | null = null;
   private lastSuccessMs: number = Date.now();
   private consecutiveErrors: number = 0;
+  private currentScenario: ScenarioName = 'NORMAL_ARRIVAL';
 
   constructor(baseUrl: string, flightId: string = 'UAE231', pollIntervalMs: number = 1500) {
     this.baseUrl = baseUrl.replace(/\/$/, '');
@@ -796,17 +797,28 @@ export class HttpDataLinkAdapter implements DataLinkAdapter {
     const elapsed = Date.now() - this.lastSuccessMs;
     const status: ConnectionStatus =
       elapsed > 120000 || this.consecutiveErrors >= 3 ? 'DISCONNECTED' : 'DELAYED';
-    if (this.latestState) {
+    if (!this.latestState) {
+      // Failsafe fallback so cockpit UI never renders as an empty pitch-black page
+      const fallback = createScenarios()[this.currentScenario] || createScenarios().NORMAL_ARRIVAL;
       this.latestState = {
-        ...this.latestState,
+        ...fallback,
         connectionStatus: status,
       };
       for (const l of this.listeners) l(this.latestState);
+      return;
     }
+    this.latestState = {
+      ...this.latestState,
+      connectionStatus: status,
+    };
+    for (const l of this.listeners) l(this.latestState);
   }
 
   subscribe(onStateUpdate: (state: ConsolidatedDashboardState) => void): () => void {
     this.listeners.add(onStateUpdate);
+    if (this.latestState) {
+      onStateUpdate(this.latestState);
+    }
     this.startPolling();
     return () => {
       this.listeners.delete(onStateUpdate);
@@ -824,6 +836,12 @@ export class HttpDataLinkAdapter implements DataLinkAdapter {
         const res = await fetch(`${this.baseUrl}/api/dashboard/${this.flightId}`);
         if (res.ok) {
           const data: ConsolidatedDashboardState = await res.json();
+          // Apply scenario overrides if user selected client-side test scenarios
+          if (this.currentScenario === 'LOST_CONNECTION') {
+            data.connectionStatus = 'DISCONNECTED';
+          } else if (this.currentScenario === 'PROPOSED_REROUTE' && !data.reroute) {
+            data.reroute = createScenarios().PROPOSED_REROUTE.reroute;
+          }
           this.latestState = data;
           this.lastSuccessMs = Date.now();
           this.consecutiveErrors = 0;
@@ -862,6 +880,7 @@ export class HttpDataLinkAdapter implements DataLinkAdapter {
   }
 
   async setScenario(name: ScenarioName): Promise<void> {
+    this.currentScenario = name;
     try {
       if (name === 'RUNWAY_WEATHER_CHANGE') {
         await fetch(`${this.baseUrl}/demo/fog`, {
@@ -878,19 +897,43 @@ export class HttpDataLinkAdapter implements DataLinkAdapter {
       } else if (name === 'NORMAL_ARRIVAL') {
         await fetch(`${this.baseUrl}/demo/reset`, { method: 'POST' });
       }
+
+      if (name === 'LOST_CONNECTION' && this.latestState) {
+        this.latestState = {
+          ...this.latestState,
+          connectionStatus: 'DISCONNECTED',
+        };
+        for (const l of this.listeners) l(this.latestState);
+        return;
+      }
+
       const res = await fetch(`${this.baseUrl}/api/dashboard/${this.flightId}`);
       if (res.ok) {
         const data: ConsolidatedDashboardState = await res.json();
+        if (name === 'PROPOSED_REROUTE' && !data.reroute) {
+          data.reroute = createScenarios().PROPOSED_REROUTE.reroute;
+        }
         this.latestState = data;
         for (const l of this.listeners) l(data);
+      } else if (this.latestState) {
+        const scenarioData = createScenarios()[name];
+        if (scenarioData) {
+          this.latestState = { ...this.latestState, ...scenarioData };
+          for (const l of this.listeners) l(this.latestState);
+        }
       }
     } catch (err) {
       console.warn('Scenario switch error:', err);
+      const scenarioData = createScenarios()[name];
+      if (scenarioData) {
+        this.latestState = scenarioData;
+        for (const l of this.listeners) l(this.latestState);
+      }
     }
   }
 
   getCurrentScenario(): ScenarioName {
-    return 'NORMAL_ARRIVAL';
+    return this.currentScenario;
   }
 
   getConnectionStatus(): ConnectionStatus {
