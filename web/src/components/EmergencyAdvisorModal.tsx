@@ -507,6 +507,48 @@ export const EmergencyAdvisorModal: React.FC<EmergencyAdvisorModalProps> = ({
                 )}
               </div>
 
+              {/* GCAA Hospital Landing Area (HLA) Helipad & Trauma Evacuation Advisory */}
+              {evaluation.hospitalHelipadAdvisory && (
+                <div className="p-4 rounded-xl bg-gradient-to-r from-rose-950/50 via-[#0A1830] to-rose-900/40 border-2 border-rose-500/70 shadow-lg">
+                  <div className="flex items-center justify-between mb-2.5 pb-2 border-b border-rose-500/30">
+                    <div className="flex items-center space-x-2.5">
+                      <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-600 text-white flex items-center space-x-1 shadow-sm">
+                        <span>✚</span>
+                        <span>GCAA HOSPITAL LANDING AREA (HLA)</span>
+                      </span>
+                      <span className="text-sm font-bold text-white tracking-wide">
+                        {evaluation.hospitalHelipadAdvisory.hospitalName}
+                      </span>
+                    </div>
+                    <span className="text-xs font-mono text-rose-300 font-bold bg-rose-950/80 px-2.5 py-1 rounded border border-rose-500/40">
+                      {evaluation.hospitalHelipadAdvisory.distanceFromOmdbNm} NM · ~{evaluation.hospitalHelipadAdvisory.directTransferTimeMin} MIN BLUE-LIGHT TRANSFER
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs font-mono mb-3">
+                    <div className="bg-[#0A1830]/90 p-2.5 rounded-lg border border-rose-500/30">
+                      <div className="text-[10px] text-slate-400 uppercase">Regulatory Authority</div>
+                      <div className="text-white font-bold">{evaluation.hospitalHelipadAdvisory.authority}</div>
+                      <div className="text-[10px] text-rose-400 mt-0.5">{evaluation.hospitalHelipadAdvisory.regulatoryStatus}</div>
+                    </div>
+                    <div className="bg-[#0A1830]/90 p-2.5 rounded-lg border border-rose-500/30">
+                      <div className="text-[10px] text-slate-400 uppercase">Preferred Runway Rollout & Exit</div>
+                      <div className="text-white font-bold">{evaluation.hospitalHelipadAdvisory.preferredRunwayExit}</div>
+                      <div className="text-[10px] text-emerald-400 mt-0.5">Staging: {evaluation.hospitalHelipadAdvisory.recommendedStaging}</div>
+                    </div>
+                    <div className="bg-[#0A1830]/90 p-2.5 rounded-lg border border-rose-500/30">
+                      <div className="text-[10px] text-slate-400 uppercase">Trauma Center Specialties</div>
+                      <div className="text-white font-bold">{evaluation.hospitalHelipadAdvisory.traumaSpecialties?.join(', ')}</div>
+                    </div>
+                  </div>
+
+                  <div className="text-xs text-rose-200 bg-rose-950/60 p-2.5 rounded-lg border border-rose-500/40 font-mono">
+                    <span className="font-bold text-rose-300">ATC Action: </span>
+                    {evaluation.hospitalHelipadAdvisory.recommendedAction}
+                  </div>
+                </div>
+              )}
+
               {/* Candidate Comparison Strip: Baseline vs FCFS vs Feasible Options */}
               <div>
                 <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-300 mb-2">

@@ -130,9 +130,10 @@ class SuggestionEngine:
             if ac.priority.level == PriorityLevel.MEDICAL:
                 sug_id = f"SUG-MED-{ac.callsign}"
                 decl_note = (
-                    f"Confirmed {ac.priority.declarationType.value} declaration."
+                    f"Confirmed {ac.priority.declarationType.value} medical declaration. "
+                    "Pre-alert DHA ambulance convoy at South Gate 1 for 7-minute direct transfer to Rashid Hospital Trauma Center."
                     if ac.priority.declarationStatus == "CONFIRMED" and ac.priority.declarationType != "NONE"
-                    else "Medical report onboard — confirm PAN PAN / MAYDAY declaration with PIC per GCAA eAIC 2020-06 before emergency resequencing."
+                    else "Medical report onboard — confirm PAN PAN / MAYDAY declaration with PIC per GCAA eAIC 2020-06 before emergency resequencing. Rashid Hospital HLA standby."
                 )
                 new_suggestions[sug_id] = SuggestionItem(
                     suggestionId=sug_id,

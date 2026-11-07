@@ -17,6 +17,8 @@ Never mutates live server state and never issues ATC clearances.
 
 import copy
 import datetime
+import json
+import os
 from typing import Dict, List, Optional, Any, Tuple
 from pydantic import BaseModel, Field
 
@@ -188,6 +190,7 @@ class RiskAdvisorEvaluationResult(BaseModel):
     recommendedCandidates: List[CandidateSequencePlan] = Field(default_factory=list)
     rejectedCandidates: List[CandidateSequencePlan] = Field(default_factory=list)
     baselineComparisonSummary: Dict[str, Any] = Field(default_factory=dict)
+    hospitalHelipadAdvisory: Optional[Dict[str, Any]] = None
     llmExplanation: Optional[str] = None
 
 
@@ -596,6 +599,64 @@ class EmergencySequenceRiskAdvisor:
             ),
         }
 
+        # Medical Helipad Advisory (GCAA HLA Integration)
+        hospital_advisory = None
+        emerg_nature = getattr(target_ac.priority, "emergencyNature", None) or ""
+        reason_codes = getattr(target_ac.priority, "reasonCodes", []) or []
+        is_medical = (
+            prio_level == PriorityLevel.MEDICAL
+            or any(w in emerg_nature.lower() for w in ("medical", "cardiac", "patient", "injury", "illness", "doctor"))
+            or any("MED" in rc.upper() for rc in reason_codes)
+        )
+        if is_medical:
+            helipads_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "gcaa_hospital_helipads.json")
+            primary_hospital = None
+            if os.path.exists(helipads_path):
+                try:
+                    with open(helipads_path, "r") as f:
+                        h_data = json.load(f)
+                        h_list = h_data.get("hospitalHelipads", [])
+                        if h_list:
+                            primary_hospital = h_list[0]
+                except Exception:
+                    pass
+            if not primary_hospital:
+                primary_hospital = {
+                    "id": "HLA-DXB-RASHID",
+                    "name": "Rashid Hospital Trauma Center Heliport",
+                    "regulatoryStatus": "Hospital Landing Area Acceptance (HLA)",
+                    "authority": "GCAA / Dubai Health Authority (DHA)",
+                    "facilityType": "Level 1 Trauma & Emergency Hospital",
+                    "distanceFromOmdbNm": 2.7,
+                    "bearingFromOmdbDeg": 260,
+                    "directTransferTimeMin": 7,
+                    "traumaSpecialties": [
+                        "Major Trauma & Cardiac Catheterization",
+                        "Neurosurgery & Stroke Unit",
+                        "Emergency Resuscitation"
+                    ],
+                    "preferredRunwayExit": "RWY 30L / Taxiway Kilo to South Perimeter Gate"
+                }
+
+            hospital_advisory = {
+                "hospitalId": primary_hospital.get("id", "HLA-DXB-RASHID"),
+                "hospitalName": primary_hospital.get("name", "Rashid Hospital Trauma Center Heliport"),
+                "authority": primary_hospital.get("authority", "GCAA / Dubai Health Authority (DHA)"),
+                "regulatoryStatus": primary_hospital.get("regulatoryStatus", "Hospital Landing Area Acceptance (HLA)"),
+                "facilityType": primary_hospital.get("facilityType", "Level 1 Trauma Center"),
+                "distanceFromOmdbNm": primary_hospital.get("distanceFromOmdbNm", 2.7),
+                "bearingFromOmdbDeg": primary_hospital.get("bearingFromOmdbDeg", 260),
+                "directTransferTimeMin": primary_hospital.get("directTransferTimeMin", 7),
+                "traumaSpecialties": primary_hospital.get("traumaSpecialties", ["Major Trauma & Cardiac Care"]),
+                "preferredRunwayExit": primary_hospital.get("preferredRunwayExit", "RWY 30L / Taxiway Kilo to South Perimeter Gate"),
+                "recommendedStaging": "Gate 1 South Perimeter / Apron Taxiway Kilo staging",
+                "recommendedAction": (
+                    f"Priority arrival on RWY 30L. Coordinate expedited rollout to {primary_hospital.get('preferredRunwayExit', 'Taxiway Kilo')}. "
+                    f"Alert Dubai Health Authority blue-light medical escort at South Perimeter Gate 1 for direct {primary_hospital.get('directTransferTimeMin', 7)}-minute "
+                    f"transfer to {primary_hospital.get('name', 'Rashid Hospital Trauma Center')}."
+                )
+            }
+
         return RiskAdvisorEvaluationResult(
             evaluationStatus=eval_status,
             statusReasons=status_reasons,
@@ -626,6 +687,7 @@ class EmergencySequenceRiskAdvisor:
             recommendedCandidates=top_feasible,
             rejectedCandidates=rejected_candidates,
             baselineComparisonSummary=comparison_summary,
+            hospitalHelipadAdvisory=hospital_advisory,
         )
 
     @staticmethod

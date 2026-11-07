@@ -1,0 +1,47 @@
+{
+  "source": "Dubai Airports Ground Operations Manual / GCAA Terminal Zoning",
+  "airportIcao": "OMDB",
+  "version": "1.0.0",
+  "concourses": {
+    "CONCOURSE_A": {
+      "terminal": "Terminal 3",
+      "dedicatedOperators": ["UAE", "QFA"],
+      "allowedWakeCategories": ["SUPER", "HEAVY"],
+      "aerobridgeType": "Multi-Level Dual Deck A380 Compatible",
+      "stands": ["A01", "A02", "A03", "A04", "A05", "A06", "A07", "A08", "A09", "A10", "A11", "A12", "A13", "A14", "A15", "A16", "A17", "A18", "A19", "A20", "A21", "A22", "A23", "A24"],
+      "description": "World's premier purpose-built A380 Super facility. Restricted strictly to Emirates A380/B77W and Qantas."
+    },
+    "CONCOURSE_B": {
+      "terminal": "Terminal 3",
+      "dedicatedOperators": ["UAE"],
+      "allowedWakeCategories": ["HEAVY", "SUPER"],
+      "aerobridgeType": "Widebody Dual Bridge",
+      "stands": ["B01", "B02", "B03", "B04", "B05", "B06", "B07", "B08", "B09", "B10", "B11", "B12", "B13", "B14", "B15", "B16", "B17", "B18", "B19", "B20", "B21", "B22", "B23", "B24", "B25", "B26", "B27", "B28", "B29", "B30", "B31", "B32"],
+      "description": "Core Emirates flagship widebody terminal for B777-300ER, B777-200LR, and A350-900 operations."
+    },
+    "CONCOURSE_C": {
+      "terminal": "Terminal 3",
+      "dedicatedOperators": ["UAE", "FDB"],
+      "allowedWakeCategories": ["HEAVY", "MEDIUM"],
+      "aerobridgeType": "Standard Widebody & Narrowbody",
+      "stands": ["C01", "C02", "C03", "C04", "C05", "C06", "C07", "C08", "C09", "C10", "C11", "C12", "C13", "C14", "C15", "C16", "C17", "C18", "C19", "C20"],
+      "description": "Terminal 3 concourse supporting mixed Emirates and codeshare connections."
+    },
+    "CONCOURSE_D": {
+      "terminal": "Terminal 1",
+      "dedicatedOperators": ["FOREIGN_AIRLINES", "BAW", "DLH", "SIA", "THY", "IGO", "AFR", "KLM", "SVA", "AIC", "OMA", "GFA", "JZR"],
+      "allowedWakeCategories": ["HEAVY", "MEDIUM"],
+      "aerobridgeType": "Flexible Multi-Carrier Bridges",
+      "stands": ["D01", "D02", "D03", "D04", "D05", "D06", "D07", "D08", "D09", "D10", "D11", "D12", "D13", "D14", "D15", "D16", "D17", "D18", "D19", "D20", "D21", "D22", "D23", "D24", "D25", "D26", "D27", "D28", "D29", "D30", "D31", "D32"],
+      "description": "International airline concourse connected to Terminal 1 via automated people mover (APM)."
+    },
+    "TERMINAL_2_F": {
+      "terminal": "Terminal 2",
+      "dedicatedOperators": ["FDB", "ABY", "REGIONAL_LCC", "CARGO"],
+      "allowedWakeCategories": ["MEDIUM", "LIGHT"],
+      "aerobridgeType": "Walk-boarding & Bus Apron Stands",
+      "stands": ["F01", "F02", "F03", "F04", "F05", "F06", "F07", "F08", "F09", "F10", "F11", "F12", "F13", "F14", "F15", "F16", "F17", "F18", "F19", "F20", "F21", "F22", "F23", "F24"],
+      "description": "Terminal 2 hub across northern perimeter dedicated to flydubai, regional carriers, and executive flights."
+    }
+  }
+}

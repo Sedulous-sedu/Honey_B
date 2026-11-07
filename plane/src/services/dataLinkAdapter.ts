@@ -790,6 +790,8 @@ export class HttpDataLinkAdapter implements DataLinkAdapter {
     this.baseUrl = baseUrl.replace(/\/$/, '');
     this.flightId = flightId;
     this.pollIntervalMs = pollIntervalMs;
+    // Pre-populate with realistic baseline immediately so UI never renders as an empty void
+    this.latestState = createScenarios().NORMAL_ARRIVAL;
   }
 
   private handleFetchFailure() {

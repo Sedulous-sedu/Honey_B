@@ -52,6 +52,24 @@ export const RadarScope: React.FC = () => {
   // DXB VOR holding fix: 25.2528, 55.4500
   const [dxbVor_x, dxbVor_y] = project(25.2528, 55.4500);
 
+  // Dubai TMA RNAV STAR Feeder Waypoints (GCAA UAE eAIP)
+  const [desdi_x, desdi_y] = project(25.6008, 54.7083);
+  const [darax_x, darax_y] = project(26.1617, 55.8833);
+  const [bubin_x, bubin_y] = project(24.9617, 56.1117);
+
+  // GCAA Hospital Landing Area (Rashid Hospital Level 1 Trauma Center, 2.7 NM WSW)
+  const [rashidHosp_x, rashidHosp_y] = project(25.2442, 55.3208);
+
+  const hasMedicalEmergency = flightsList.some(
+    (a) => a.priority?.level === 'MEDICAL' || a.priority?.reasonCodes?.some((r) => r.includes('MED'))
+  );
+  const isSelectedMedical = Boolean(
+    selectedAircraft &&
+      (selectedAircraft.priority?.level === 'MEDICAL' ||
+        selectedAircraft.priority?.reasonCodes?.some((r) => r.includes('MED')))
+  );
+  const showMedicalCorridor = hasMedicalEmergency || isSelectedMedical;
+
   return (
     <div className="relative w-full h-full bg-[#0A1830] rounded-lg border border-[#F5A623]/40 overflow-hidden flex flex-col shadow-2xl">
       {/* Top Status Header */}
@@ -355,6 +373,107 @@ export const RadarScope: React.FC = () => {
             opacity="0.75"
           />
         </g>
+
+        {/* Dubai TMA RNAV STAR Feeder Waypoints (GCAA UAE eAIP) */}
+        <g id="tma-waypoints" opacity="0.85">
+          {/* DESDI Northwest Feeder & Holding Fix */}
+          <g>
+            <polygon
+              points={`${desdi_x},${desdi_y - 6} ${desdi_x + 6},${desdi_y} ${desdi_x},${desdi_y + 6} ${desdi_x - 6},${desdi_y}`}
+              fill="none"
+              stroke="#38bdf8"
+              strokeWidth="1.8"
+            />
+            <circle cx={desdi_x} cy={desdi_y} r="1.5" fill="#38bdf8" />
+            <text x={desdi_x + 8} y={desdi_y + 3} fill="#38bdf8" fontSize="9" fontFamily="'B612 Mono', ui-monospace, monospace" fontWeight="bold">
+              DESDI (FL100)
+            </text>
+            <line
+              x1={desdi_x}
+              y1={desdi_y}
+              x2={halfView - 30}
+              y2={halfView - 20}
+              stroke="#38bdf8"
+              strokeWidth="1"
+              strokeDasharray="3 3"
+              opacity="0.35"
+            />
+          </g>
+
+          {/* DARAX Northeast Entry Fix */}
+          <g>
+            <polygon
+              points={`${darax_x},${darax_y - 6} ${darax_x + 6},${darax_y} ${darax_x},${darax_y + 6} ${darax_x - 6},${darax_y}`}
+              fill="none"
+              stroke="#38bdf8"
+              strokeWidth="1.8"
+            />
+            <circle cx={darax_x} cy={darax_y} r="1.5" fill="#38bdf8" />
+            <text x={darax_x + 8} y={darax_y + 3} fill="#38bdf8" fontSize="9" fontFamily="'B612 Mono', ui-monospace, monospace" fontWeight="bold">
+              DARAX (FL110)
+            </text>
+          </g>
+
+          {/* BUBIN East-Southeast Feeder & Holding Fix */}
+          <g>
+            <polygon
+              points={`${bubin_x},${bubin_y - 6} ${bubin_x + 6},${bubin_y} ${bubin_x},${bubin_y + 6} ${bubin_x - 6},${bubin_y}`}
+              fill="none"
+              stroke="#38bdf8"
+              strokeWidth="1.8"
+            />
+            <circle cx={bubin_x} cy={bubin_y} r="1.5" fill="#38bdf8" />
+            <text x={bubin_x + 8} y={bubin_y + 3} fill="#38bdf8" fontSize="9" fontFamily="'B612 Mono', ui-monospace, monospace" fontWeight="bold">
+              BUBIN (9000ft)
+            </text>
+            <line
+              x1={bubin_x}
+              y1={bubin_y}
+              x2={halfView + 40}
+              y2={halfView + 20}
+              stroke="#38bdf8"
+              strokeWidth="1"
+              strokeDasharray="3 3"
+              opacity="0.35"
+            />
+          </g>
+        </g>
+
+        {/* GCAA Hospital Landing Area (HLA) — Rashid Hospital Level 1 Trauma Center */}
+        {showMedicalCorridor && (
+          <g id="rashid-trauma-helipad">
+            <circle cx={rashidHosp_x} cy={rashidHosp_y} r="16" fill="rgba(239, 68, 68, 0.2)" className="animate-ping" />
+            <circle cx={rashidHosp_x} cy={rashidHosp_y} r="10" fill="#ef4444" stroke="#FFFFFF" strokeWidth="1.5" />
+            <text x={rashidHosp_x} y={rashidHosp_y + 3.5} textAnchor="middle" fill="#FFFFFF" fontSize="10" fontWeight="bold">
+              ✚
+            </text>
+            <line
+              x1={rwy30L_x}
+              y1={rwy30L_y}
+              x2={rashidHosp_x}
+              y2={rashidHosp_y}
+              stroke="#ef4444"
+              strokeWidth="1.8"
+              strokeDasharray="4 3"
+            />
+            <g transform={`translate(${rashidHosp_x - 90}, ${rashidHosp_y + 14})`}>
+              <rect
+                x="0"
+                y="0"
+                width="180"
+                height="22"
+                rx="4"
+                fill="#0A1830"
+                stroke="#ef4444"
+                strokeWidth="1"
+                fillOpacity="0.95"
+              />
+              <text x="90" y="14" textAnchor="middle" fill="#fca5a5" fontSize="8.5" fontFamily="'B612 Mono', ui-monospace, monospace" fontWeight="bold">
+                ✚ RASHID TRAUMA HLA (2.7 NM · 7m)
+              </text>
+            </g>
+          </g>
+        )}
 
         {/* Aircraft Blips & Airplanes */}
         {flightsList.map((ac) => {

@@ -1295,3 +1295,44 @@ def get_airport_traffic_stats():
         with open(stats_file, "r") as f:
             return json.load(f)
     return {"error": "Stats file not found", "source": "Bayanat.ae"}
+
+
+@app.get("/api/reference/helipads")
+def get_hospital_helipads():
+    """Returns official GCAA Hospital Landing Area (HLA) helipads for Dubai medical evacuations."""
+    file_path = os.path.join(state.data_dir, "gcaa_hospital_helipads.json")
+    if os.path.exists(file_path):
+        with open(file_path, "r") as f:
+            return json.load(f)
+    return {"error": "Helipads reference file not found", "source": "GCAA / Bayanat.ae"}
+
+
+@app.get("/api/reference/aircraft-types")
+def get_aircraft_types_registry():
+    """Returns official GCAA-registered aircraft wake categories, MTOW, and RECAT separation matrix."""
+    file_path = os.path.join(state.data_dir, "gcaa_aircraft_registry.json")
+    if os.path.exists(file_path):
+        with open(file_path, "r") as f:
+            return json.load(f)
+    return {"error": "Aircraft registry file not found", "source": "GCAA / Bayanat.ae"}
+
+
+@app.get("/api/reference/waypoints")
+def get_dubai_tma_waypoints():
+    """Returns official Dubai CTA RNAV arrival feeder waypoints (DESDI, DARAX, BUBIN, DXB VOR)."""
+    file_path = os.path.join(state.data_dir, "dubai_tma_waypoints.json")
+    if os.path.exists(file_path):
+        with open(file_path, "r") as f:
+            return json.load(f)
+    return {"error": "Waypoints file not found", "source": "GCAA UAE eAIP"}
+
+
+@app.get("/api/reference/terminal-matrix")
+def get_terminal_gates_matrix():
+    """Returns OMDB Concourse zoning rules, dedicated airlines, and aerobridge capabilities."""
+    file_path = os.path.join(state.data_dir, "omdb_terminal_gates_matrix.json")
+    if os.path.exists(file_path):
+        with open(file_path, "r") as f:
+            return json.load(f)
+    return {"error": "Terminal matrix file not found", "source": "Dubai Airports Ground Operations"}
+

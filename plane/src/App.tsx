@@ -13,6 +13,7 @@ import { ArrivalConditionsCard } from './components/ArrivalConditionsCard';
 import { OperationalNoticesCard } from './components/OperationalNoticesCard';
 import { MessagesPanel } from './components/MessagesPanel';
 import { TouchSafetyShowcase } from './components/TouchSafetyShowcase';
+import { CockpitErrorBoundary } from './components/CockpitErrorBoundary';
 
 export default function App() {
   const [scenario, setScenario] = useState<ScenarioName>('NORMAL_ARRIVAL');
@@ -142,12 +143,14 @@ export default function App() {
 
       {/* ── FIRST SCREEN & DEFAULT VIEW: Single-Glance Pilot Overview ── */}
       {state && activeTab === 'overview' && (
-        <TabletPilotOverview
-          state={state}
-          onSendPilotResponse={handleSendPilotResponse}
-          onOpenUpdates={() => handleNavigateToSection('operational-notices-panel')}
-          onOpenFlightStatus={() => handleNavigateToSection('arrival-overview-panel')}
-        />
+        <CockpitErrorBoundary>
+          <TabletPilotOverview
+            state={state}
+            onSendPilotResponse={handleSendPilotResponse}
+            onOpenUpdates={() => handleNavigateToSection('operational-notices-panel')}
+            onOpenFlightStatus={() => handleNavigateToSection('arrival-overview-panel')}
+          />
+        </CockpitErrorBoundary>
       )}
 
       {/* ── SECOND VIEW: Detailed Cockpit Screens (Accessible via "Updates", "Flight Status", or navigation) ── */}

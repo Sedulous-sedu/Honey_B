@@ -1,0 +1,70 @@
+{
+  "source": "General Civil Aviation Authority (GCAA) UAE Heliports Registry / Bayanat.ae",
+  "version": "1.0.0",
+  "curatedAtUtc": "2026-11-07T08:00:00Z",
+  "referenceAirport": "OMDB",
+  "omdbArpCoordinates": {
+    "lat": 25.24979,
+    "lon": 55.370992
+  },
+  "hospitalHelipads": [
+    {
+      "id": "HLA-DXB-RASHID",
+      "name": "Rashid Hospital Trauma Center Heliport",
+      "regulatoryStatus": "Hospital Landing Area Acceptance (HLA)",
+      "authority": "GCAA / Dubai Health Authority (DHA)",
+      "facilityType": "Level 1 Trauma & Emergency Hospital",
+      "emirate": "Dubai",
+      "lat": 25.244166,
+      "lon": 55.320833,
+      "elevationFt": 15,
+      "bearingFromOmdbDeg": 260,
+      "distanceFromOmdbNm": 2.7,
+      "directTransferTimeMin": 7,
+      "traumaSpecialties": [
+        "Major Trauma & Cardiac Catheterization",
+        "Neurosurgery & Stroke Unit",
+        "Emergency Resuscitation"
+      ],
+      "preferredRunwayExit": "RWY 30L / Taxiway Kilo to South Perimeter Gate"
+    },
+    {
+      "id": "HLA-DXB-JALILA",
+      "name": "Al Jalila Children's Specialty Hospital Heliport",
+      "regulatoryStatus": "Hospital Landing Area Acceptance (HLA)",
+      "authority": "GCAA / Dubai Academic Health Corporation",
+      "facilityType": "Specialized Pediatric & Neonatal Center",
+      "emirate": "Dubai",
+      "lat": 25.2250,
+      "lon": 55.3206,
+      "elevationFt": 22,
+      "bearingFromOmdbDeg": 240,
+      "distanceFromOmdbNm": 3.6,
+      "directTransferTimeMin": 9,
+      "traumaSpecialties": [
+        "Pediatric Intensive Care (PICU)",
+        "Pediatric Cardiology & Surgery"
+      ],
+      "preferredRunwayExit": "RWY 30L / Taxiway Mike to Al Khail South Gate"
+    },
+    {
+      "id": "HLA-DXB-DUBAI-HOSP",
+      "name": "Dubai Hospital Heliport",
+      "regulatoryStatus": "Hospital Landing Area Acceptance (HLA)",
+      "authority": "GCAA / Dubai Health Authority (DHA)",
+      "facilityType": "General & Specialized Care Hospital",
+      "emirate": "Dubai",
+      "lat": 25.2850,
+      "lon": 55.3203,
+      "elevationFt": 18,
+      "bearingFromOmdbDeg": 300,
+      "distanceFromOmdbNm": 3.2,
+      "directTransferTimeMin": 8,
+      "traumaSpecialties": [
+        "Cardiovascular Care",
+        "Adult Intensive Care (ICU)"
+      ],
+      "preferredRunwayExit": "RWY 30R / Taxiway Charlie to North Perimeter Gate"
+    }
+  ]
+}

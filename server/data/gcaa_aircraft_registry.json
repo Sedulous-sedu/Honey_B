@@ -1,0 +1,115 @@
+{
+  "source": "General Civil Aviation Authority (GCAA) UAE Open Data / Bayanat.ae",
+  "version": "1.0.0",
+  "effectiveYear": 2026,
+  "description": "Certified aircraft types operating in UAE airspace with official Wake Turbulence Category and approach characteristics.",
+  "aircraftTypes": {
+    "A388": {
+      "model": "Airbus A380-800",
+      "wakeCategory": "SUPER",
+      "recatClass": "SUPER",
+      "approachCategory": "CAT D",
+      "maxTakeoffWeightKg": 575000,
+      "typicalAutolandCapability": "CAT_IIIB",
+      "allowedConcoursesOMDB": ["CONCOURSE_A", "REMOTE_STANDS_SUPER"]
+    },
+    "B77W": {
+      "model": "Boeing 777-300ER",
+      "wakeCategory": "HEAVY",
+      "recatClass": "UPPER_HEAVY",
+      "approachCategory": "CAT D",
+      "maxTakeoffWeightKg": 351534,
+      "typicalAutolandCapability": "CAT_IIIB",
+      "allowedConcoursesOMDB": ["CONCOURSE_A", "CONCOURSE_B", "CONCOURSE_C", "CONCOURSE_D", "REMOTE_WIDE"]
+    },
+    "B772": {
+      "model": "Boeing 777-200LR",
+      "wakeCategory": "HEAVY",
+      "recatClass": "UPPER_HEAVY",
+      "approachCategory": "CAT D",
+      "maxTakeoffWeightKg": 347452,
+      "typicalAutolandCapability": "CAT_IIIB",
+      "allowedConcoursesOMDB": ["CONCOURSE_B", "CONCOURSE_C", "CONCOURSE_D", "REMOTE_WIDE"]
+    },
+    "A359": {
+      "model": "Airbus A350-900",
+      "wakeCategory": "HEAVY",
+      "recatClass": "UPPER_HEAVY",
+      "approachCategory": "CAT C",
+      "maxTakeoffWeightKg": 280000,
+      "typicalAutolandCapability": "CAT_IIIB",
+      "allowedConcoursesOMDB": ["CONCOURSE_B", "CONCOURSE_C", "CONCOURSE_D", "REMOTE_WIDE"]
+    },
+    "B789": {
+      "model": "Boeing 787-9 Dreamliner",
+      "wakeCategory": "HEAVY",
+      "recatClass": "LOWER_HEAVY",
+      "approachCategory": "CAT C",
+      "maxTakeoffWeightKg": 254000,
+      "typicalAutolandCapability": "CAT_IIIB",
+      "allowedConcoursesOMDB": ["CONCOURSE_C", "CONCOURSE_D", "REMOTE_WIDE"]
+    },
+    "B78X": {
+      "model": "Boeing 787-10 Dreamliner",
+      "wakeCategory": "HEAVY",
+      "recatClass": "LOWER_HEAVY",
+      "approachCategory": "CAT C",
+      "maxTakeoffWeightKg": 254000,
+      "typicalAutolandCapability": "CAT_IIIB",
+      "allowedConcoursesOMDB": ["CONCOURSE_C", "CONCOURSE_D", "REMOTE_WIDE"]
+    },
+    "A333": {
+      "model": "Airbus A330-300",
+      "wakeCategory": "HEAVY",
+      "recatClass": "LOWER_HEAVY",
+      "approachCategory": "CAT C",
+      "maxTakeoffWeightKg": 242000,
+      "typicalAutolandCapability": "CAT_IIIB",
+      "allowedConcoursesOMDB": ["CONCOURSE_C", "CONCOURSE_D", "REMOTE_WIDE"]
+    },
+    "B38M": {
+      "model": "Boeing 737 MAX 8",
+      "wakeCategory": "MEDIUM",
+      "recatClass": "UPPER_MEDIUM",
+      "approachCategory": "CAT C",
+      "maxTakeoffWeightKg": 82190,
+      "typicalAutolandCapability": "CAT_IIIB",
+      "allowedConcoursesOMDB": ["TERMINAL_2_F", "CONCOURSE_D", "REMOTE_NARROW"]
+    },
+    "B738": {
+      "model": "Boeing 737-800",
+      "wakeCategory": "MEDIUM",
+      "recatClass": "UPPER_MEDIUM",
+      "approachCategory": "CAT C",
+      "maxTakeoffWeightKg": 79010,
+      "typicalAutolandCapability": "CAT_IIIA",
+      "allowedConcoursesOMDB": ["TERMINAL_2_F", "CONCOURSE_D", "REMOTE_NARROW"]
+    },
+    "A20N": {
+      "model": "Airbus A320neo",
+      "wakeCategory": "MEDIUM",
+      "recatClass": "UPPER_MEDIUM",
+      "approachCategory": "CAT C",
+      "maxTakeoffWeightKg": 79000,
+      "typicalAutolandCapability": "CAT_IIIB",
+      "allowedConcoursesOMDB": ["TERMINAL_2_F", "CONCOURSE_D", "REMOTE_NARROW"]
+    },
+    "A21N": {
+      "model": "Airbus A321neo",
+      "wakeCategory": "MEDIUM",
+      "recatClass": "UPPER_MEDIUM",
+      "approachCategory": "CAT C",
+      "maxTakeoffWeightKg": 97000,
+      "typicalAutolandCapability": "CAT_IIIB",
+      "allowedConcoursesOMDB": ["TERMINAL_2_F", "CONCOURSE_D", "REMOTE_NARROW"]
+    }
+  },
+  "recatSeparationNm": {
+    "SUPER": { "SUPER": 3.0, "UPPER_HEAVY": 5.0, "LOWER_HEAVY": 6.0, "UPPER_MEDIUM": 7.0, "LOWER_MEDIUM": 7.0, "LIGHT": 8.0 },
+    "UPPER_HEAVY": { "SUPER": 3.0, "UPPER_HEAVY": 4.0, "LOWER_HEAVY": 5.0, "UPPER_MEDIUM": 5.0, "LOWER_MEDIUM": 6.0, "LIGHT": 7.0 },
+    "LOWER_HEAVY": { "SUPER": 3.0, "UPPER_HEAVY": 3.0, "LOWER_HEAVY": 4.0, "UPPER_MEDIUM": 4.0, "LOWER_MEDIUM": 5.0, "LIGHT": 6.0 },
+    "UPPER_MEDIUM": { "SUPER": 3.0, "UPPER_HEAVY": 3.0, "LOWER_HEAVY": 3.0, "UPPER_MEDIUM": 3.0, "LOWER_MEDIUM": 4.0, "LIGHT": 5.0 },
+    "LOWER_MEDIUM": { "SUPER": 3.0, "UPPER_HEAVY": 3.0, "LOWER_HEAVY": 3.0, "UPPER_MEDIUM": 3.0, "LOWER_MEDIUM": 3.0, "LIGHT": 4.0 },
+    "LIGHT": { "SUPER": 3.0, "UPPER_HEAVY": 3.0, "LOWER_HEAVY": 3.0, "UPPER_MEDIUM": 3.0, "LOWER_MEDIUM": 3.0, "LIGHT": 3.0 }
+  }
+}

@@ -462,3 +462,95 @@ def test_b_adsb_provider_pool_failover_cooldown_and_monotonicity():
     assert tracks["896old"].altitudeFt == 9500
 
 
+def test_reference_endpoints_bayanat_and_gcaa():
+    """Verify official Bayanat.ae and GCAA reference endpoints serve valid regulatory data."""
+    # 1. Airport Stats from Bayanat.ae
+    res_stats = client.get("/api/reference/airport-stats")
+    assert res_stats.status_code == 200
+    stats_data = res_stats.json()
+    assert "source" in stats_data
+    assert "Bayanat.ae" in stats_data["source"]
+    assert "emirateTotals" in stats_data
+    assert "Dubai" in stats_data["emirateTotals"]
+
+    # 2. GCAA Hospital Helipads for Medical Evacuations
+    res_heli = client.get("/api/reference/helipads")
+    assert res_heli.status_code == 200
+    heli_data = res_heli.json()
+    assert len(heli_data["hospitalHelipads"]) >= 3
+    rashid = next(h for h in heli_data["hospitalHelipads"] if h["id"] == "HLA-DXB-RASHID")
+    assert "Rashid Hospital" in rashid["name"]
+    assert rashid["distanceFromOmdbNm"] == 2.7
+    assert rashid["directTransferTimeMin"] == 7
+
+    # 3. GCAA Aircraft Registry and Wake Matrix
+    res_ac = client.get("/api/reference/aircraft-types")
+    assert res_ac.status_code == 200
+    ac_data = res_ac.json()
+    assert "A388" in ac_data["aircraftTypes"]
+    assert ac_data["aircraftTypes"]["A388"]["wakeCategory"] == "SUPER"
+    assert "recatSeparationNm" in ac_data
+
+    # 4. Dubai TMA RNAV STAR Feeder Waypoints
+    res_wp = client.get("/api/reference/waypoints")
+    assert res_wp.status_code == 200
+    wp_data = res_wp.json()
+    wp_names = [w["name"] for w in wp_data["waypoints"]]
+    assert "DESDI" in wp_names
+    assert "DARAX" in wp_names
+    assert "BUBIN" in wp_names
+    assert "DXB" in wp_names
+
+    # 5. OMDB Concourse & Terminal Gates Matrix
+    res_term = client.get("/api/reference/terminal-matrix")
+    assert res_term.status_code == 200
+    term_data = res_term.json()
+    assert "CONCOURSE_A" in term_data["concourses"]
+    assert "UAE" in term_data["concourses"]["CONCOURSE_A"]["dedicatedOperators"]
+
+
+def test_concourse_zoning_and_operator_stand_rules():
+    """Verify Dubai Airports terminal zoning rules and operator concourse restrictions."""
+    state.stands["A02"]["status"] = "FREE"
+    state.stands["A02"]["currentAircraft"] = None
+    state.stands["D01"]["status"] = "FREE"
+    state.stands["D01"]["currentAircraft"] = None
+
+    # 1. Foreign international airline (BAW107) cannot be assigned to Terminal 3 Concourse A
+    ok_a, err_a, _, _ = state.validate_and_reassign_stand("BAW107", "A02")
+    assert not ok_a
+    assert "restricted to Emirates and Qantas" in err_a
+    assert "Terminal 1 Concourse D" in err_a
+
+    # 2. Foreign international airline (BAW107) can be assigned to Terminal 1 Concourse D
+    ok_d, err_d, _, _ = state.validate_and_reassign_stand("BAW107", "D01")
+    assert ok_d
+    assert err_d is None
+    assert state.stands["D01"]["status"] == "OCCUPIED"
+    assert state.stands["D01"]["currentAircraft"] == "BAW107"
+
+    # 3. Widebody Heavy aircraft (UAE231) cannot dock at Terminal 2 Apron F (narrowbody only)
+    ok_f, err_f, _, _ = state.validate_and_reassign_stand("UAE231", "F01")
+    assert not ok_f
+    assert "limited to narrowbody" in err_f
+
+
+def test_medical_emergency_hospital_helipad_advisory():
+    """Verify that EmergencySequenceRiskAdvisor attaches GCAA Hospital Helipad advisory for medical cases."""
+    from app.risk_advisor import EmergencySequenceRiskAdvisor
+
+    res = EmergencySequenceRiskAdvisor.evaluate(
+        aircraft_list=list(state._fixture_aircraft.values()),
+        weather=state._fixture_weather,
+        target_aircraft_id="THY762"
+    )
+    assert res.hospitalHelipadAdvisory is not None
+    assert res.hospitalHelipadAdvisory["hospitalId"] == "HLA-DXB-RASHID"
+    assert "Rashid Hospital Trauma Center" in res.hospitalHelipadAdvisory["hospitalName"]
+    assert res.hospitalHelipadAdvisory["distanceFromOmdbNm"] == 2.7
+    assert res.hospitalHelipadAdvisory["directTransferTimeMin"] == 7
+    assert "RWY 30L" in res.hospitalHelipadAdvisory["preferredRunwayExit"]
+    assert "South Perimeter Gate 1" in res.hospitalHelipadAdvisory["recommendedAction"]
+
+
+

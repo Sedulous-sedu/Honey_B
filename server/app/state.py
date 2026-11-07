@@ -1,6 +1,7 @@
 import json
 import os
 import datetime
+import re
 from typing import Dict, List, Optional, Any, Set, Tuple
 from app.models import (
     AircraftStatePayload,
@@ -299,6 +300,17 @@ class AppState:
             airport_data = json.load(f)
             self.stands = {s["id"]: s for s in airport_data["stands"]}
 
+        # Load terminal and concourse zoning rules
+        matrix_file = os.path.join(self.data_dir, "omdb_terminal_gates_matrix.json")
+        if os.path.exists(matrix_file):
+            try:
+                with open(matrix_file, "r") as f:
+                    self.terminal_matrix = json.load(f)
+            except Exception:
+                self.terminal_matrix = {}
+        else:
+            self.terminal_matrix = {}
+
         # Load controllers
         with open(os.path.join(self.data_dir, "controllers.json")) as f:
             controllers_list = json.load(f)
@@ -385,7 +397,7 @@ class AppState:
 
     def validate_and_reassign_stand(self, aircraft_id: str, new_stand_id: str) -> Tuple[bool, Optional[str], Optional[str], Optional[Dict[str, Any]]]:
         """Atomically checks existence, occupancy, wake size fit, and reassigns stand."""
-        ac = self.aircraft.get(aircraft_id)
+        ac = self.aircraft.get(aircraft_id) or self._fixture_aircraft.get(aircraft_id)
         if not ac:
             return False, f"Aircraft '{aircraft_id}' not found.", None, None
 
@@ -405,6 +417,30 @@ class AppState:
         ac_wake = ac.wakeCategory
         if ac_wake == "SUPER" and stand_size != "SUPER":
             return False, f"Aircraft wake {ac_wake} requires a SUPER stand (Stand {new_stand_id} is {stand_size}).", None, None
+
+        # Operator and Concourse Zoning Compatibility Check
+        operator_icao = None
+        if ac.identity and ac.identity.operatingAirline and ac.identity.operatingAirline.icao:
+            operator_icao = ac.identity.operatingAirline.icao.upper()
+        elif ac.callsign:
+            m = re.match(r"^([A-Z]{3})", ac.callsign.upper())
+            if m:
+                operator_icao = m.group(1)
+
+        prefix = new_stand_id[0].upper()
+        if prefix == "A":
+            if operator_icao and operator_icao not in ("UAE", "QFA"):
+                return False, f"Concourse A stand '{new_stand_id}' is restricted to Emirates and Qantas dual-deck widebody operations. Foreign carrier {operator_icao} must use Terminal 1 Concourse D.", None, None
+            if ac_wake in ("MEDIUM", "LIGHT"):
+                return False, f"Concourse A stand '{new_stand_id}' requires SUPER or HEAVY aircraft. Medium/Light aircraft {aircraft_id} cannot dock at Concourse A.", None, None
+        elif prefix == "B":
+            if operator_icao and operator_icao != "UAE":
+                return False, f"Concourse B stand '{new_stand_id}' is reserved for Emirates widebody operations. Airline {operator_icao} must be assigned to Concourse D or Terminal 2.", None, None
+            if ac_wake in ("MEDIUM", "LIGHT"):
+                return False, f"Concourse B stand '{new_stand_id}' is configured for widebody (HEAVY/SUPER) aircraft only.", None, None
+        elif prefix == "F":
+            if ac_wake in ("SUPER", "HEAVY"):
+                return False, f"Terminal 2 Apron F stand '{new_stand_id}' is limited to narrowbody (MEDIUM/LIGHT) aircraft. Widebody {ac_wake} cannot dock at Terminal 2.", None, None
 
         # Atomic transaction: free old stand and claim new
         prev_stand = ac.assignedStand

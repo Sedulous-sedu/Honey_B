@@ -1,0 +1,49 @@
+{
+  "source": "GCAA UAE eAIP / OpenNav Dubai Terminal Area Fixes",
+  "version": "1.0.0",
+  "referenceAirport": "OMDB",
+  "terminalControlArea": "Dubai CTA / Emirates FIR",
+  "waypoints": [
+    {
+      "name": "DESDI",
+      "type": "RNAV_STAR_ENTRY_HOLDING",
+      "lat": 25.6008,
+      "lon": 54.7083,
+      "sector": "NORTHWEST",
+      "minimumCrossingAltFt": 10000,
+      "holdingInboundCourseDeg": 120,
+      "description": "Standard arrival feeder fix and high-altitude holding stack for European & Western routes into OMDB."
+    },
+    {
+      "name": "DARAX",
+      "type": "RNAV_STAR_ENTRY",
+      "lat": 26.1617,
+      "lon": 55.8833,
+      "sector": "NORTHEAST",
+      "minimumCrossingAltFt": 11000,
+      "holdingInboundCourseDeg": 210,
+      "description": "Northern arrival entry fix from Iranian airspace & North Asian corridors."
+    },
+    {
+      "name": "BUBIN",
+      "type": "RNAV_STAR_ENTRY_HOLDING",
+      "lat": 24.9617,
+      "lon": 56.1117,
+      "sector": "EAST_SOUTHEAST",
+      "minimumCrossingAltFt": 9000,
+      "holdingInboundCourseDeg": 290,
+      "description": "Eastern feeder fix and holding stack for routes from Asia & the Indian subcontinent."
+    },
+    {
+      "name": "DXB",
+      "type": "VOR_DME_CORE_HOLDING",
+      "lat": 25.2528,
+      "lon": 55.4500,
+      "frequencyMhz": 115.7,
+      "sector": "TERMINAL_CORE",
+      "minimumCrossingAltFt": 4000,
+      "holdingInboundCourseDeg": 300,
+      "description": "Primary Dubai VOR/DME holding fix for RWY 30L/30R missed approach & terminal low visibility sequencing."
+    }
+  ]
+}
