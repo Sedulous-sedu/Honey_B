@@ -1285,3 +1285,13 @@ def get_weather_stations():
         "metarStations": ["OMDB", "OMDW", "OMSJ", "OMAA", "OMRK"],
         "attribution": "OurAirports public domain aeronautical data (CC0)"
     }
+
+
+@app.get("/api/reference/airport-stats")
+def get_airport_traffic_stats():
+    """Returns official UAE airport movements & traffic volume statistics curated from Bayanat.ae."""
+    stats_file = os.path.join(state.data_dir, "uae_airport_traffic_stats.json")
+    if os.path.exists(stats_file):
+        with open(stats_file, "r") as f:
+            return json.load(f)
+    return {"error": "Stats file not found", "source": "Bayanat.ae"}

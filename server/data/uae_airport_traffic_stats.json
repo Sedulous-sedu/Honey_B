@@ -1,0 +1,345 @@
+{
+  "source": "Bayanat.ae (UAE Official Open Data Portal)",
+  "curatedAtUtc": "2026-11-07T06:56:00Z",
+  "emirateTotals": {
+    "Abu Dhabi": {
+      "2014": {
+        "arrivals": 69514,
+        "departures": 69522
+      },
+      "2015": {
+        "arrivals": 79145,
+        "departures": 79091
+      },
+      "2016": {
+        "arrivals": 80694,
+        "departures": 80438
+      },
+      "2017": {
+        "arrivals": 74418,
+        "departures": 74182
+      },
+      "2018": {
+        "arrivals": 66022,
+        "departures": 65957
+      }
+    },
+    "Dubai": {
+      "2014": {
+        "arrivals": 190208,
+        "departures": 190195
+      },
+      "2015": {
+        "arrivals": 213210,
+        "departures": 213237
+      },
+      "2016": {
+        "arrivals": 220431,
+        "departures": 220632
+      },
+      "2017": {
+        "arrivals": 217249,
+        "departures": 217350
+      },
+      "2018": {
+        "arrivals": 216288,
+        "departures": 216355
+      }
+    },
+    "Sharjah": {
+      "2014": {
+        "arrivals": 34940,
+        "departures": 34981
+      },
+      "2015": {
+        "arrivals": 35517,
+        "departures": 35598
+      },
+      "2016": {
+        "arrivals": 38013,
+        "departures": 38126
+      },
+      "2017": {
+        "arrivals": 39053,
+        "departures": 39199
+      },
+      "2018": {
+        "arrivals": 40794,
+        "departures": 40817
+      }
+    },
+    "Ras al-Khaimah": {
+      "2014": {
+        "arrivals": 1328,
+        "departures": 1308
+      },
+      "2015": {
+        "arrivals": 2260,
+        "departures": 2239
+      },
+      "2016": {
+        "arrivals": 2855,
+        "departures": 2841
+      },
+      "2017": {
+        "arrivals": 2588,
+        "departures": 2538
+      },
+      "2018": {
+        "arrivals": 1810,
+        "departures": 1758
+      }
+    },
+    "Fujairah": {
+      "2014": {
+        "arrivals": 634,
+        "departures": 605
+      },
+      "2015": {
+        "arrivals": 526,
+        "departures": 389
+      },
+      "2016": {
+        "arrivals": 783,
+        "departures": 591
+      },
+      "2017": {
+        "arrivals": 577,
+        "departures": 366
+      },
+      "2018": {
+        "arrivals": 390,
+        "departures": 191
+      }
+    },
+    "other Local Airports": {
+      "2014": {
+        "total": 74505
+      },
+      "2015": {
+        "total": 78883
+      },
+      "2016": {
+        "total": 69733
+      },
+      "2017": {
+        "total": 63938
+      }
+    },
+    "UAE": {
+      "2014": {
+        "total": 667740
+      },
+      "2015": {
+        "total": 740095
+      },
+      "2016": {
+        "total": 755137
+      },
+      "2017": {
+        "total": 731458
+      }
+    },
+    "Total Arrivals": {
+      "2018": {
+        "arrivals": 325304
+      }
+    },
+    "Total Departures": {
+      "2018": {
+        "departures": 325078
+      }
+    },
+    "Other Local Airports": {
+      "2018": {
+        "total": 42924
+      }
+    }
+  },
+  "airportHistorical": {
+    "Abu Dhabi": {
+      "2008": 93163,
+      "2009": 102118,
+      "2010": 135715,
+      "2011": 142430,
+      "2012": 150768,
+      "2013": 135213,
+      "2014": 186207,
+      "2015": 169989,
+      "2016": 168535
+    },
+    "Al - Ain": {
+      "2008": 2786,
+      "2009": 3274,
+      "2010": 3131,
+      "2011": 2753,
+      "2012": 4421,
+      "2013": 93424,
+      "2014": 26993,
+      "2015": 24579,
+      "2016": 25749
+    },
+    "Dubai": {
+      "2008": 270374,
+      "2009": 280476,
+      "2010": 307283,
+      "2011": 326341,
+      "2012": 344656,
+      "2013": 373534,
+      "2014": 357842,
+      "2015": 407315,
+      "2016": 420870
+    },
+    "Sharjah": {
+      "2008": 61494,
+      "2009": 62211,
+      "2010": 65783,
+      "2011": 64341,
+      "2012": 65975,
+      "2013": 66247,
+      "2014": 70559,
+      "2015": 71426,
+      "2016": 75967
+    },
+    "Ras Al - Khaima": {
+      "2008": 6753,
+      "2009": 9492,
+      "2010": 11807,
+      "2011": 10473,
+      "2012": 11948,
+      "2013": 10815,
+      "2014": 8957,
+      "2015": 13842,
+      "2016": 14242
+    },
+    "Fujeira": {
+      "2008": 7775,
+      "2009": 7247,
+      "2010": 5368,
+      "2011": 4469,
+      "2012": 21465,
+      "2013": 14222,
+      "2014": 10223,
+      "2015": 8719,
+      "2016": 9692
+    }
+  },
+  "monthlyDistributions": {
+    "OMAA": {
+      "2013": {
+        "January": 13351,
+        "February": 12596,
+        "March": 13636,
+        "April": 13082,
+        "May": 13495,
+        "June": 13207,
+        "July": 13905,
+        "August": 14130,
+        "September": 14471,
+        "October": 14733,
+        "November": 14953,
+        "December": 15225
+      },
+      "2014": {
+        "January": 14905,
+        "February": 14058,
+        "March": 15333,
+        "April": 15056,
+        "May": 15790,
+        "June": 15492,
+        "July": 15400,
+        "August": 15672,
+        "September": 15747,
+        "October": 16146,
+        "November": 15922,
+        "December": 16686
+      },
+      "2015": {
+        "January": 14117,
+        "February": 12807,
+        "March": 14414,
+        "April": 13982,
+        "May": 14447,
+        "June": 14117,
+        "July": 14689,
+        "August": 14964,
+        "September": 14130,
+        "October": 14304,
+        "November": 13753,
+        "December": 14265
+      },
+      "2016": {
+        "January": 14233,
+        "February": 13092,
+        "March": 14117,
+        "April": 13718,
+        "May": 14137,
+        "June": 13538,
+        "July": 14478,
+        "August": 14681,
+        "September": 14201,
+        "October": 14402,
+        "November": 13853,
+        "December": 14085
+      }
+    },
+    "OMAL": {
+      "2013": {
+        "January": 371,
+        "February": 264,
+        "March": 256,
+        "April": 229,
+        "May": 196,
+        "June": 221,
+        "July": 190,
+        "August": 239,
+        "September": 292,
+        "October": 264,
+        "November": 280,
+        "December": 345
+      },
+      "2014": {
+        "January": 3304,
+        "February": 3423,
+        "March": 2523,
+        "April": 2887,
+        "May": 2329,
+        "June": 2464,
+        "July": 2406,
+        "August": 3376,
+        "September": 2578,
+        "October": 341,
+        "November": 485,
+        "December": 877
+      },
+      "2015": {
+        "January": 1534,
+        "February": 2019,
+        "March": 2376,
+        "April": 2749,
+        "May": 2884,
+        "June": 2420,
+        "July": 2038,
+        "August": 2118,
+        "September": 1656,
+        "October": 1435,
+        "November": 1575,
+        "December": 1775
+      },
+      "2016": {
+        "January": 2069,
+        "February": 2082,
+        "March": 1634,
+        "April": 2640,
+        "May": 2086,
+        "June": 2291,
+        "July": 1982,
+        "August": 2391,
+        "September": 2550,
+        "October": 2193,
+        "November": 1728,
+        "December": 2103
+      }
+    }
+  }
+}

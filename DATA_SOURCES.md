@@ -83,6 +83,22 @@ This document catalogs all external public data sources utilized by Honey B, the
 
 ---
 
+### 6. Bayanat.ae UAE Official Open Data (Airport Movements & Capacity)
+- **Authority**: UAE Federal Competitiveness and Statistics Center / General Civil Aviation Authority (GCAA) / Statistics Centre − Abu Dhabi (SCAD).
+- **Portal**: [Bayanat.ae](https://bayanat.ae/Datasets).
+- **Compiled File**: `server/data/uae_airport_traffic_stats.json`
+- **Endpoint**: `GET /api/reference/airport-stats`
+- **License / Terms**: UAE Open Government Data License.
+- **Contents**:
+  - Yearly total aircraft movements (2008–2016) by airport: Dubai (`OMDB`: 420,870 movements), Abu Dhabi (`OMAA`: 168,535 movements), Sharjah (`OMSJ`: 75,967 movements), Ras Al Khaimah (`OMRK`: 14,242 movements), and Fujairah (`OMAL`: 9,692 movements).
+  - Arrivals vs. departures breakdown by Emirate (2014–2018).
+  - Monthly movement distributions for Abu Dhabi International and Al Ain International.
+- **Operational Usage in Honey B**:
+  - Calibrates baseline Runway Acceptance Rates (RAR) and airport saturation limits for arrival management (AMAN).
+  - Supplies realistic diversion airport capacity thresholds (e.g. OMSJ acceptance slack vs. OMDB saturation) during low-visibility fog procedures or runway emergency closures.
+
+---
+
 ## Provenance Taxonomy
 
 All telemetry and advisory objects carry explicit `provenance` attributes:
