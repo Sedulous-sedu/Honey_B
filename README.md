@@ -129,3 +129,15 @@ cd Honey_B/server
 - JSON Schemas: `Honey_B/shared/schema/*.json`
 - Test Fixtures: `Honey_B/shared/fixtures/*.json`
 - Interface Specification: `Honey_B_Ground_Hub_Interface_Spec.md`
+
+## UAE Simulation Lab
+
+A seven-airport arrival simulation is available at
+`http://localhost:8000/simulation-lab`. It includes seeded disruptions, phase
+checkpoints, a regional map, diversion screening, optional BlueSky movement,
+AirTrafficSim replay export, and a separate Bluebird research connector.
+
+Install `server/requirements-simulation.txt` to enable BlueSky, or use the existing
+requirements for the simplified engine. The lab starts paused and does not change
+the live observation store. Flight identifiers and operational capacities are
+explicitly demo assumptions. See [setup, handoff and modeling limits](docs/SIMULATION_LAB.md).

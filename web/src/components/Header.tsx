@@ -62,6 +62,7 @@ export const Header: React.FC = () => {
           )}
         </div>
 
+        <a href={`${window.location.protocol}//${window.location.hostname}:8000/simulation-lab`} target="_blank" rel="noreferrer" className="text-xs text-[#F5A623] underline">UAE Simulation Lab</a>
         {/* Page Switcher */}
         <div className="flex bg-[#08172C] p-0.5 rounded-lg border border-[#1A3A66]">
           <button
