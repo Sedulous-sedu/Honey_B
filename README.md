@@ -135,5 +135,5 @@ cd Honey_B/server
 ## 7. Team Credits
 
 Honey B was developed collaboratively for UAE Hackathon 2026.
-
+- **[Abin Raj Devarajan (@Sedulous-sedu)](https://github.com/Sedulous-sedu)** — Pilot Cockpit interface and simulation integration.
 - **[Abid (@abidzzz)](https://github.com/abidzzz)** — Control Centre developer; developed Honey B's air traffic control centre component.
