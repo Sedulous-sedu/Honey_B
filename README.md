@@ -138,4 +138,4 @@ cd Honey_B/server
 
 Honey B was developed collaboratively for UAE Hackathon 2026.
 
-- **Abid** — Honey B team member and project collaborator.
+- **[Abid (@abidzzz)](https://github.com/abidzzz)** — Honey B team member and project collaborator.
