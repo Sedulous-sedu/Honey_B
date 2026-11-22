@@ -131,3 +131,11 @@ cd Honey_B/server
 - JSON Schemas: `Honey_B/shared/schema/*.json`
 - Test Fixtures: `Honey_B/shared/fixtures/*.json`
 - Interface Specification: `Honey_B_Ground_Hub_Interface_Spec.md`
+
+---
+
+## 7. Team Credits
+
+Honey B was developed collaboratively for UAE Hackathon 2026.
+
+- **Abid** — Honey B team member and project collaborator.
