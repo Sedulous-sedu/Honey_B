@@ -55,6 +55,7 @@ from app.providers.osm_geometry import OsmGeometryProvider
 from app.providers.ourairports import OurAirportsProvider
 from app.providers.recording_manager import RecordingManager
 import copy
+from app.simulation_lab.api import router as simulation_lab_router, lab
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("HoneyB_GroundHub")
@@ -153,6 +154,12 @@ async def real_data_ingestion_loop():
 async def simulation_loop():
     while True:
         try:
+            if not lab.paused:
+                try:
+                    lab.advance(lab.speed)
+                except Exception:
+                    lab.paused = True
+                    logger.exception("Simulation Lab paused after engine failure")
             Simulator.tick()
 
             # Broadcast any command status changes from simulator (EXECUTING, DONE)
@@ -218,6 +225,8 @@ async def lifespan(app: FastAPI):
     await state.adsb_provider.close()
 
 app = FastAPI(title="Honey B Ground Control Hub", version="1.0.0", lifespan=lifespan)
+
+app.include_router(simulation_lab_router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -1282,7 +1291,7 @@ def get_weather_stations():
     return {
         "primaryAirport": "OMDB",
         "stations": stations,
-        "metarStations": ["OMDB", "OMDW", "OMSJ", "OMAA", "OMRK"],
+        "metarStations": ["OMDB", "OMDW", "OMSJ", "OMAA", "OMRK", "OMFJ", "OMAL"],
         "attribution": "OurAirports public domain aeronautical data (CC0)"
     }
 
@@ -1336,3 +1345,52 @@ def get_terminal_gates_matrix():
             return json.load(f)
     return {"error": "Terminal matrix file not found", "source": "Dubai Airports Ground Operations"}
 
+
+
+@app.post("/api/simulation-lab/handoff/omdb")
+async def handoff_lab_omdb():
+    """Copy only active OMDB arrivals to a PAUSED WHAT_IF hub scenario.
+
+    This is an explicit snapshot handoff, not a second writer for the lab.
+    The existing OMDB console is not yet a regional/multi-airport console.
+    """
+    import datetime
+    from app.simulation_lab.handoff import prepare_omdb_handoff
+    from app.simulation_lab.runtime import EPOCH
+
+    aircraft, wx = prepare_omdb_handoff(lab, state.data_dir)
+    scenario = RecordingManager.create_what_if_scenario(
+        "UAE Lab OMDB paused handoff", aircraft, WeatherPayload(**wx)
+    )
+    state.switch_mode(DataMode.WHAT_IF, scenario.scenario_id)
+    state.commands.clear()
+    state.suggestions.clear()
+    state.advisories.clear()
+    state.claims.clear()
+    state.pending_status_events.clear()
+    state.approved_sequence_advisory = None
+    state.sim_start_time = datetime.datetime.fromtimestamp(EPOCH, datetime.timezone.utc)
+    state.sim_time_sec = lab.time
+    state.is_paused = True
+    lab.paused = True
+    state.weather.observedAt = state.get_sim_time_iso()
+    state.log_event(
+        "SIMULATION_LAB",
+        "Paused OMDB snapshot imported; generated demo identities and operational assumptions",
+    )
+    SuggestionEngine.compute_all_suggestions()
+    for ws, info in list(manager.active_connections.items()):
+        snap = build_snapshot(info["role"], info.get("aircraftId"))
+        await manager.send_to_socket(
+            ws,
+            state.create_envelope(
+                "state.snapshot", snap, aircraft_id=info.get("aircraftId")
+            ),
+        )
+    return {
+        "status": "PAUSED_SNAPSHOT_LOADED",
+        "aircraftCount": len(aircraft),
+        "flightIds": list(aircraft),
+        "scenarioId": scenario.scenario_id,
+        "limitations": "OMDB snapshot only; no two-way synchronization or regional control through the legacy console",
+    }

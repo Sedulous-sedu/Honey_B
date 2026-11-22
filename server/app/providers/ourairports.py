@@ -1,6 +1,6 @@
 """OurAirports reference loader for UAE aerodromes and runways.
 
-Filters official public-domain OurAirports data for OMDB, OMDW, OMSJ, OMAA, OMRK.
+Filters public-domain community OurAirports data for OMDB, OMDW, OMSJ, OMAA, OMRK, OMFJ, OMAL.
 Caches local snapshot in server/data/ourairports_uae.json with hash, retrieval date, and license info.
 Validates runway coordinates, physical IDs, and preserves missing data honestly.
 """
@@ -10,6 +10,7 @@ import json
 import hashlib
 import datetime
 import logging
+import tempfile
 from typing import Dict, List, Any, Optional
 import httpx
 
@@ -19,7 +20,7 @@ DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../data")
 CACHE_FILE = os.path.join(DATA_DIR, "ourairports_uae.json")
 AIRPORTS_URL = "https://davidmegginson.github.io/ourairports-data/airports.csv"
 RUNWAYS_URL = "https://davidmegginson.github.io/ourairports-data/runways.csv"
-TARGET_ICAOS = {"OMDB", "OMDW", "OMSJ", "OMAA", "OMRK"}
+TARGET_ICAOS = {"OMDB", "OMDW", "OMSJ", "OMAA", "OMRK", "OMFJ", "OMAL"}
 
 
 class OurAirportsProvider:
@@ -29,7 +30,10 @@ class OurAirportsProvider:
         if not force_refresh and os.path.exists(CACHE_FILE):
             try:
                 with open(CACHE_FILE, "r") as f:
-                    return json.load(f)
+                    cached = json.load(f)
+                    if TARGET_ICAOS.issubset(cached.get("airports", {})):
+                        return cached
+                    logger.info("Cached reference is incomplete; refreshing seven-airport dataset")
             except Exception as e:
                 logger.warning(f"Error reading OurAirports cache, will re-fetch: {e}")
 
@@ -46,6 +50,7 @@ class OurAirportsProvider:
         try:
             with httpx.Client(headers=headers, timeout=15.0) as client:
                 r_air = client.get(AIRPORTS_URL)
+                r_air.raise_for_status()
                 if r_air.status_code == 200:
                     airports_csv_hash = hashlib.sha256(r_air.content).hexdigest()
                     reader = csv.DictReader(r_air.text.splitlines())
@@ -64,6 +69,7 @@ class OurAirportsProvider:
                             }
 
                 r_run = client.get(RUNWAYS_URL)
+                r_run.raise_for_status()
                 if r_run.status_code == 200:
                     runways_csv_hash = hashlib.sha256(r_run.content).hexdigest()
                     reader = csv.DictReader(r_run.text.splitlines())
@@ -95,10 +101,16 @@ class OurAirportsProvider:
                 with open(CACHE_FILE, "r") as f:
                     return json.load(f)
 
+        if not TARGET_ICAOS.issubset(airports_data) or any(not a["runways"] for a in airports_data.values()):
+            if os.path.exists(CACHE_FILE):
+                with open(CACHE_FILE, "r") as f:
+                    return json.load(f)
+            raise RuntimeError("Incomplete OurAirports response; reference cache was not replaced")
+
         payload = {
             "version": "1.0.0",
             "retrievedAtUtc": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "license": "Public Domain (Creative Commons CC0)",
+            "license": "Public Domain (OurAirports)",
             "source": "OurAirports open data (David Megginson)",
             "airportsSha256": airports_csv_hash,
             "runwaysSha256": runways_csv_hash,
@@ -106,8 +118,11 @@ class OurAirportsProvider:
         }
 
         os.makedirs(DATA_DIR, exist_ok=True)
-        with open(CACHE_FILE, "w") as f:
+        # Publish only a complete snapshot, atomically, preserving a usable cache.
+        with tempfile.NamedTemporaryFile(mode="w", dir=DATA_DIR, suffix=".json", delete=False) as f:
             json.dump(payload, f, indent=2)
+            temporary_path = f.name
+        os.replace(temporary_path, CACHE_FILE)
 
         return payload
 
