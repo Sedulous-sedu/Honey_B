@@ -30,7 +30,7 @@ The **Ground-Control Server is the SINGLE SOURCE OF TRUTH**:
                                         |              |
                                         v              v
             +------------------------------+        +---------------------------+
-            | CONTROL-CENTER CONSOLE (ME)  |        | PILOT COCKPIT (TEAMMATE)  |
+            | CONTROL-CENTER CONSOLE (ABID)  |        | PILOT COCKPIT (TEAMMATE)  |
             | - 30 NM Radar Scope          |        | - Cockpit flight displays |
             | - Traffic List (28 tracks)   |        | - Clearance inbox         |
             | - Honey B Suggested Actions  |        | - WILCO / UNABLE / STANDBY|
@@ -138,4 +138,4 @@ cd Honey_B/server
 
 Honey B was developed collaboratively for UAE Hackathon 2026.
 
-- **[Abid (@abidzzz)](https://github.com/abidzzz)** — Honey B team member and project collaborator.
+- **[Abid (@abidzzz)](https://github.com/abidzzz)** — Control Centre developer; developed Honey B's air traffic control centre component.
